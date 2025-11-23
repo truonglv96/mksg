@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mắt Kính Sài Gòn - Trang chủ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <style>
+        /* CSS tùy chỉnh cho Mega Menu Desktop */
+        nav.hidden.lg\:block {
+            position: relative;
+            overflow-x: visible;
+        }
+
+        nav.hidden.lg\:block .container {
+            position: relative;
+        }
+
+        .has-mega-menu {
+            position: static;
+        }
+
+        .mega-menu-content {
+            display: none;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(85vw, calc(100vw - 2rem));
+            max-width: 100vw;
+            z-index: 50;
+            border-top: 4px solid #dc2626;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        /* Tính toán top position dựa trên chiều cao của nav */
+        .has-mega-menu:hover .mega-menu-content {
+            top: var(--nav-bottom, 100px);
+        }
+
+        /* Ngăn body scroll ngang khi mega menu mở */
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        /* Kích hoạt hiển thị khi hover vào thẻ cha */
+        .has-mega-menu:hover .mega-menu-content {
+            display: block;
+        }
+
+        /* Loại bỏ padding của container bên trong mega menu */
+        .mega-menu-content .container {
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Ẩn thanh cuộn của Sidebar khi không cần (Tuỳ chọn) */
+        #mobile-sidebar {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Đảm bảo Swiper container ẩn các slide không hiển thị */
+        .product-slider.swiper-container,
+        .category-swiper,
+        .related-swiper {
+            overflow: hidden !important;
+            width: 100%;
+        }
+
+        .product-slider .swiper-wrapper,
+        .category-swiper .swiper-wrapper,
+        .related-swiper .swiper-wrapper {
+            display: flex;
+        }
+
+        /* Đảm bảo các slide không hiển thị bị ẩn hoàn toàn */
+        .product-slider .swiper-slide,
+        .category-swiper .swiper-slide,
+        .related-swiper .swiper-slide {
+            flex-shrink: 0;
+            height: auto;
+        }
+
+        .category-swiper .swiper-button-next,
+        .category-swiper .swiper-button-prev,
+        .related-swiper .swiper-button-next,
+        .related-swiper .swiper-button-prev {
+            color: #dc2626;
+        }
+
+        /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
+        .category-swiper .swiper-slide,
+        .related-swiper .swiper-slide {
+            height: auto;
+            display: flex;
+        }
+
+        .category-swiper .swiper-slide>div,
+        .related-swiper .swiper-slide>div {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        .category-swiper .swiper-slide .p-4,
+        .related-swiper .swiper-slide .p-4 {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* Đẩy buttons xuống đáy của card */
+        .category-swiper .swiper-slide .flex.gap-2 {
+            margin-top: auto;
+        }
+
+        /* Đảm bảo tiêu đề và brand có chiều cao cố định */
+        .category-swiper .swiper-slide h3,
+        .related-swiper .swiper-slide h3 {
+            min-height: 2.5rem;
+            display: -webkit-box;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .category-swiper .swiper-slide .text-gray-500,
+        .related-swiper .swiper-slide .text-gray-500 {
+            min-height: 1.5rem;
+        }
+
+        /* Đảm bảo phần giá có chiều cao đồng đều */
+        .category-swiper .swiper-slide>div>.p-4>div:nth-child(3),
+        .related-swiper .swiper-slide>div>.p-4>div:nth-child(3) {
+            min-height: 2.5rem;
+        }
+
+        /* Hiệu ứng hover hình ảnh sản phẩm - Hover toàn bộ swiper-slide */
+        .swiper-slide.group .product-img-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 2;
+        }
+
+        .swiper-slide.group:hover .product-img-hover {
+            opacity: 1;
+        }
+
+        .swiper-slide.group:hover .product-img-main {
+            opacity: 1;
+        }
+
+        /* Badge giảm giá góc phải trên hình */
+        .discount-badge {
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Căn giá bên phải */
+        .category-swiper .swiper-slide .text-red-600,
+        .category-swiper .swiper-slide .line-through {
+            text-align: right;
+        }
+
+        /* Color swatches & option pills */
+        .color-chip {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.85rem;
+            border: 1.5px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .color-chip.active {
+            border-color: #dc2626;
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .option-pill {
+            border: 1.5px solid transparent;
+        }
+
+        .option-pill.active {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .thumbnail-button.active,
+        .lightbox-thumbnail.active {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+        }
+
+        .consult-form-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 1.75rem;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .consult-form-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .consult-form-header span {
+            font-size: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #fca5a5, #ef4444);
+            color: #fff;
+            line-height: 1;
+            flex-shrink: 0;
+            box-shadow: 0 12px 30px rgba(239, 68, 68, 0.18);
+        }
+
+        .consult-form-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .consult-form-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .consult-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .consult-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .consult-form-grid--full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+        }
+
+        .form-field label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            border-radius: 0.9rem;
+            border: 1.25px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: #111827;
+            background: #f9fafb;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-field textarea {
+            min-height: 7.5rem;
+            resize: vertical;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: #ef4444;
+            background: #ffffff;
+            box-shadow: 0 8px 22px rgba(239, 68, 68, 0.12);
+            outline: none;
+        }
+
+        .form-field input:hover,
+        .form-field select:hover,
+        .form-field textarea:hover {
+            border-color: #f87171;
+            background: #ffffff;
+        }
+
+        .form-field input::placeholder,
+        .form-field textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .consult-form button[type="submit"] {
+            width: 100%;
+            border-radius: 1rem;
+            padding: 0.95rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .consult-form button[type="submit"] span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.85rem;
+            background: rgba(255, 255, 255, 0.18);
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .consult-form button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(220, 38, 38, 0.25);
+        }
+
+        .consult-form button[type="submit"]:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+        }
+
+        .consult-form-help {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .consult-form-help a {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* News page styles */
+        .news-hero {
+            background: linear-gradient(135deg, rgba(254, 242, 242, 0.95), rgba(255, 255, 255, 0.98));
+            border-radius: 2rem;
+            padding: 2.5rem 2rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(220, 38, 38, 0.1);
+        }
+
+        .news-hero::after {
+            content: "";
+            position: absolute;
+            inset: -30% auto auto -20%;
+            width: 45%;
+            aspect-ratio: 1/1;
+            background: radial-gradient(circle at center, rgba(248, 113, 113, 0.4), transparent 65%);
+            z-index: 0;
+        }
+
+        .news-hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .news-hero h1 {
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+        }
+
+        .news-hero__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .news-hero__meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            color: #b91c1c;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 15px 25px rgba(239, 68, 68, 0.12);
+        }
+
+        .news-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 2.25rem;
+        }
+
+        .news-search {
+            position: relative;
+            flex: 1;
+            min-width: min(280px, 100%);
+        }
+
+        .news-search input {
+            width: 100%;
+            border-radius: 999px;
+            border: 1.5px solid #e2e8f0;
+            padding: 0.85rem 3rem 0.85rem 1.1rem;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+
+        .news-search svg {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.2rem;
+            height: 1.2rem;
+            color: #9ca3af;
+        }
+
+        .news-chip {
+            border-radius: 999px;
+            padding: 0.6rem 1.1rem;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .news-chip:hover,
+        .news-chip.active {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 12px 25px rgba(239, 68, 68, 0.12);
+        }
+
+        .news-featured {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2.75rem;
+        }
+
+        @media (min-width: 1024px) {
+            .news-featured {
+                grid-template-columns: 2fr 1fr;
+            }
+
+            .news-featured__secondary {
+                display: grid;
+            gap: 1rem;
+            }
+        }
+
+        .news-featured__main {
+            position: relative;
+            border-radius: 1.75rem;
+            overflow: hidden;
+            min-height: 320px;
+            display: grid;
+            align-content: end;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18);
+        }
+
+        .news-featured__main img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.03);
+            transition: transform 0.4s ease;
+        }
+
+        .news-featured__main:hover img {
+            transform: scale(1.08);
+        }
+
+        .news-featured__content {
+            position: relative;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.9) 85%);
+            color: #fff;
+            padding: 2.5rem 2rem 2rem;
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .news-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .news-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            font-size: 0.82rem;
+            color: #94a3b8;
+        }
+
+        .news-featured__secondary article {
+            background: #fff;
+            border-radius: 1.35rem;
+            padding: 1.3rem;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+            display: grid;
+            gap: 0.6rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .news-featured__secondary article:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(239, 68, 68, 0.12);
+        }
+
+        .news-featured__secondary img {
+            width: 100%;
+            border-radius: 1rem;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .news-layout {
+            display: grid;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (min-width: 1024px) {
+            .news-layout {
+                grid-template-columns: minmax(0, 1fr) 320px;
+        }
+        }
+
+        .news-grid {
+            display: grid;
+            gap: .6rem;
+        }
+
+        @media (min-width: 768px) {
+            .news-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .news-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .news-card {
+            display: grid;
+            grid-template-rows: 220px auto;
+            background: #fff;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 60px rgba(239, 68, 68, 0.1);
+        }
+
+        .news-card__image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .news-card__content {
+            padding: 1.4rem 1.5rem 1rem;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .news-card__content h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+
+        .news-card__content p {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .news-card__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: #64748b;
+        }
+
+        .news-card__footer a {
+            font-weight: 600;
+            color: #ef4444;
+        }
+
+        .news-aside {
+            background: #fff;
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            box-shadow: 0 20px 55px rgba(15, 23, 42, 0.1);
+            display: grid;
+            gap: 1.5rem;
+            height: max-content;
+        }
+
+        .news-aside h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .news-trending {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .news-trending li {
+            display: grid;
+            gap: 0.25rem;
+        }
+
+        .news-trending a {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .news-trending span {
+            font-size: 0.78rem;
+            color: #94a3b8;
+        }
+
+        .showroom-card {
+            background: rgba(239, 68, 68, 0.08);
+            border-radius: 1.2rem;
+            padding: 1rem;
+            display: grid;
+            gap: 0.45rem;
+            font-size: 0.85rem;
+            color: #b91c1c;
+            margin-bottom: 10px;
+        }
+
+        .news-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .news-pagination button {
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 0.9rem;
+            border: 1.5px solid #e2e8f0;
+            background: #fff;
+            color: #475569;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .news-pagination button:hover,
+        .news-pagination button.active {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: 0 12px 25px rgba(239, 68, 68, 0.12);
+        }
+
+        .subscribe-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.05));
+            border-radius: 2rem;
+            padding: 2.25rem;
+            display: grid;
+            gap: 1.25rem;
+            align-items: center;
+            box-shadow: 0 25px 60px rgba(239, 68, 68, 0.15);
+        }
+
+        @media (min-width: 1024px) {
+            .subscribe-card {
+                grid-template-columns: 1.6fr 1fr;
+            }
+        }
+
+        .subscribe-card form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .subscribe-card input {
+            flex: 1;
+            min-width: 220px;
+            border-radius: 999px;
+            border: none;
+            padding: 0.85rem 1.1rem;
+            font-size: 0.95rem;
+        }
+
+        .subscribe-card button {
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            padding: 0.85rem 1.4rem;
+            font-weight: 600;
+            box-shadow: 0 18px 36px rgba(239, 68, 68, 0.25);
+        }
+
+        .form-field--select select {
+            padding-right: 2.75rem;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: none;
+        }
+
+        .form-field--select::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 1.1rem;
+            width: 0.65rem;
+            height: 0.65rem;
+            border-right: 2px solid #ef4444;
+            border-bottom: 2px solid #ef4444;
+            transform: translateY(-50%) rotate(45deg);
+            pointer-events: none;
+        }
+
+        .form-field--datetime input[type="datetime-local"] {
+            padding-right: 2.75rem;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-field--datetime input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .form-field--datetime input[type="datetime-local"]::-webkit-inner-spin-button,
+        .form-field--datetime input[type="datetime-local"]::-webkit-clear-button {
+            display: none;
+        }
+
+        .form-field--datetime::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='3' ry='3'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") center/contain no-repeat;
+            pointer-events: none;
+        }
+
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.72);
+            z-index: 90;
+            padding: 1.5rem;
+        }
+
+        .image-lightbox.active {
+            display: flex;
+        }
+
+        .image-lightbox__content {
+            position: relative;
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.25);
+            max-width: min(960px, 100%);
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .image-lightbox__main {
+            position: relative;
+            width: 100%;
+            background: #f8fafc;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-lightbox__main img {
+            max-height: 70vh;
+            width: 100%;
+            object-fit: contain;
+            background: #ffffff;
+        }
+
+        .image-lightbox__nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.92);
+            color: #dc2626;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .image-lightbox__nav:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .image-lightbox__nav--prev {
+            left: 1rem;
+        }
+
+        .image-lightbox__nav--next {
+            right: 1rem;
+        }
+
+        .image-lightbox__thumbs {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+
+        .lightbox-thumbnail {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 1rem;
+            border: 2px solid transparent;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #ffffff;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .lightbox-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lightbox-thumbnail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        .image-lightbox__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.05);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            line-height: 0;
+            color: #0f172a;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .image-lightbox__close:hover {
+            background: rgba(15, 23, 42, 0.12);
+        }
+
+        @media (max-width: 640px) {
+            .image-lightbox__content {
+                padding: 0.75rem;
+                border-radius: 1rem;
+            }
+
+            .image-lightbox__nav {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+
+            .lightbox-thumbnail {
+                width: 3.5rem;
+                height: 3.5rem;
+                border-radius: 0.85rem;
+            }
+        }
+
+        /* Tab panels */
+        .tab-button.active {
+            color: #dc2626;
+            border-bottom: 3px solid #dc2626;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Hover effect cho product cards */
+        .product-card .product-img-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 2;
+        }
+
+        .product-card.group:hover .product-img-hover {
+            opacity: 1;
+        }
+
+        .product-card.group:hover .product-img-main {
+            opacity: 1;
+        }
+
+        /* Đảm bảo product cards có chiều cao đồng đều */
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-card>div:last-child {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-card .flex.gap-2 {
+            margin-top: auto;
+        }
+
+        /* Giỏ hàng dropdown */
+        #cart-dropdown {
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #cart-dropdown.translate-x-full {
+            transform: translateX(100%);
+        }
+
+        /* Mobile Filter Sidebar */
+        #mobile-filter-sidebar {
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #mobile-filter-sidebar.-translate-x-full {
+            transform: translateX(-100%);
+        }
+
+        /* Animation cho notification */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile Product Cards Optimization */
+        @media (max-width: 767px) {
+
+            .product-summary {
+                padding: 1.25rem;
+                border-radius: 1.5rem;
+            }
+
+            .product-summary h1 {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+
+            .product-summary .text-sm {
+                font-size: 0.825rem;
+            }
+
+            .price-card {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 1.25rem;
+            }
+
+            .price-card .price-current {
+                font-size: 1.9rem;
+            }
+
+            .price-card .price-old {
+                font-size: 0.85rem;
+            }
+
+            .benefits-list {
+                font-size: 0.85rem;
+                gap: 0.5rem;
+            }
+
+            .benefits-list li {
+                padding: 0.4rem 0;
+            }
+
+            .cta-buttons {
+                gap: 0.875rem;
+            }
+
+            .cta-buttons button {
+                width: 100%;
+            }
+
+            .support-chips {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .info-badges {
+                padding: 1.25rem;
+                gap: 0.75rem;
+                border-radius: 1.5rem;
+            }
+
+            .highlights-grid {
+                gap: 1rem;
+            }
+
+            .highlight-card {
+                padding: 1.25rem;
+                border-radius: 1.5rem;
+            }
+
+            .product-tabs {
+                border-radius: 1.5rem;
+            }
+
+            .product-tabs .tab-button {
+                padding: 0.75rem 0;
+                font-size: 0.875rem;
+            }
+
+            .product-tabs .p-6 {
+                padding: 1.25rem !important;
+            }
+
+            .showroom-section {
+                padding: 1.5rem;
+                border-radius: 1.75rem;
+            }
+
+            .showroom-section form {
+                padding: 0.5rem;
+                background: #ffffff;
+                border-radius: 1.25rem;
+            }
+
+            .related-grid {
+                gap: 0.75rem;
+            }
+
+            .related-grid .product-card {
+                border-radius: 1.25rem;
+            }
+
+            /* Product Cards - Tối ưu cho mobile */
+            .product-card .p-3 {
+                padding: 0.5rem !important;
+            }
+
+            .product-card h3 {
+                font-size: 0.7rem !important;
+                line-height: 1.2 !important;
+                min-height: 2rem !important;
+                margin-bottom: 0.375rem !important;
+            }
+
+            .product-card img {
+                height: 140px !important;
+                object-fit: cover;
+            }
+
+            .product-card .text-sm {
+                font-size: 0.65rem !important;
+            }
+
+            .product-card .text-lg {
+                font-size: 0.875rem !important;
+            }
+
+            .product-card .border.border-green-600 {
+                font-size: 0.6rem !important;
+                padding: 0.25rem 0.375rem !important;
+            }
+
+            /* Ẩn button "xem" trên mobile */
+            .product-card button:last-child {
+                display: none;
+            }
+
+            /* Badge giảm giá trên mobile - product cards */
+            .product-card .discount-badge {
+                font-size: 0.625rem !important;
+                padding: 0.25rem 0.375rem !important;
+            }
+
+            /* Frame style buttons on mobile */
+            .frame-style-btn {
+                padding: 0.5rem !important;
+            }
+
+            .frame-style-btn svg {
+                width: 1.5rem !important;
+                height: 1.5rem !important;
+            }
+
+            .frame-style-btn p {
+                font-size: 0.625rem !important;
+            }
+        }
+
+        /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
+        .product-slider .swiper-button-next,
+        .product-slider .swiper-button-prev {
+            color: #dc2626;
+        }
+
+        /* Chỉnh lại vị trí của Pagination */
+        .swiper-pagination-bullet-active {
+            background: #dc2626 !important;
+        }
+
+        /* Cần thêm CSS cho mobile arrow để nó xoay */
+        #toggle-tròng-kính span {
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="shadow-md sticky top-0 bg-white z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center lg:hidden">
+            <button id="mobile-menu-btn" class="text-3xl text-gray-700">☰</button>
+
+            <div class="flex flex-col items-center flex-shrink-0">
+                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
+                    alt="Mắt Kính Hàng Hiệu" class="h-6">
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+
+                <button id="cart-btn"
+                    class="relative w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full">
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    <span id="cart-count"
+                        class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="hidden lg:block bg-white shadow-lg">
+            <div class="container mx-auto flex justify-between items-center py-3">
+                <div class="flex items-center">
+                    <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
+                        alt="Mắt Kính Sài Gòn" class="h-8 mr-3">
+                </div>
+
+                <ul class="flex space-x-6 text-sm font-medium">
+                    <li><a href="#" class="hover:text-red-600">THƯƠNG HIỆU</a></li>
+                    <li><a href="#" class="hover:text-red-600">KIẾN THỨC</a></li>
+                    <li class="has-mega-menu relative">
+                        <a href="#" class="text-red-600 font-bold">TRÒNG KÍNH</a>
+                        <div class="mega-menu-content bg-white shadow-xl py-6">
+                            <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Hai Tròng</li>
+                                        <li>Đổi Màu</li>
+                                        <li>Chống Bể</li>
+                                        <li>Siêu Mỏng</li>
+                                        <li>Siêu Cứng</li>
+                                        <li>Kính Mắt Có Độ</li>
+                                        <li>Tròng Kính Thời Trang</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">CHIẾT SUẤT</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Chiết suất 1.50</li>
+                                        <li>Chiết suất 1.53</li>
+                                        <li>Chiết suất 1.56</li>
+                                        <li>Chiết suất 1.58</li>
+                                        <li>Chiết suất 1.59</li>
+                                        <li>Chiết suất 1.60</li>
+                                        <li>Chiết suất 1.67</li>
+                                        <li>Chiết suất 1.71</li>
+                                        <li>Chiết suất 1.74</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">ÁNH SÁNG XANH</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Tròng Ánh Sáng Xanh</li>
+                                        <li>Lọc Ánh Sáng Xanh Essilor</li>
+                                        <li>Lọc Ánh Sáng Xanh Zeiss</li>
+                                        <li>Cắt Ánh Sáng Xanh + UV</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG CAO CẤP</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Đơn Tròng ZEISS SmartLife</li>
+                                        <li>AntiVirus Platinum UV</li>
+                                        <li>Zeiss DuraVision Platinum</li>
+                                        <li>Kiểm Soát Cận Thị</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">KÍNH ĐA TRÒNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Đa Tròng</li>
+                                        <li>Đa Tròng Đức Zeiss</li>
+                                        <li>Đa Tròng Nhật Levalens</li>
+                                        <li>Đa Tròng Pháp Essilor</li>
+                                        <li>Đa Tròng Hàn Quốc Chemi</li>
+                                        <li>Đa Tròng Varilux X Series</li>
+                                        <li>Đa Tròng Thái Lan Excelite</li>
+                                        <li>Đa Tròng Singapore Zinimy</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="has-mega-menu relative">
+                        <a href="#" class="text-red-600 font-bold">TRÒNG KÍNH</a>
+                        <div class="mega-menu-content bg-white shadow-xl py-6">
+                            <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Hai Tròng</li>
+                                        <li>Đổi Màu</li>
+                                        <li>Chống Bể</li>
+                                        <li>Siêu Mỏng</li>
+                                        <li>Siêu Cứng</li>
+                                        <li>Kính Mắt Có Độ</li>
+                                        <li>Tròng Kính Thời Trang</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">CHIẾT SUẤT</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Chiết suất 1.50</li>
+                                        <li>Chiết suất 1.53</li>
+                                        <li>Chiết suất 1.56</li>
+                                        <li>Chiết suất 1.58</li>
+                                        <li>Chiết suất 1.59</li>
+                                        <li>Chiết suất 1.60</li>
+                                        <li>Chiết suất 1.67</li>
+                                        <li>Chiết suất 1.71</li>
+                                        <li>Chiết suất 1.74</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">ÁNH SÁNG XANH</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Tròng Ánh Sáng Xanh</li>
+                                        <li>Lọc Ánh Sáng Xanh Essilor</li>
+                                        <li>Lọc Ánh Sáng Xanh Zeiss</li>
+                                        <li>Cắt Ánh Sáng Xanh + UV</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG CAO CẤP</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Đơn Tròng ZEISS SmartLife</li>
+                                        <li>AntiVirus Platinum UV</li>
+                                        <li>Zeiss DuraVision Platinum</li>
+                                        <li>Kiểm Soát Cận Thị</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">KÍNH ĐA TRÒNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Đa Tròng</li>
+                                        <li>Đa Tròng Đức Zeiss</li>
+                                        <li>Đa Tròng Nhật Levalens</li>
+                                        <li>Đa Tròng Pháp Essilor</li>
+                                        <li>Đa Tròng Hàn Quốc Chemi</li>
+                                        <li>Đa Tròng Varilux X Series</li>
+                                        <li>Đa Tròng Thái Lan Excelite</li>
+                                        <li>Đa Tròng Singapore Zinimy</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#" class="hover:text-red-600">GỌNG KÍNH</a></li>
+                    <li><a href="#" class="hover:text-red-600">KÍNH MÁT</a></li>
+                    <li><a href="#" class="hover:text-red-600">CONTACT LENS</a></li>
+                    <li><a href="#" class="hover:text-red-600">ĐỐI TÁC</a></li>
+                </ul>
+
+                <div class="flex items-center space-x-4">
+                    <button class="text-xl text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+
+                    <button id="cart-btn-desktop"
+                        class="relative w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:border-red-600 transition-colors">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                        <span id="cart-count-desktop"
+                            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Overlay khi giỏ hàng mở -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[65] hidden"></div>
+
+    <!-- Giỏ hàng Dropdown -->
+    <div id="cart-dropdown"
+        class="fixed top-0 right-0 w-80 md:w-96 h-full bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800">Giỏ Hàng (<span id="cart-total-items">0</span>)</h3>
+                <button id="close-cart" class="text-gray-600 hover:text-red-600 text-2xl">&times;</button>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-4">
+                <p class="text-gray-500 text-center py-8">Giỏ hàng trống</p>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold text-gray-800">Tổng cộng:</span>
+                    <span id="cart-total-price" class="font-bold text-red-600 text-xl">0 VNĐ</span>
+                </div>
+                <button
+                    class="w-full bg-red-600 text-white py-3 rounded font-medium hover:bg-red-700 transition-colors">
+                    Thanh Toán
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[60] 
+            transform -translate-x-full transition-transform duration-300 lg:hidden">
+
+        <div class="p-4 flex justify-end items-center border-b">
+            <button id="close-sidebar-btn" class="text-3xl text-gray-700">&times;</button>
+        </div>
+
+        <div class="overflow-y-auto h-full pb-20">
+            <div class="bg-red-600 text-white text-center py-2 font-bold text-sm">
+                <span class="inline-block mr-2 text-lg">🏷️</span> ĐANG GIẢM GIÁ
+            </div>
+
+            <ul class="text-gray-700">
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">TRANG CHỦ</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">GIỚI THIỆU</a></li>
+
+                <li class="border-b">
+                    <div class="p-3 flex justify-between items-center font-bold" id="toggle-tròng-kính">
+                        TRÒNG KÍNH <span
+                            class="text-2xl align-middle transform transition-transform duration-200">^</span>
+                    </div>
+
+                    <ul id="submenu-tròng-kính" class="bg-gray-50 text-sm p-2 hidden">
+                        <li class="p-2 font-bold">TRÒNG KÍNH THEO TÍNH NĂNG</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đổi màu</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống ánh sáng xanh</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính cận siêu mỏng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đơn tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính hai tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đa tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống bể</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính mắt có độ</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính Polarized phân cực</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng Kính Kiểm Soát Cận Thị</li>
+
+                        <li class="p-2 font-bold mt-2 border-t">CHIẾT SUẤT TRÒNG KÍNH</li>
+                    </ul>
+                </li>
+
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">GỌNG KÍNH</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">KÍNH MÁT</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">CONTACT LENS</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">ĐỐI TÁC</a></li>
+
+            </ul>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8">
+        <section class="news-hero">
+            <span class="inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold text-red-600 bg-white/70 border border-red-200 rounded-full mb-4 shadow-sm w-fit">
+                📰 Trang tin Mắt Kính Sài Gòn
+            </span>
+            <h1>Kho kiến thức & bản tin cập nhật cho người yêu đôi mắt</h1>
+            <p class="text-gray-600 text-lg max-w-3xl">
+                Cùng khám phá xu hướng kính mới, mẹo chăm sóc mắt và câu chuyện tại hệ thống showroom của Mắt Kính Sài Gòn.
+                Chúng tôi cập nhật mỗi tuần để bạn luôn dẫn đầu phong cách và bảo vệ thị lực tốt nhất.
+            </p>
+            <div class="news-hero__meta">
+                <span>📍 3 showroom tại TP.HCM</span>
+                <span>🕒 Thứ 2 - Thứ 7: 08h00 - 20h30</span>
+                <span>📞 Hotline: 0888 368 888</span>
+            </div>
+        </section>
+
+        <section class="news-filter">
+            <div class="news-search">
+                <input type="search" id="news-search" placeholder="Tìm kiếm bài viết, chủ đề hoặc thương hiệu...">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 21l-5.2-5.2m1.45-4.55A6.25 6.25 0 1110 4.25a6.25 6.25 0 017.25 6.25z" />
+                </svg>
+            </div>
+            <button type="button" class="news-chip active" data-filter="all">Tất cả</button>
+            <button type="button" class="news-chip" data-filter="kien-thuc">Kiến thức mắt</button>
+            <button type="button" class="news-chip" data-filter="xu-huong">Xu hướng kính</button>
+            <button type="button" class="news-chip" data-filter="cham-soc">Chăm sóc mắt</button>
+            <button type="button" class="news-chip" data-filter="su-kien">Sự kiện nổi bật</button>
+        </section>
+
+        <section class="news-featured">
+            <article class="news-featured__main">
+                <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1300&q=80" alt="Chuyên gia kiểm tra thị lực tại showroom">
+                <div class="news-featured__content">
+                    <span class="news-badge">Kiến thức</span>
+                    <h2 class="text-2xl font-semibold leading-tight">ZEISS DuraVision Gold UV – Công nghệ phủ đánh dấu tiêu chuẩn vàng mới</h2>
+                    <p class="text-sm text-gray-200">Bí quyết mang lại tầm nhìn sắc nét, chống bám bẩn và chống tia UV toàn diện cho người dùng gọng kính cao cấp.</p>
+                    <div class="news-meta">
+                        <span>11 Tháng 10, 2025</span>
+                        <span>8 phút đọc</span>
+            </div>
+                </div>
+            </article>
+            <div class="news-featured__secondary">
+                <article>
+                    <img src="https://images.unsplash.com/photo-1490367532201-b9bc1dc483f6?auto=format&fit=crop&w=900&q=80" alt="Khách hàng thử kính đổi màu">
+                    <span class="news-badge text-red-600 bg-red-50 uppercase">Xu hướng</span>
+                    <h3 class="text-lg font-semibold text-slate-900">Transitions® GEN S – Tốc độ đổi màu dẫn đầu 2025</h3>
+                    <p class="text-sm text-slate-600">GEN S đạt 3 chữ S: Speed, Smart, Style. Khám phá bảng màu mới cùng kinh nghiệm phối đồ.</p>
+                    <div class="news-meta text-slate-400">
+                        <span>05 Tháng 05, 2025</span>
+                        <span>6 phút đọc</span>
+                    </div>
+                </article>
+                <article>
+                    <img src="https://images.unsplash.com/photo-1517963879433-6ad2b056d712?auto=format&fit=crop&w=900&q=80" alt="Nhân viên tư vấn tại cửa hàng mắt kính">
+                    <span class="news-badge text-red-600 bg-red-50 uppercase">Sự kiện</span>
+                    <h3 class="text-lg font-semibold text-slate-900">Đón tiếp đoàn chuyên gia Carl Zeiss Vision tại showroom Q.3</h3>
+                    <p class="text-sm text-slate-600">Cùng lắng nghe chia sẻ về công nghệ kiểm soát cận thị MyoCare và trải nghiệm độc quyền SmartLife.</p>
+                    <div class="news-meta text-slate-400">
+                        <span>23 Tháng 05, 2025</span>
+                        <span>4 phút đọc</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="news-layout">
+                        <div>
+                <div class="news-grid" id="news-grid">
+                    <article class="news-card" data-category="kien-thuc">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1506630448388-4e683c67ddb0?auto=format&fit=crop&w=900&q=80" alt="Kính đa tròng Zeiss Light 2">
+                        </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Kiến thức</span>
+                            <h3>Zeiss Light 2 – Giải pháp đa tròng mới cho người bận rộn</h3>
+                            <p>Đánh giá chi tiết vùng nhìn rộng, độ chuyển vùng mượt và công nghệ chống phản quang giúp di chuyển an toàn.</p>
+                            <div class="news-card__footer">
+                                <span>28 Tháng 07, 2024 • 7 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                    </div>
+                            </div>
+                    </article>
+                    <article class="news-card" data-category="cham-soc">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1000&q=80" alt="Chăm sóc kính đúng cách">
+                            </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Chăm sóc mắt</span>
+                            <h3>5 bước chăm sóc kính chống ánh sáng xanh giữ độ trong suốt lâu dài</h3>
+                            <p>Từ vệ sinh bằng dung dịch chuyên dụng đến bảo quản trong hộp chống sốc – những mẹo đơn giản nhưng ít người biết.</p>
+                            <div class="news-card__footer">
+                                <span>15 Tháng 08, 2025 • 5 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                        </div>
+                            </div>
+                    </article>
+                    <article class="news-card" data-category="xu-huong">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1000&q=80" alt="Kính mát thời trang">
+                            </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Xu hướng</span>
+                            <h3>Top 6 gọng kính titanium mạ vàng đang thống trị giới doanh nhân</h3>
+                            <p>Sự kết hợp giữa độ bền, trọng lượng nhẹ và thiết kế sắc nét giúp bạn ghi điểm ở mọi cuộc hẹn quan trọng.</p>
+                            <div class="news-card__footer">
+                                <span>02 Tháng 09, 2025 • 6 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                        </div>
+                            </div>
+                    </article>
+                    <article class="news-card" data-category="su-kien">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1000&q=80" alt="Showroom Mắt Kính Sài Gòn">
+                            </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Sự kiện</span>
+                            <h3>Khai trương không gian trải nghiệm kính đa tròng toàn diện</h3>
+                            <p>Thử miễn phí đo khúc xạ chuyên sâu, nhận tư vấn từ chuyên gia Essilor và ưu đãi 15% cho khách hẹn lịch online.</p>
+                            <div class="news-card__footer">
+                                <span>10 Tháng 06, 2025 • 4 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                        </div>
+                        </div>
+                    </article>
+                    <article class="news-card" data-category="cham-soc">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1492538368677-f6e0afe31dcc?auto=format&fit=crop&w=1000&q=80" alt="Trẻ em đeo kính">
+                        </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Chăm sóc mắt</span>
+                            <h3>Kiểm soát cận thị trẻ em: MyoCare và Stellest khác nhau ở điểm nào?</h3>
+                            <p>Bảng so sánh chi tiết giúp phụ huynh chọn giải pháp hiệu quả, dễ thích nghi cho con trong năm học mới.</p>
+                            <div class="news-card__footer">
+                                <span>30 Tháng 08, 2024 • 9 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                                    </div>
+                        </div>
+                    </article>
+                    <article class="news-card" data-category="xu-huong">
+                        <div class="news-card__image">
+                            <img src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=1000&q=80" alt="Khách hàng lựa chọn kính tại cửa hàng">
+                        </div>
+                        <div class="news-card__content">
+                            <span class="news-badge text-red-600 bg-red-50 uppercase">Xu hướng</span>
+                            <h3>Checklist mua kính áp tròng thời trang 2025: màu, đường kính và độ ẩm</h3>
+                            <p>Gợi ý top sản phẩm được yêu thích nhất tại Mắt Kính Sài Gòn kèm tips phối makeup hài hòa.</p>
+                            <div class="news-card__footer">
+                                <span>25 Tháng 04, 2025 • 5 phút đọc</span>
+                                <a href="#">Đọc tiếp →</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <nav class="news-pagination" aria-label="Phân trang bài viết">
+                    <button type="button" aria-label="Trang trước">←</button>
+                    <button type="button" class="active">1</button>
+                    <button type="button">2</button>
+                    <button type="button">3</button>
+                    <button type="button" aria-label="Trang tiếp theo">→</button>
+                </nav>
+            </div>
+
+            <aside class="news-aside">
+                                    <div>
+                    <h3>Đọc nhiều nhất</h3>
+                    <ul class="news-trending">
+                        <li>
+                            <a href="#">Cách đọc đơn kính chuẩn cùng chuyên gia Essilor</a>
+                            <span>12 Tháng 03, 2025 • 12K lượt xem</span>
+                        </li>
+                        <li>
+                            <a href="#">Tips chọn kính chống lóa cho người lái xe ban đêm</a>
+                            <span>18 Tháng 04, 2025 • 9K lượt xem</span>
+                        </li>
+                        <li>
+                            <a href="#">Bộ sưu tập kính mát unisex hè 2025</a>
+                            <span>02 Tháng 05, 2025 • 7.5K lượt xem</span>
+                        </li>
+                    </ul>
+                                    </div>
+                                    <div>
+                    <h3>Lịch hoạt động showroom</h3>
+                    <div class="showroom-card">
+                        <strong>Showroom 301B Điện Biên Phủ, Q.3</strong>
+                        <span>Thứ 2 - Thứ 7: 08h00 - 20h30</span>
+                        <span>Chủ nhật & Lễ: 08h30 - 20h00</span>
+                        <span>Hotline: 0966 666 301</span>
+                                    </div>
+                    <div class="showroom-card">
+                        <strong>245C Xô Viết Nghệ Tĩnh, Q. Bình Thạnh</strong>
+                        <span>Hotline: 0888 368 888</span>
+                            </div>
+                    <div class="showroom-card">
+                        <strong>90 Nguyễn Hữu Thọ, Bà Rịa</strong>
+                        <span>Lịch tư vấn theo hẹn trước</span>
+                        </div>
+                        </div>
+                <div>
+                    <h3>Bản tin nhanh</h3>
+                    <p class="text-sm text-slate-600">Nhận cảnh báo ưu đãi độc quyền và lịch workshop chăm sóc mắt định kỳ.</p>
+                    <button class="w-full mt-3 bg-red-50 text-red-600 font-semibold py-2.5 rounded-xl border border-red-200 hover:bg-red-100 transition">
+                        Đăng ký ngay
+                    </button>
+                </div>
+            </aside>
+        </section>
+
+        <section class="subscribe-card">
+            <div>
+                <h2 class="text-2xl font-semibold text-red-700">Đăng ký bản tin Mắt Kính Sài Gòn</h2>
+                <p class="text-slate-600">Thông tin mới mỗi thứ Hai: xu hướng kính, công nghệ tròng kính và ưu đãi chỉ dành cho hội viên.</p>
+            </div>
+            <form>
+                <input type="email" placeholder="Email của bạn">
+                <button type="submit">Đăng ký</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="bg-gray-100 border-t pt-8 pb-4 text-sm text-gray-700">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">CHÍNH SÁCH & QUY ĐỊNH</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-red-600">Giới Thiệu</a></li>
+                    <li><a href="#" class="hover:text-red-600">Chính sách bảo hành</a></li>
+                    <li><a href="#" class="hover:text-red-600">Tuyển dụng</a></li>
+                    <li><a href="#" class="hover:text-red-600">Quy trình Đổi trả/Hoàn tiền</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">QUY ĐỊNH PHÁP LÝ</h4>
+                <p><strong>CÔNG TY:</strong> MẮT KÍNH SÀI GÒN .COM</p>
+                <p>Địa chỉ: 301B Điện Biên Phủ, P.Xuân Hòa, TP.HCM</p>
+                <p>Mã số DN: 0313364999</p>
+                <p>Email: info@matkinhsaigon.com</p>
+                <p>Hotline: 0989.266.079</p>
+                <img src="logo_da_thong_bao.png" alt="Đã thông báo Bộ Công Thương" class="mt-3 h-10">
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">KẾT NỐI VỚI CHÚNG TÔI</h4>
+                <div class="flex space-x-3 text-2xl mb-4">
+                    <a href="#" class="hover:text-red-600"><img src="icon_facebook.png" alt="Facebook" class="h-6"></a>
+                    <a href="#" class="hover:text-red-600"><img src="icon_youtube.png" alt="Youtube" class="h-6"></a>
+                </div>
+                <h4 class="font-bold mb-3 text-red-600">THỜI GIAN LÀM VIỆC</h4>
+                <p>Thứ Hai - Thứ Bảy: 07:30 - 20:00</p>
+                <p>Ngày Lễ & CN: 09:00 - 20:00</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">BẢN ĐỒ</h4>
+                <img src="map_screenshot.jpg" alt="Bản đồ" class="w-full h-32 object-cover rounded">
+            </div>
+        </div>
+        <div class="text-center mt-8 pt-4 border-t border-gray-300">
+            &copy; 2025 Mắt Kính Sài Gòn. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mega menu positioning
+            const desktopNav = document.querySelector('nav.hidden.lg\\:block');
+            const setMegaMenuOffset = () => {
+                if (!desktopNav) return;
+                const { bottom } = desktopNav.getBoundingClientRect();
+                document.documentElement.style.setProperty('--nav-bottom', `${bottom}px`);
+            };
+            setMegaMenuOffset();
+            window.addEventListener('resize', setMegaMenuOffset);
+            window.addEventListener('scroll', setMegaMenuOffset);
+
+            // Mobile sidebar
+            const mobileSidebar = document.getElementById('mobile-sidebar');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            if (mobileMenuBtn && mobileSidebar) {
+                mobileMenuBtn.addEventListener('click', () => mobileSidebar.classList.remove('-translate-x-full'));
+            }
+            if (closeSidebarBtn && mobileSidebar) {
+                closeSidebarBtn.addEventListener('click', () => mobileSidebar.classList.add('-translate-x-full'));
+            }
+
+            const toggleTrongKinh = document.getElementById('toggle-tròng-kính');
+            const submenuTrongKinh = document.getElementById('submenu-tròng-kính');
+            if (toggleTrongKinh && submenuTrongKinh) {
+                const arrow = toggleTrongKinh.querySelector('span');
+                submenuTrongKinh.classList.add('hidden');
+                toggleTrongKinh.addEventListener('click', () => {
+                    const hidden = submenuTrongKinh.classList.toggle('hidden');
+                    arrow.textContent = hidden ? '^' : 'v';
+                });
+            }
+
+            // News filter logic
+            const newsCards = Array.from(document.querySelectorAll('.news-card'));
+            const newsChips = Array.from(document.querySelectorAll('.news-chip'));
+            const searchInput = document.getElementById('news-search');
+            const emptyState = document.createElement('p');
+            emptyState.className = 'text-center text-sm text-slate-500 py-6 hidden';
+            emptyState.textContent = 'Không tìm thấy bài viết phù hợp với bộ lọc hiện tại.';
+
+            const newsGrid = document.getElementById('news-grid');
+            if (newsGrid) {
+                newsGrid.appendChild(emptyState);
+            }
+
+            let activeFilter = 'all';
+            let searchTerm = '';
+
+            const applyFilters = () => {
+                let visibleCount = 0;
+                newsCards.forEach(card => {
+                    const matchesCategory = activeFilter === 'all' || card.dataset.category === activeFilter;
+                    const text = card.textContent.toLowerCase();
+                    const matchesSearch = !searchTerm || text.includes(searchTerm);
+                    const shouldShow = matchesCategory && matchesSearch;
+                    card.classList.toggle('hidden', !shouldShow);
+                    if (shouldShow) visibleCount += 1;
+                });
+                if (emptyState) {
+                    emptyState.classList.toggle('hidden', visibleCount !== 0);
+                }
+            };
+
+            newsChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    if (chip.dataset.filter === activeFilter) return;
+                    activeFilter = chip.dataset.filter || 'all';
+                    newsChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    applyFilters();
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', event => {
+                    searchTerm = event.target.value.trim().toLowerCase();
+                    applyFilters();
+                });
+            }
+
+            applyFilters();
+        });
+    </script>
+</body>
+
+</html>

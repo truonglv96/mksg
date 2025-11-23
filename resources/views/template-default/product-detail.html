@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mắt Kính Sài Gòn - Trang chủ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <style>
+        /* CSS tùy chỉnh cho Mega Menu Desktop */
+        nav.hidden.lg\:block {
+            position: relative;
+            overflow-x: visible;
+        }
+
+        nav.hidden.lg\:block .container {
+            position: relative;
+        }
+
+        .has-mega-menu {
+            position: static;
+        }
+
+        .mega-menu-content {
+            display: none;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(85vw, calc(100vw - 2rem));
+            max-width: 100vw;
+            z-index: 50;
+            border-top: 4px solid #dc2626;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        /* Tính toán top position dựa trên chiều cao của nav */
+        .has-mega-menu:hover .mega-menu-content {
+            top: var(--nav-bottom, 100px);
+        }
+
+        /* Ngăn body scroll ngang khi mega menu mở */
+        body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        /* Kích hoạt hiển thị khi hover vào thẻ cha */
+        .has-mega-menu:hover .mega-menu-content {
+            display: block;
+        }
+
+        /* Loại bỏ padding của container bên trong mega menu */
+        .mega-menu-content .container {
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        /* Ẩn thanh cuộn của Sidebar khi không cần (Tuỳ chọn) */
+        #mobile-sidebar {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Đảm bảo Swiper container ẩn các slide không hiển thị */
+        .product-slider.swiper-container,
+        .category-swiper,
+        .related-swiper {
+            overflow: hidden !important;
+            width: 100%;
+        }
+
+        .product-slider .swiper-wrapper,
+        .category-swiper .swiper-wrapper,
+        .related-swiper .swiper-wrapper {
+            display: flex;
+        }
+
+        /* Đảm bảo các slide không hiển thị bị ẩn hoàn toàn */
+        .product-slider .swiper-slide,
+        .category-swiper .swiper-slide,
+        .related-swiper .swiper-slide {
+            flex-shrink: 0;
+            height: auto;
+        }
+
+        .category-swiper .swiper-button-next,
+        .category-swiper .swiper-button-prev,
+        .related-swiper .swiper-button-next,
+        .related-swiper .swiper-button-prev {
+            color: #dc2626;
+        }
+
+        /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
+        .category-swiper .swiper-slide,
+        .related-swiper .swiper-slide {
+            height: auto;
+            display: flex;
+        }
+
+        .category-swiper .swiper-slide>div,
+        .related-swiper .swiper-slide>div {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        .category-swiper .swiper-slide .p-4,
+        .related-swiper .swiper-slide .p-4 {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* Đẩy buttons xuống đáy của card */
+        .category-swiper .swiper-slide .flex.gap-2 {
+            margin-top: auto;
+        }
+
+        /* Đảm bảo tiêu đề và brand có chiều cao cố định */
+        .category-swiper .swiper-slide h3,
+        .related-swiper .swiper-slide h3 {
+            min-height: 2.5rem;
+            display: -webkit-box;
+            line-clamp: 2;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .category-swiper .swiper-slide .text-gray-500,
+        .related-swiper .swiper-slide .text-gray-500 {
+            min-height: 1.5rem;
+        }
+
+        /* Đảm bảo phần giá có chiều cao đồng đều */
+        .category-swiper .swiper-slide>div>.p-4>div:nth-child(3),
+        .related-swiper .swiper-slide>div>.p-4>div:nth-child(3) {
+            min-height: 2.5rem;
+        }
+
+        /* Hiệu ứng hover hình ảnh sản phẩm - Hover toàn bộ swiper-slide */
+        .swiper-slide.group .product-img-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 2;
+        }
+
+        .swiper-slide.group:hover .product-img-hover {
+            opacity: 1;
+        }
+
+        .swiper-slide.group:hover .product-img-main {
+            opacity: 1;
+        }
+
+        /* Badge giảm giá góc phải trên hình */
+        .discount-badge {
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Căn giá bên phải */
+        .category-swiper .swiper-slide .text-red-600,
+        .category-swiper .swiper-slide .line-through {
+            text-align: right;
+        }
+
+        /* Color swatches & option pills */
+        .color-chip {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.85rem;
+            border: 1.5px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .color-chip.active {
+            border-color: #dc2626;
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .option-pill {
+            border: 1.5px solid transparent;
+        }
+
+        .option-pill.active {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .thumbnail-button.active,
+        .lightbox-thumbnail.active {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+        }
+
+        .consult-form-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 1.75rem;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .consult-form-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .consult-form-header span {
+            font-size: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, #fca5a5, #ef4444);
+            color: #fff;
+            line-height: 1;
+            flex-shrink: 0;
+            box-shadow: 0 12px 30px rgba(239, 68, 68, 0.18);
+        }
+
+        .consult-form-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .consult-form-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .consult-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .consult-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .consult-form-grid--full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+        }
+
+        .form-field label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            border-radius: 0.9rem;
+            border: 1.25px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: #111827;
+            background: #f9fafb;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .form-field textarea {
+            min-height: 7.5rem;
+            resize: vertical;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: #ef4444;
+            background: #ffffff;
+            box-shadow: 0 8px 22px rgba(239, 68, 68, 0.12);
+            outline: none;
+        }
+
+        .form-field input:hover,
+        .form-field select:hover,
+        .form-field textarea:hover {
+            border-color: #f87171;
+            background: #ffffff;
+        }
+
+        .form-field input::placeholder,
+        .form-field textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        .consult-form button[type="submit"] {
+            width: 100%;
+            border-radius: 1rem;
+            padding: 0.95rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .consult-form button[type="submit"] span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.85rem;
+            background: rgba(255, 255, 255, 0.18);
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .consult-form button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px rgba(220, 38, 38, 0.25);
+        }
+
+        .consult-form button[type="submit"]:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25);
+        }
+
+        .consult-form-help {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .consult-form-help a {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .form-field--select select {
+            padding-right: 2.75rem;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: none;
+        }
+
+        .form-field--select::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 1.1rem;
+            width: 0.65rem;
+            height: 0.65rem;
+            border-right: 2px solid #ef4444;
+            border-bottom: 2px solid #ef4444;
+            transform: translateY(-50%) rotate(45deg);
+            pointer-events: none;
+        }
+
+        .form-field--datetime input[type="datetime-local"] {
+            padding-right: 2.75rem;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-field--datetime input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .form-field--datetime input[type="datetime-local"]::-webkit-inner-spin-button,
+        .form-field--datetime input[type="datetime-local"]::-webkit-clear-button {
+            display: none;
+        }
+
+        .form-field--datetime::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='3' ry='3'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") center/contain no-repeat;
+            pointer-events: none;
+        }
+
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.72);
+            z-index: 90;
+            padding: 1.5rem;
+        }
+
+        .image-lightbox.active {
+            display: flex;
+        }
+
+        .image-lightbox__content {
+            position: relative;
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.25);
+            max-width: min(960px, 100%);
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .image-lightbox__main {
+            position: relative;
+            width: 100%;
+            background: #f8fafc;
+            border-radius: 1rem;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-lightbox__main img {
+            max-height: 70vh;
+            width: 100%;
+            object-fit: contain;
+            background: #ffffff;
+        }
+
+        .image-lightbox__nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3rem;
+            height: 3rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.92);
+            color: #dc2626;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .image-lightbox__nav:hover {
+            background: #ffffff;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .image-lightbox__nav--prev {
+            left: 1rem;
+        }
+
+        .image-lightbox__nav--next {
+            right: 1rem;
+        }
+
+        .image-lightbox__thumbs {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+
+        .lightbox-thumbnail {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 1rem;
+            border: 2px solid transparent;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #ffffff;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .lightbox-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lightbox-thumbnail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        }
+
+        .image-lightbox__close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.05);
+            border-radius: 9999px;
+            padding: 0.5rem;
+            line-height: 0;
+            color: #0f172a;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .image-lightbox__close:hover {
+            background: rgba(15, 23, 42, 0.12);
+        }
+
+        @media (max-width: 640px) {
+            .image-lightbox__content {
+                padding: 0.75rem;
+                border-radius: 1rem;
+            }
+
+            .image-lightbox__nav {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
+            }
+
+            .lightbox-thumbnail {
+                width: 3.5rem;
+                height: 3.5rem;
+                border-radius: 0.85rem;
+            }
+        }
+
+        /* Tab panels */
+        .tab-button.active {
+            color: #dc2626;
+            border-bottom: 3px solid #dc2626;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Hover effect cho product cards */
+        .product-card .product-img-hover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 2;
+        }
+
+        .product-card.group:hover .product-img-hover {
+            opacity: 1;
+        }
+
+        .product-card.group:hover .product-img-main {
+            opacity: 1;
+        }
+
+        /* Đảm bảo product cards có chiều cao đồng đều */
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .product-card>div:last-child {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-card .flex.gap-2 {
+            margin-top: auto;
+        }
+
+        /* Giỏ hàng dropdown */
+        #cart-dropdown {
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #cart-dropdown.translate-x-full {
+            transform: translateX(100%);
+        }
+
+        /* Mobile Filter Sidebar */
+        #mobile-filter-sidebar {
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #mobile-filter-sidebar.-translate-x-full {
+            transform: translateX(-100%);
+        }
+
+        /* Animation cho notification */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Mobile Product Cards Optimization */
+        @media (max-width: 767px) {
+
+            .product-summary {
+                padding: 1.25rem;
+                border-radius: 1.5rem;
+            }
+
+            .product-summary h1 {
+                font-size: 1.5rem;
+                line-height: 2rem;
+            }
+
+            .product-summary .text-sm {
+                font-size: 0.825rem;
+            }
+
+            .price-card {
+                padding: 1rem;
+                text-align: center;
+                border-radius: 1.25rem;
+            }
+
+            .price-card .price-current {
+                font-size: 1.9rem;
+            }
+
+            .price-card .price-old {
+                font-size: 0.85rem;
+            }
+
+            .benefits-list {
+                font-size: 0.85rem;
+                gap: 0.5rem;
+            }
+
+            .benefits-list li {
+                padding: 0.4rem 0;
+            }
+
+            .cta-buttons {
+                gap: 0.875rem;
+            }
+
+            .cta-buttons button {
+                width: 100%;
+            }
+
+            .support-chips {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .info-badges {
+                padding: 1.25rem;
+                gap: 0.75rem;
+                border-radius: 1.5rem;
+            }
+
+            .highlights-grid {
+                gap: 1rem;
+            }
+
+            .highlight-card {
+                padding: 1.25rem;
+                border-radius: 1.5rem;
+            }
+
+            .product-tabs {
+                border-radius: 1.5rem;
+            }
+
+            .product-tabs .tab-button {
+                padding: 0.75rem 0;
+                font-size: 0.875rem;
+            }
+
+            .product-tabs .p-6 {
+                padding: 1.25rem !important;
+            }
+
+            .showroom-section {
+                padding: 1.5rem;
+                border-radius: 1.75rem;
+            }
+
+            .showroom-section form {
+                padding: 0.5rem;
+                background: #ffffff;
+                border-radius: 1.25rem;
+            }
+
+            .related-grid {
+                gap: 0.75rem;
+            }
+
+            .related-grid .product-card {
+                border-radius: 1.25rem;
+            }
+
+            /* Product Cards - Tối ưu cho mobile */
+            .product-card .p-3 {
+                padding: 0.5rem !important;
+            }
+
+            .product-card h3 {
+                font-size: 0.7rem !important;
+                line-height: 1.2 !important;
+                min-height: 2rem !important;
+                margin-bottom: 0.375rem !important;
+            }
+
+            .product-card img {
+                height: 140px !important;
+                object-fit: cover;
+            }
+
+            .product-card .text-sm {
+                font-size: 0.65rem !important;
+            }
+
+            .product-card .text-lg {
+                font-size: 0.875rem !important;
+            }
+
+            .product-card .border.border-green-600 {
+                font-size: 0.6rem !important;
+                padding: 0.25rem 0.375rem !important;
+            }
+
+            /* Ẩn button "xem" trên mobile */
+            .product-card button:last-child {
+                display: none;
+            }
+
+            /* Badge giảm giá trên mobile - product cards */
+            .product-card .discount-badge {
+                font-size: 0.625rem !important;
+                padding: 0.25rem 0.375rem !important;
+            }
+
+            /* Frame style buttons on mobile */
+            .frame-style-btn {
+                padding: 0.5rem !important;
+            }
+
+            .frame-style-btn svg {
+                width: 1.5rem !important;
+                height: 1.5rem !important;
+            }
+
+            .frame-style-btn p {
+                font-size: 0.625rem !important;
+            }
+        }
+
+        /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
+        .product-slider .swiper-button-next,
+        .product-slider .swiper-button-prev {
+            color: #dc2626;
+        }
+
+        /* Chỉnh lại vị trí của Pagination */
+        .swiper-pagination-bullet-active {
+            background: #dc2626 !important;
+        }
+
+        /* Cần thêm CSS cho mobile arrow để nó xoay */
+        #toggle-tròng-kính span {
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="shadow-md sticky top-0 bg-white z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center lg:hidden">
+            <button id="mobile-menu-btn" class="text-3xl text-gray-700">☰</button>
+
+            <div class="flex flex-col items-center flex-shrink-0">
+                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
+                    alt="Mắt Kính Hàng Hiệu" class="h-6">
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+
+                <button id="cart-btn"
+                    class="relative w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full">
+                    <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                        </path>
+                    </svg>
+                    <span id="cart-count"
+                        class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="hidden lg:block bg-white shadow-lg">
+            <div class="container mx-auto flex justify-between items-center py-3">
+                <div class="flex items-center">
+                    <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
+                        alt="Mắt Kính Sài Gòn" class="h-8 mr-3">
+                </div>
+
+                <ul class="flex space-x-6 text-sm font-medium">
+                    <li><a href="#" class="hover:text-red-600">THƯƠNG HIỆU</a></li>
+                    <li><a href="#" class="hover:text-red-600">KIẾN THỨC</a></li>
+                    <li class="has-mega-menu relative">
+                        <a href="#" class="text-red-600 font-bold">TRÒNG KÍNH</a>
+                        <div class="mega-menu-content bg-white shadow-xl py-6">
+                            <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Hai Tròng</li>
+                                        <li>Đổi Màu</li>
+                                        <li>Chống Bể</li>
+                                        <li>Siêu Mỏng</li>
+                                        <li>Siêu Cứng</li>
+                                        <li>Kính Mắt Có Độ</li>
+                                        <li>Tròng Kính Thời Trang</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">CHIẾT SUẤT</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Chiết suất 1.50</li>
+                                        <li>Chiết suất 1.53</li>
+                                        <li>Chiết suất 1.56</li>
+                                        <li>Chiết suất 1.58</li>
+                                        <li>Chiết suất 1.59</li>
+                                        <li>Chiết suất 1.60</li>
+                                        <li>Chiết suất 1.67</li>
+                                        <li>Chiết suất 1.71</li>
+                                        <li>Chiết suất 1.74</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">ÁNH SÁNG XANH</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Tròng Ánh Sáng Xanh</li>
+                                        <li>Lọc Ánh Sáng Xanh Essilor</li>
+                                        <li>Lọc Ánh Sáng Xanh Zeiss</li>
+                                        <li>Cắt Ánh Sáng Xanh + UV</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG CAO CẤP</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Đơn Tròng ZEISS SmartLife</li>
+                                        <li>AntiVirus Platinum UV</li>
+                                        <li>Zeiss DuraVision Platinum</li>
+                                        <li>Kiểm Soát Cận Thị</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">KÍNH ĐA TRÒNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Đa Tròng</li>
+                                        <li>Đa Tròng Đức Zeiss</li>
+                                        <li>Đa Tròng Nhật Levalens</li>
+                                        <li>Đa Tròng Pháp Essilor</li>
+                                        <li>Đa Tròng Hàn Quốc Chemi</li>
+                                        <li>Đa Tròng Varilux X Series</li>
+                                        <li>Đa Tròng Thái Lan Excelite</li>
+                                        <li>Đa Tròng Singapore Zinimy</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="has-mega-menu relative">
+                        <a href="#" class="text-red-600 font-bold">TRÒNG KÍNH</a>
+                        <div class="mega-menu-content bg-white shadow-xl py-6">
+                            <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Hai Tròng</li>
+                                        <li>Đổi Màu</li>
+                                        <li>Chống Bể</li>
+                                        <li>Siêu Mỏng</li>
+                                        <li>Siêu Cứng</li>
+                                        <li>Kính Mắt Có Độ</li>
+                                        <li>Tròng Kính Thời Trang</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">CHIẾT SUẤT</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Chiết suất 1.50</li>
+                                        <li>Chiết suất 1.53</li>
+                                        <li>Chiết suất 1.56</li>
+                                        <li>Chiết suất 1.58</li>
+                                        <li>Chiết suất 1.59</li>
+                                        <li>Chiết suất 1.60</li>
+                                        <li>Chiết suất 1.67</li>
+                                        <li>Chiết suất 1.71</li>
+                                        <li>Chiết suất 1.74</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-2">
+                                    <h4 class="font-bold mb-3 text-red-600">ÁNH SÁNG XANH</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Tròng Ánh Sáng Xanh</li>
+                                        <li>Lọc Ánh Sáng Xanh Essilor</li>
+                                        <li>Lọc Ánh Sáng Xanh Zeiss</li>
+                                        <li>Cắt Ánh Sáng Xanh + UV</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG CAO CẤP</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Đơn Tròng ZEISS SmartLife</li>
+                                        <li>AntiVirus Platinum UV</li>
+                                        <li>Zeiss DuraVision Platinum</li>
+                                        <li>Kiểm Soát Cận Thị</li>
+                                    </ul>
+                                </div>
+                                <div class="col-span-3">
+                                    <h4 class="font-bold mb-3 text-red-600">KÍNH ĐA TRÒNG</h4>
+                                    <ul class="space-y-2 text-sm">
+                                        <li>Các Loại Đa Tròng</li>
+                                        <li>Đa Tròng Đức Zeiss</li>
+                                        <li>Đa Tròng Nhật Levalens</li>
+                                        <li>Đa Tròng Pháp Essilor</li>
+                                        <li>Đa Tròng Hàn Quốc Chemi</li>
+                                        <li>Đa Tròng Varilux X Series</li>
+                                        <li>Đa Tròng Thái Lan Excelite</li>
+                                        <li>Đa Tròng Singapore Zinimy</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="#" class="hover:text-red-600">GỌNG KÍNH</a></li>
+                    <li><a href="#" class="hover:text-red-600">KÍNH MÁT</a></li>
+                    <li><a href="#" class="hover:text-red-600">CONTACT LENS</a></li>
+                    <li><a href="#" class="hover:text-red-600">ĐỐI TÁC</a></li>
+                </ul>
+
+                <div class="flex items-center space-x-4">
+                    <button class="text-xl text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+
+                    <button id="cart-btn-desktop"
+                        class="relative w-8 h-8 flex items-center justify-center border border-gray-300 rounded-full hover:border-red-600 transition-colors">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                        <span id="cart-count-desktop"
+                            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Overlay khi giỏ hàng mở -->
+    <div id="cart-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-[65] hidden"></div>
+
+    <!-- Giỏ hàng Dropdown -->
+    <div id="cart-dropdown"
+        class="fixed top-0 right-0 w-80 md:w-96 h-full bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-300">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-lg font-bold text-gray-800">Giỏ Hàng (<span id="cart-total-items">0</span>)</h3>
+                <button id="close-cart" class="text-gray-600 hover:text-red-600 text-2xl">&times;</button>
+            </div>
+
+            <!-- Cart Items -->
+            <div id="cart-items" class="flex-1 overflow-y-auto p-4">
+                <p class="text-gray-500 text-center py-8">Giỏ hàng trống</p>
+            </div>
+
+            <!-- Footer -->
+            <div class="border-t p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-bold text-gray-800">Tổng cộng:</span>
+                    <span id="cart-total-price" class="font-bold text-red-600 text-xl">0 VNĐ</span>
+                </div>
+                <button
+                    class="w-full bg-red-600 text-white py-3 rounded font-medium hover:bg-red-700 transition-colors">
+                    Thanh Toán
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[60] 
+            transform -translate-x-full transition-transform duration-300 lg:hidden">
+
+        <div class="p-4 flex justify-end items-center border-b">
+            <button id="close-sidebar-btn" class="text-3xl text-gray-700">&times;</button>
+        </div>
+
+        <div class="overflow-y-auto h-full pb-20">
+            <div class="bg-red-600 text-white text-center py-2 font-bold text-sm">
+                <span class="inline-block mr-2 text-lg">🏷️</span> ĐANG GIẢM GIÁ
+            </div>
+
+            <ul class="text-gray-700">
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">TRANG CHỦ</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">GIỚI THIỆU</a></li>
+
+                <li class="border-b">
+                    <div class="p-3 flex justify-between items-center font-bold" id="toggle-tròng-kính">
+                        TRÒNG KÍNH <span
+                            class="text-2xl align-middle transform transition-transform duration-200">^</span>
+                    </div>
+
+                    <ul id="submenu-tròng-kính" class="bg-gray-50 text-sm p-2 hidden">
+                        <li class="p-2 font-bold">TRÒNG KÍNH THEO TÍNH NĂNG</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đổi màu</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống ánh sáng xanh</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính cận siêu mỏng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đơn tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính hai tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đa tròng</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống bể</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính mắt có độ</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính Polarized phân cực</li>
+                        <li class="pl-4 py-1 hover:bg-gray-200">Tròng Kính Kiểm Soát Cận Thị</li>
+
+                        <li class="p-2 font-bold mt-2 border-t">CHIẾT SUẤT TRÒNG KÍNH</li>
+                    </ul>
+                </li>
+
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">GỌNG KÍNH</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">KÍNH MÁT</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">CONTACT LENS</a></li>
+                <li class="p-3 border-b hover:bg-gray-100"><a href="#">ĐỐI TÁC</a></li>
+
+            </ul>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <!-- Breadcrumb -->
+        <nav class="text-sm text-gray-500 flex items-center gap-1 mb-6 overflow-x-auto whitespace-nowrap"
+            aria-label="Breadcrumb">
+            <a href="home.html" class="hover:text-red-600 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5.5a0.5 0.5 0 01-0.5-0.5V15a1 1 0 00-1-1h-4a1 1 0 00-1 1v5.5a0.5 0.5 0 01-0.5 0.5H4a1 1 0 01-1-1V9.75z" />
+                </svg>
+                Trang chủ
+            </a>
+            <span>/</span>
+            <a href="product-category.html" class="hover:text-red-600">Gọng kính</a>
+            <span>/</span>
+            <span class="text-gray-700 font-medium">Helen Keller H83026 C1</span>
+        </nav>
+
+        <!-- Product Summary -->
+        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10">
+                <!-- Gallery -->
+                <div>
+                    <button type="button" id="lightbox-trigger"
+                        class="relative w-full h-[420px] lg:h-[520px] flex items-center justify-center bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                        aria-label="Phóng to hình sản phẩm">
+                        <img id="main-product-image"
+                            src="https://matkinhsaigon.com.vn/img/product/1636552509_0_img.png"
+                            alt="Gọng kính Helen Keller H83026 C1"
+                            class="max-h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110">
+                        <span
+                            class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 text-xs font-semibold rounded-full shadow">
+                            -15%
+                        </span>
+                    </button>
+                    <div class="flex gap-3 mt-4 overflow-x-auto pb-1">
+                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552509_1_img.png"
+                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
+                            <img src="https://matkinhsaigon.com.vn/img/product/1636552509_1_img.png"
+                                alt="Helen Keller H83026 C1 - Góc chính" class="w-full h-full object-cover">
+                        </button>
+                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
+                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
+                            <img src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
+                                alt="Helen Keller H83026 C1 - Góc nghiên" class="w-full h-full object-cover">
+                        </button>
+                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552510_3_img.png"
+                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
+                            <img src="https://matkinhsaigon.com.vn/img/product/1636552510_3_img.png"
+                                alt="Helen Keller H83026 C1 - Cận cảnh bản lề" class="w-full h-full object-cover">
+                        </button>
+                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
+                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
+                            <img src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
+                                alt="Helen Keller H83026 C1 - Phụ kiện kèm theo" class="w-full h-full object-cover">
+                        </button>
+                    </div>
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
+                                🚚
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-800">Miễn phí vận chuyển</p>
+                                <p class="text-xs text-gray-500">Giao nhanh 24-72h toàn quốc</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
+                                🔁
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-800">Đổi trả trong 7 ngày</p>
+                                <p class="text-xs text-gray-500">Miễn phí nếu lỗi từ nhà sản xuất</p>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
+                                🛡️
+                            </span>
+                            <div>
+                                <p class="font-semibold text-gray-800">Bảo hành 12 tháng</p>
+                                <p class="text-xs text-gray-500">Chính hãng Helen Keller toàn hệ thống</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product content -->
+                <div class="space-y-5">
+                    <div class="space-y-2">
+                        <p id="product-brand" class="uppercase tracking-wide text-xs font-semibold text-red-600">Helen Keller</p>
+                        <h1 id="product-name" class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                            Gọng Kính Helen Keller H83026 C1
+                        </h1>
+                        <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                            <div class="flex items-center gap-1 text-yellow-500">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.034a1 1 0 00-1.175 0l-2.802 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.463a1 1 0 00.95-.69l1.068-3.292z" />
+                                </svg>
+                                4.8 (128 đánh giá)
+                            </div>
+                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <p>Mã SP: <span class="font-medium text-gray-700">H83026-C1</span></p>
+                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <p>Tình trạng: <span class="font-medium text-green-600">Còn hàng</span></p>
+                        </div>
+                    </div>
+
+                    <div class="price-card bg-red-50 border border-red-100 rounded-2xl p-4 sm:p-5 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="price-current text-3xl font-bold text-red-600" data-product-price>1.105.000 VNĐ</span>
+                            <span class="price-old text-sm text-gray-500 line-through">1.300.000 VNĐ</span>
+                            <span class="price-saving text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full">Tiết kiệm 15%</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Màu gọng</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 active"
+                                    data-color="Đen bóng" style="background: linear-gradient(135deg, #0f172a 50%, #f8fafc 50%);" aria-label="Đen bóng" aria-pressed="true">
+                                </button>
+                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    data-color="Vàng kim nhã" style="background: linear-gradient(135deg, #facc15 50%, #fde68a 50%);" aria-label="Vàng kim nhã" aria-pressed="false">
+                                </button>
+                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    data-color="Bạc ánh gương" style="background: linear-gradient(135deg, #e5e7eb 50%, #9ca3af 50%);" aria-label="Bạc ánh gương" aria-pressed="false">
+                                </button>
+                            </div>
+                            <p id="selected-color" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">Đen bóng</span></p>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Chọn gói tròng kính</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition active"
+                                    data-option="1.56 chống UV" aria-pressed="true">
+                                    <p class="font-semibold text-gray-800">Tròng 1.56 Chống UV</p>
+                                    <p class="text-xs text-gray-500 mt-1">Bảo vệ mắt cơ bản, phù hợp sử dụng hàng ngày</p>
+                                </button>
+                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
+                                    data-option="1.56 chống ánh sáng xanh" aria-pressed="false">
+                                    <p class="font-semibold text-gray-800">Tròng 1.56 Chống Ánh Sáng Xanh</p>
+                                    <p class="text-xs text-gray-500 mt-1">Giảm mỏi mắt khi dùng máy tính, điện thoại</p>
+                                </button>
+                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
+                                    data-option="1.60 siêu mỏng đổi màu" aria-pressed="false">
+                                    <p class="font-semibold text-gray-800">Tròng 1.60 Siêu Mỏng Đổi Màu</p>
+                                    <p class="text-xs text-gray-500 mt-1">Mỏng nhẹ, chuyển màu nhanh khi ra nắng</p>
+                                </button>
+                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
+                                    data-option="1.67 chiết suất cao smartlife" aria-pressed="false">
+                                    <p class="font-semibold text-gray-800">Tròng 1.67 ZEISS SmartLife</p>
+                                    <p class="text-xs text-gray-500 mt-1">Công nghệ mới nhất, bảo vệ tối ưu, bảo hành 24 tháng</p>
+                                </button>
+                            </div>
+                            <p id="selected-option" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">Tròng 1.56 Chống UV</span></p>
+                        </div>
+                    </div>
+
+                    <ul class="benefits-list space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-red-500">✔</span>
+                            Thiết kế mắt mèo thanh lịch, phù hợp gương mặt trái xoan, tròn và hình trái tim.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-red-500">✔</span>
+                            Chất liệu hợp kim siêu nhẹ kết hợp đệm mũi silicon êm ái, đeo lâu không đau.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-red-500">✔</span>
+                            Bản lề lò xo linh hoạt, hạn chế gãy gọng, giữ form chuẩn trong quá trình sử dụng.
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 text-red-500">✔</span>
+                            Tặng kèm hộp + khăn lau chính hãng Helen Keller.
+                        </li>
+                    </ul>
+
+                    <div class="cta-buttons flex flex-col sm:flex-row gap-3">
+                        <button
+                            class="flex-1 bg-red-600 text-white py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-700 transition shadow-lg shadow-red-200 add-to-cart-btn">
+                            Thêm vào giỏ hàng
+                        </button>
+                        <button
+                            class="flex-1 border border-red-600 text-red-600 py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-50 transition">
+                            Mua ngay
+                        </button>
+                    </div>
+
+                    <div class="support-chips flex flex-wrap items-center gap-3 text-sm">
+                        <span class="px-3 py-2 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-2">
+                            🛠️ Lắp kính trong 30 phút tại cửa hàng
+                        </span>
+                        <a href="tel:0888368889"
+                            class="px-4 py-2 rounded-full bg-yellow-50 text-yellow-700 font-semibold flex items-center gap-2 hover:bg-yellow-100 transition">
+                            ☎ Hotline tư vấn: 0888 368 889
+                        </a>
+                    </div>
+
+                    <div class="info-badges bg-gray-50 border border-gray-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-gray-600">
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500 mt-0.5">🏬</span>
+                            <p><strong>Nhận tại showroom</strong><br>301B Điện Biên Phủ, Q.3 - hoặc hệ thống 3 chi nhánh Mắt Kính Sài Gòn.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500 mt-0.5">🎁</span>
+                            <p><strong>Quà tặng kèm</strong><br>Khăn lau & dung dịch vệ sinh kính cao cấp.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-red-500 mt-0.5">💳</span>
+                            <p><strong>Thanh toán linh hoạt</strong><br>Tiền mặt, chuyển khoản, quẹt thẻ, trả góp.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="image-lightbox" class="image-lightbox hidden" role="dialog" aria-modal="true"
+            aria-label="Xem hình sản phẩm phóng to">
+            <div class="image-lightbox__content">
+                <button type="button" id="lightbox-close" class="image-lightbox__close"
+                    aria-label="Đóng phóng to hình ảnh">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <div class="image-lightbox__main">
+                    <button type="button" id="lightbox-prev"
+                        class="image-lightbox__nav image-lightbox__nav--prev" aria-label="Hình trước">&lsaquo;</button>
+                    <img id="lightbox-main-image" src="" alt="Hình sản phẩm phóng to">
+                    <button type="button" id="lightbox-next"
+                        class="image-lightbox__nav image-lightbox__nav--next" aria-label="Hình tiếp theo">&rsaquo;</button>
+                </div>
+                <div id="lightbox-thumbnails" class="image-lightbox__thumbs"></div>
+            </div>
+        </div>
+
+        <!-- Highlights -->
+        <section class="highlights-grid grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-10">
+            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Cam kết chính hãng 100%</h3>
+                <p class="text-sm text-gray-600">Sản phẩm Helen Keller nhập khẩu, có đầy đủ tem chống hàng giả, phiếu bảo hành,
+                    hóa đơn VAT theo yêu cầu.</p>
+            </div>
+            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Đo thị lực chuẩn quốc tế</h3>
+                <p class="text-sm text-gray-600">Trang thiết bị Essilor &amp; ZEISS, bác sĩ nhãn khoa nhiều kinh nghiệm. Đặt lịch trước để được ưu tiên.</p>
+            </div>
+            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Hậu mãi trọn đời</h3>
+                <p class="text-sm text-gray-600">Miễn phí vệ sinh, chỉnh sửa gọng, thay ốc, da mũi, căn chỉnh form trong suốt quá trình sử dụng.</p>
+            </div>
+        </section>
+
+        <!-- Tabs -->
+        <section class="product-tabs bg-white border border-gray-100 rounded-2xl shadow-sm mb-10">
+            <div class="flex items-center gap-6 px-4 sm:px-6 border-b overflow-x-auto">
+                <button class="tab-button active py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-description">Mô tả sản phẩm</button>
+                <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-specs">Thông số kỹ thuật</button>
+                <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-services">Dịch vụ &amp; bảo hành</button>
+                <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-faq">Câu hỏi thường gặp</button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div id="tab-description" class="tab-panel active space-y-4 text-sm leading-relaxed text-gray-700">
+                    <p><strong>Helen Keller H83026 C1</strong> mang ngôn ngữ thiết kế mắt mèo thanh lịch, bo cong mềm mại giúp
+                        tôn lên những đường nét nữ tính. Thân gọng hợp kim Titanium phủ sơn tĩnh điện cao cấp giúp bề mặt
+                        giữ màu lâu, chống trầy xước và chống ăn mòn tốt hơn.</p>
+                    <p>Phần ve mũi sử dụng đệm silicon trong suốt, bám nhẹ, hạn chế trượt. Bản lề lò xo linh hoạt giúp mở rộng
+                        tối đa, ôm sát mọi form mặt mà không gây khó chịu. Đây là lựa chọn tối ưu cho dân văn phòng,
+                        doanh nhân và những ai tìm kiếm chiếc kính vừa tinh tế khi đi làm vừa nổi bật khi đi chơi.</p>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li>Kích thước chuẩn châu Á, dễ dàng cho việc lắp tròng độ hoặc tròng không độ.</li>
+                        <li>Tương thích với mọi loại tròng: cận, viễn, loạn, lọc ánh sáng xanh, đổi màu.</li>
+                        <li>Phụ kiện chính hãng đi kèm: hộp kính Helen Keller, khăn lau microfiber, phiếu bảo hành.</li>
+                    </ul>
+                </div>
+
+                <div id="tab-specs" class="tab-panel">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2 uppercase">Thông số chi tiết</h4>
+                            <dl class="space-y-2">
+                                <div class="flex justify-between">
+                                    <dt>Chiều rộng tròng (Lens Width)</dt>
+                                    <dd class="font-medium text-gray-900">52 mm</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt>Cầu mũi (Bridge)</dt>
+                                    <dd class="font-medium text-gray-900">17 mm</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt>Chiều dài càng (Temple)</dt>
+                                    <dd class="font-medium text-gray-900">140 mm</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt>Chất liệu gọng</dt>
+                                    <dd class="font-medium text-gray-900">Hợp kim Titanium phủ sơn</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt>Trọng lượng</dt>
+                                    <dd class="font-medium text-gray-900">~18 gram (không tròng)</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2 uppercase">Phụ kiện &amp; bảo hành</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-red-500 mt-0.5">•</span>
+                                    Hộp kính Helen Keller chính hãng, giấy bảo hành 12 tháng.
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-red-500 mt-0.5">•</span>
+                                    Khăn lau microfiber, lọ vệ sinh kính (áp dụng đơn hàng online).
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-red-500 mt-0.5">•</span>
+                                    Thẻ ưu đãi giảm 10% cho lần mua tròng kính kế tiếp.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-services" class="tab-panel">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🔧 Điều chỉnh trọn đời</h4>
+                            <p>Miễn phí căn chỉnh form, thay ốc, vệ sinh, chăm sóc kính tại mọi showroom của Mắt Kính Sài Gòn.</p>
+                        </div>
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🛡️ Bảo hành chính hãng</h4>
+                            <p>Bảo hành 12 tháng đối với gọng, hỗ trợ 50% phí thay mới nếu gãy do vô tình trong 3 tháng đầu.</p>
+                        </div>
+                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
+                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🎯 Chăm sóc sau bán</h4>
+                            <p>Nhắn tin nhắc vệ sinh kính định kỳ, tư vấn nâng cấp tròng miễn phí theo độ cận thay đổi.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-faq" class="tab-panel">
+                    <div class="space-y-4 text-sm text-gray-700">
+                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
+                            <summary class="font-semibold text-gray-800 cursor-pointer">Có được thử kính online không?</summary>
+                            <p class="mt-2">Bạn có thể đặt lịch tư vấn video call với chuyên viên. Chúng tôi sẽ đo gương mặt và gợi ý kích thước phù hợp, sau đó gửi ảnh phối kính trực tiếp cho bạn.</p>
+                        </details>
+                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
+                            <summary class="font-semibold text-gray-800 cursor-pointer">Nếu kính không hợp thì sao?</summary>
+                            <p class="mt-2">Trong vòng 7 ngày, bạn được đổi sản phẩm khác hoặc hoàn lại 100% tiền gọng (tròng kính tùy chính sách từng loại).</p>
+                        </details>
+                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
+                            <summary class="font-semibold text-gray-800 cursor-pointer">Có hỗ trợ đo mắt miễn phí không?</summary>
+                            <p class="mt-2">Có. Bạn chỉ cần đặt lịch trước qua hotline 0888 368 889 để tránh phải chờ đợi. Đo mắt hoàn toàn miễn phí, kể cả khi bạn chưa mua hàng ngay.</p>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Showrooms -->
+        <section class="showroom-section bg-gradient-to-br from-red-50 via-white to-white border border-red-100 rounded-2xl p-6 md:p-8 mb-10">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="max-w-xl">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">Trải nghiệm trực tiếp tại showroom Mắt Kính Sài Gòn</h2>
+                    <p class="text-sm text-gray-600 mb-4">Hệ thống cửa hàng phủ khắp TP.HCM, phục vụ đo mắt chuẩn quốc tế, lắp kính lấy nhanh và chăm sóc sau bán tận tâm.</p>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li><strong>Showroom 1:</strong> 301B Điện Biên Phủ, P. Xuân Hòa, TP.HCM</li>
+                        <li><strong>Showroom 2:</strong> 245C Xô Viết Nghệ Tĩnh, Phường Gia Định, TP.HCM</li>
+                        <li><strong>Showroom 3:</strong> 90 Nguyễn Hữu Thọ, Phường Bà Rịa, TP.HCM</li>
+                        <li><strong>Giờ làm việc:</strong> Thứ 2 - Thứ 7: 08h00 - 20h30 | CN &amp; Lễ: 08h30 - 20h00</li>
+                    </ul>
+                </div>
+                <div class="flex-1 w-full">
+                    <div class="consult-form-card h-full">
+                        <div class="consult-form-header">
+                            <span>📅</span>
+                            <div>
+                                <h3 class="consult-form-title">Đặt lịch đo mắt &amp; tư vấn nhanh</h3>
+                                <p class="consult-form-subtitle">Điền thông tin dưới đây, chuyên viên sẽ gọi lại trong 10 phút.</p>
+                            </div>
+                        </div>
+                        <form class="consult-form" autocomplete="on">
+                            <div class="consult-form-grid">
+                                <div class="form-field">
+                                    <label for="consult-name">Họ và tên</label>
+                                    <input id="consult-name" type="text" name="name" placeholder="Nguyễn Thị Minh Anh" autocomplete="name"
+                                        required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="consult-phone">Số điện thoại</label>
+                                    <input id="consult-phone" type="tel" name="phone" placeholder="0966 666 301" autocomplete="tel"
+                                        required>
+                                </div>
+                            </div>
+                            <div class="consult-form-grid">
+                                <div class="form-field form-field--select">
+                                    <label for="consult-showroom">Showroom gần bạn</label>
+                                    <select id="consult-showroom" name="showroom" required>
+                                        <option value="" disabled selected>Chọn chi nhánh</option>
+                                        <option>301B Điện Biên Phủ, Q.3</option>
+                                        <option>245C Xô Viết Nghệ Tĩnh, Bình Thạnh</option>
+                                        <option>90 Nguyễn Hữu Thọ, Bà Rịa</option>
+                                    </select>
+                                </div>
+                                <div class="form-field form-field--datetime">
+                                    <label for="consult-datetime">Thời gian mong muốn</label>
+                                    <input id="consult-datetime" type="datetime-local" name="datetime" required>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label for="consult-message">Nhu cầu hoặc độ kính hiện tại</label>
+                                <textarea id="consult-message" name="message" rows="3"
+                                    placeholder="Ví dụ: cần đo lại độ, muốn tư vấn tròng chống ánh sáng xanh..."></textarea>
+                            </div>
+                            <button type="submit">
+                                <span>📨</span> Gửi yêu cầu tư vấn
+                            </button>
+                        </form>
+                        <p class="consult-form-help">Hoặc liên hệ nhanh: <a href="tel:0966666301">0966 666 301</a> • <a
+                                href="mailto:mksgvn@gmail.com">mksgvn@gmail.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related products -->
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-900">Sản phẩm liên quan</h2>
+                <div class="h-1 bg-red-600 w-16 md:w-24 rounded-full"></div>
+            </div>
+            <div class="swiper-container related-swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746522921-Trong_Kinh_Essilor_TransitionsGenS_HD_Graphite_Green_1.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S Graphite Green"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S Graphite Green - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                <span
+                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">Mới</span>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor Transitions Gen S Graphite Green</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">2.990.000 VNĐ</span>
+                                    <span class="text-xs text-gray-400 line-through block">3.100.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746521856-Trong_Kinh_Essilor_TransitionsGenS_HD_1.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                <span
+                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">-6%</span>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor Transitions Gen S Chống Ánh Sáng Xanh</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">1.890.000 VNĐ</span>
+                                    <span class="text-xs text-gray-400 line-through block">2.000.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746346945-Trong_Kinh_Essilor_TransitionsGenS_4.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S 1.67"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
+                                    alt="Tròng Kính Essilor Transitions Gen S 1.67 - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor 1.67 Chống Bể Polycarbonate</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">2.490.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1741850921-Đổi_Màu_HoGa_161_Fashion_Khói_1.jpg"
+                                    alt="Tròng Kính Đổi Màu 1.61 Fashion"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
+                                    alt="Tròng Kính Đổi Màu 1.61 Fashion - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">HoGa</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Đổi Màu HoGa 1.61 Fashion Khói</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">1.450.000 VNĐ</span>
+                                    <span class="text-xs text-gray-400 line-through block">1.650.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1742799301-gong-kinh-helen-keller-h83026-c2p-1.jpg"
+                                    alt="Gọng Kính Helen Keller H83026 C2P"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1742799302-gong-kinh-helen-keller-h83026-c2p-2.jpg"
+                                    alt="Gọng Kính Helen Keller H83026 C2P - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                <span
+                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">Hot</span>
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Helen Keller</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Gọng Kính Helen Keller H83026 C2P</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">1.300.000 VNĐ</span>
+                                    <span class="text-xs text-gray-400 line-through block">1.450.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="swiper-slide group">
+                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                            <div class="relative overflow-hidden">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1742799333-gong-kinh-helen-keller-h82611-c1-1.jpg"
+                                    alt="Gọng Kính Helen Keller H82611 C1"
+                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                <img src="https://matkinhsaigon.com.vn/img/product/1742799334-gong-kinh-helen-keller-h82611-c1-2.jpg"
+                                    alt="Gọng Kính Helen Keller H82611 C1 - Hover"
+                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                            </div>
+                            <div class="p-4 space-y-2">
+                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Helen Keller</p>
+                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Gọng Kính Helen Keller H82611 C1</h3>
+                                <div class="text-right space-y-1">
+                                    <span class="text-red-600 font-bold text-base">1.250.000 VNĐ</span>
+                                    <span class="text-xs text-gray-400 line-through block">1.400.000 VNĐ</span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
+                                    <button
+                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div> -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 border-t pt-8 pb-4 text-sm text-gray-700">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">CHÍNH SÁCH & QUY ĐỊNH</h4>
+                <ul class="space-y-2">
+                    <li><a href="#" class="hover:text-red-600">Giới Thiệu</a></li>
+                    <li><a href="#" class="hover:text-red-600">Chính sách bảo hành</a></li>
+                    <li><a href="#" class="hover:text-red-600">Tuyển dụng</a></li>
+                    <li><a href="#" class="hover:text-red-600">Quy trình Đổi trả/Hoàn tiền</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">QUY ĐỊNH PHÁP LÝ</h4>
+                <p><strong>CÔNG TY:</strong> MẮT KÍNH SÀI GÒN .COM</p>
+                <p>Địa chỉ: 301B Điện Biên Phủ, P.Xuân Hòa, TP.HCM</p>
+                <p>Mã số DN: 0313364999</p>
+                <p>Email: info@matkinhsaigon.com</p>
+                <p>Hotline: 0989.266.079</p>
+                <img src="logo_da_thong_bao.png" alt="Đã thông báo Bộ Công Thương" class="mt-3 h-10">
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">KẾT NỐI VỚI CHÚNG TÔI</h4>
+                <div class="flex space-x-3 text-2xl mb-4">
+                    <a href="#" class="hover:text-red-600"><img src="icon_facebook.png" alt="Facebook" class="h-6"></a>
+                    <a href="#" class="hover:text-red-600"><img src="icon_youtube.png" alt="Youtube" class="h-6"></a>
+                </div>
+                <h4 class="font-bold mb-3 text-red-600">THỜI GIAN LÀM VIỆC</h4>
+                <p>Thứ Hai - Thứ Bảy: 07:30 - 20:00</p>
+                <p>Ngày Lễ & CN: 09:00 - 20:00</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-3 text-red-600">BẢN ĐỒ</h4>
+                <img src="map_screenshot.jpg" alt="Bản đồ" class="w-full h-32 object-cover rounded">
+            </div>
+        </div>
+        <div class="text-center mt-8 pt-4 border-t border-gray-300">
+            &copy; 2025 Mắt Kính Sài Gòn. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script>
+        // 9. LOGIC JAVASCRIPT
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- TÍNH TOÁN VỊ TRÍ TOP CHO MEGA MENU ---
+            function updateMegaMenuPosition() {
+                const nav = document.querySelector('nav.hidden.lg\\:block');
+                if (nav) {
+                    const navRect = nav.getBoundingClientRect();
+                    const navBottom = navRect.bottom;
+                    document.documentElement.style.setProperty('--nav-bottom', navBottom + 'px');
+                }
+            }
+
+            // Tính toán khi load và khi resize
+            updateMegaMenuPosition();
+            window.addEventListener('resize', updateMegaMenuPosition);
+            window.addEventListener('scroll', updateMegaMenuPosition);
+
+            // --- LOGIC MOBILE SIDEBAR ---
+            const mobileSidebar = document.getElementById('mobile-sidebar');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const toggleTrongKinh = document.getElementById('toggle-tròng-kính');
+            const submenuTrongKinh = document.getElementById('submenu-tròng-kính');
+
+            // Mở Sidebar
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileSidebar.classList.remove('-translate-x-full');
+            });
+
+            // Đóng Sidebar
+            closeSidebarBtn.addEventListener('click', () => {
+                mobileSidebar.classList.add('-translate-x-full');
+            });
+
+            // Toggle Sub-menu Tròng Kính
+            if (toggleTrongKinh && submenuTrongKinh) {
+                const arrow = toggleTrongKinh.querySelector('span');
+
+                toggleTrongKinh.addEventListener('click', () => {
+                    const isHidden = submenuTrongKinh.classList.toggle('hidden');
+
+                    if (isHidden) {
+                        arrow.classList.remove('rotate-180');
+                        arrow.textContent = '^';
+                    } else {
+                        arrow.classList.add('rotate-180');
+                        arrow.textContent = 'v'; // Thay đổi icon khi mở
+                    }
+                });
+                // Khởi tạo: Đảm bảo sub-menu ẩn khi mới load
+                submenuTrongKinh.classList.add('hidden');
+                arrow.classList.remove('rotate-180');
+                arrow.textContent = '^';
+            }
+
+
+            // --- PRODUCT DETAIL OPTIONS ---
+            const productSummary = document.getElementById('product-summary');
+            if (productSummary) {
+                const colorChips = Array.from(productSummary.querySelectorAll('.color-chip'));
+                const optionPills = Array.from(productSummary.querySelectorAll('.option-pill'));
+                const selectedColorLabel = productSummary.querySelector('#selected-color span');
+                const selectedOptionLabel = productSummary.querySelector('#selected-option span');
+
+                const setSelectedColor = (chip) => {
+                    colorChips.forEach(btn => {
+                        btn.classList.toggle('active', btn === chip);
+                        btn.setAttribute('aria-pressed', btn === chip ? 'true' : 'false');
+                    });
+                    const color = chip?.dataset.color || '';
+                    if (selectedColorLabel) {
+                        selectedColorLabel.textContent = color;
+                    }
+                    productSummary.dataset.selectedColor = color;
+                };
+
+                const setSelectedOption = (pill) => {
+                    optionPills.forEach(btn => {
+                        btn.classList.toggle('active', btn === pill);
+                        btn.setAttribute('aria-pressed', btn === pill ? 'true' : 'false');
+                    });
+                    const option = pill?.dataset.option || '';
+                    const optionTitle = pill?.querySelector('.font-semibold')?.textContent.trim() || option;
+                    if (selectedOptionLabel) {
+                        selectedOptionLabel.textContent = optionTitle;
+                    }
+                    productSummary.dataset.selectedOption = option;
+                    productSummary.dataset.selectedOptionLabel = optionTitle;
+                };
+
+                // Initialize defaults
+                if (colorChips.length) {
+                    const defaultChip = colorChips.find(chip => chip.classList.contains('active')) || colorChips[0];
+                    setSelectedColor(defaultChip);
+                }
+                if (optionPills.length) {
+                    const defaultOption = optionPills.find(pill => pill.classList.contains('active')) || optionPills[0];
+                    setSelectedOption(defaultOption);
+                }
+
+                colorChips.forEach(chip => {
+                    chip.addEventListener('click', () => setSelectedColor(chip));
+                });
+
+                optionPills.forEach(pill => {
+                    pill.addEventListener('click', () => setSelectedOption(pill));
+                });
+            }
+
+            // --- LOGIC GIỎ HÀNG ---
+            let cart = [];
+
+            const buildCartItemKey = (item) => {
+                return [item.name, item.color || '', item.lens || ''].join('||');
+            };
+
+            // Load giỏ hàng từ localStorage
+            function loadCart() {
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                    updateCartUI();
+                }
+            }
+
+            // Lưu giỏ hàng vào localStorage
+            function saveCart() {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }
+
+            // Thêm sản phẩm vào giỏ hàng
+            function addToCart(product) {
+                const productKey = buildCartItemKey(product);
+                const existingItem = cart.find(item => buildCartItemKey(item) === productKey);
+
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        ...product,
+                        quantity: 1
+                    });
+                }
+
+                saveCart();
+                updateCartUI();
+                showCartNotification();
+            }
+
+            // Xóa sản phẩm khỏi giỏ hàng
+            function removeFromCart(itemKey) {
+                cart = cart.filter(item => buildCartItemKey(item) !== itemKey);
+                saveCart();
+                updateCartUI();
+            }
+
+            // Cập nhật số lượng sản phẩm
+            function updateQuantity(itemKey, newQuantity) {
+                const item = cart.find(item => buildCartItemKey(item) === itemKey);
+                if (item) {
+                    if (newQuantity <= 0) {
+                        removeFromCart(itemKey);
+                    } else {
+                        item.quantity = newQuantity;
+                        saveCart();
+                        updateCartUI();
+                    }
+                }
+            }
+
+            // Cập nhật giao diện giỏ hàng
+            function updateCartUI() {
+                const cartCount = document.getElementById('cart-count');
+                const cartCountDesktop = document.getElementById('cart-count-desktop');
+                const cartTotalItems = document.getElementById('cart-total-items');
+                const cartItems = document.getElementById('cart-items');
+                const cartTotalPrice = document.getElementById('cart-total-price');
+
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                // Cập nhật số lượng cho cả mobile và desktop
+                cartCount.textContent = totalItems;
+                cartCountDesktop.textContent = totalItems;
+                cartTotalItems.textContent = totalItems;
+
+                if (totalItems > 0) {
+                    cartCount.classList.remove('hidden');
+                    cartCountDesktop.classList.remove('hidden');
+                } else {
+                    cartCount.classList.add('hidden');
+                    cartCountDesktop.classList.add('hidden');
+                }
+
+                // Cập nhật tổng tiền
+                cartTotalPrice.textContent = totalPrice.toLocaleString('vi-VN') + ' VNĐ';
+
+                // Cập nhật danh sách sản phẩm
+                if (cart.length === 0) {
+                    cartItems.innerHTML = '<p class="text-gray-500 text-center py-8">Giỏ hàng trống</p>';
+                } else {
+                    cartItems.innerHTML = cart.map(item => {
+                        const itemKey = encodeURIComponent(buildCartItemKey(item));
+                        const optionDetails = [
+                            item.color ? `Màu: ${item.color}` : null,
+                            item.lensLabel ? `Gói tròng: ${item.lensLabel}` : (item.lens ? `Gói tròng: ${item.lens}` : null)
+                        ].filter(Boolean).join(' • ');
+
+                        return `
+                            <div class="cart-item flex gap-3 mb-4 pb-4 border-b" data-item-key="${itemKey}">
+                                <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-sm mb-1">${item.name}</h4>
+                                    <p class="text-xs text-gray-500">${item.brand}</p>
+                                    ${optionDetails ? `<p class="text-xs text-gray-500 mt-1">${optionDetails}</p>` : ''}
+                                    <div class="flex justify-between items-center mt-2">
+                                        <div class="flex items-center gap-2">
+                                            <button class="decrease-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">-</button>
+                                            <span class="text-sm font-medium">${item.quantity}</span>
+                                            <button class="increase-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">+</button>
+                                        </div>
+                                        <span class="text-red-600 font-bold text-sm">${(item.price * item.quantity).toLocaleString('vi-VN')} VNĐ</span>
+                                    </div>
+                                </div>
+                                <button class="remove-btn text-gray-400 hover:text-red-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // Hiển thị thông báo đã thêm vào giỏ
+            function showCartNotification() {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-[80] animate-bounce';
+                notification.textContent = '✓ Đã thêm vào giỏ hàng';
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }
+
+            // Toggle giỏ hàng
+            const cartBtn = document.getElementById('cart-btn');
+            const cartBtnDesktop = document.getElementById('cart-btn-desktop');
+            const closeCart = document.getElementById('close-cart');
+            const cartDropdown = document.getElementById('cart-dropdown');
+            const cartOverlay = document.getElementById('cart-overlay');
+
+            function openCart() {
+                cartDropdown.classList.remove('translate-x-full');
+                cartOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Khóa scroll
+            }
+
+            function closeCartFunc() {
+                cartDropdown.classList.add('translate-x-full');
+                cartOverlay.classList.add('hidden');
+                document.body.style.overflow = ''; // Mở scroll
+            }
+
+            // Event listeners cho cả mobile và desktop
+            if (cartBtn) {
+                cartBtn.addEventListener('click', openCart);
+            }
+            if (cartBtnDesktop) {
+                cartBtnDesktop.addEventListener('click', openCart);
+            }
+            if (closeCart) {
+                closeCart.addEventListener('click', closeCartFunc);
+            }
+            if (cartOverlay) {
+                cartOverlay.addEventListener('click', closeCartFunc);
+            }
+
+            // Event delegation cho các buttons trong giỏ hàng
+            document.getElementById('cart-items').addEventListener('click', function (e) {
+                const cartItem = e.target.closest('.cart-item');
+                if (!cartItem) return;
+
+                const encodedKey = cartItem.dataset.itemKey;
+                if (!encodedKey) return;
+                const itemKey = decodeURIComponent(encodedKey);
+                const item = cart.find(i => buildCartItemKey(i) === itemKey);
+
+                if (!item) return;
+
+                // Xử lý click nút giảm
+                if (e.target.closest('.decrease-btn')) {
+                    updateQuantity(itemKey, item.quantity - 1);
+                }
+                // Xử lý click nút tăng
+                else if (e.target.closest('.increase-btn')) {
+                    updateQuantity(itemKey, item.quantity + 1);
+                }
+                // Xử lý click nút xóa
+                else if (e.target.closest('.remove-btn')) {
+                    removeFromCart(itemKey);
+                }
+            });
+
+            // Thêm sản phẩm vào giỏ khi click button "Thêm vào giỏ hàng"
+            document.addEventListener('click', function (e) {
+                const addButton = e.target.closest('.add-to-cart-btn');
+                if (!addButton) {
+                    return;
+                }
+
+                const productCard = addButton.closest('.product-card');
+                if (productCard) {
+                    const name = productCard.querySelector('h3').textContent.trim();
+                    const brandEl = productCard.querySelector('.product-brand, .text-gray-500');
+                    const brand = brandEl ? brandEl.textContent.trim() : '';
+                    const priceText = productCard.querySelector('.text-red-600.font-bold').textContent.trim();
+                    const price = parseInt(priceText.replace(/[^\d]/g, ''));
+                    const image = productCard.querySelector('.product-img-main').src;
+
+                    addToCart({
+                        name: name,
+                        brand: brand,
+                        price: price,
+                        image: image
+                    });
+                    return;
+                }
+
+                if (productSummary && productSummary.contains(addButton)) {
+                    const name = productSummary.querySelector('#product-name')?.textContent.trim() || '';
+                    const brand = productSummary.querySelector('#product-brand')?.textContent.trim() || '';
+                    const priceText = productSummary.querySelector('[data-product-price]')?.textContent.trim() || '';
+                    const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
+                    const image = document.getElementById('main-product-image')?.src || '';
+                    const color = productSummary.dataset.selectedColor || productSummary.querySelector('.color-chip.active')?.dataset.color || '';
+                    const lens = productSummary.dataset.selectedOption || productSummary.querySelector('.option-pill.active')?.dataset.option || '';
+                    const lensLabel = productSummary.dataset.selectedOptionLabel || productSummary.querySelector('.option-pill.active .font-semibold')?.textContent.trim() || '';
+
+                    addToCart({
+                        name,
+                        brand,
+                        price,
+                        image,
+                        color,
+                        lens,
+                        lensLabel
+                    });
+                    return;
+                }
+            });
+
+            // Load giỏ hàng khi trang tải
+            loadCart();
+
+            // --- LOGIC MOBILE FILTER SIDEBAR ---
+            const mobileFilterBtn = document.getElementById('mobile-filter-btn');
+            const mobileFilterSidebar = document.getElementById('mobile-filter-sidebar');
+            const closeMobileFilter = document.getElementById('close-mobile-filter');
+            const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
+
+            // Mở filter sidebar
+            function openMobileFilter() {
+                mobileFilterSidebar.classList.remove('-translate-x-full');
+                mobileFilterOverlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Khóa scroll
+            }
+
+            // Đóng filter sidebar
+            function closeMobileFilterFunc() {
+                mobileFilterSidebar.classList.add('-translate-x-full');
+                mobileFilterOverlay.classList.add('hidden');
+                document.body.style.overflow = ''; // Mở scroll
+            }
+
+            // Event listeners
+            if (mobileFilterBtn) {
+                mobileFilterBtn.addEventListener('click', openMobileFilter);
+            }
+            if (closeMobileFilter) {
+                closeMobileFilter.addEventListener('click', closeMobileFilterFunc);
+            }
+            if (mobileFilterOverlay) {
+                mobileFilterOverlay.addEventListener('click', closeMobileFilterFunc);
+            }
+
+            // --- PRODUCT GALLERY & LIGHTBOX ---
+            const mainImageEl = document.getElementById('main-product-image');
+            if (mainImageEl) {
+                const mainImageTrigger = document.getElementById('lightbox-trigger');
+                const thumbnailButtons = Array.from(document.querySelectorAll('.thumbnail-button'));
+                const lightboxEl = document.getElementById('image-lightbox');
+                const lightboxMainImage = document.getElementById('lightbox-main-image');
+                const lightboxThumbsContainer = document.getElementById('lightbox-thumbnails');
+                const lightboxPrev = document.getElementById('lightbox-prev');
+                const lightboxNext = document.getElementById('lightbox-next');
+                const lightboxClose = document.getElementById('lightbox-close');
+
+                const gallerySources = [];
+                const galleryAlts = [];
+                const seenSources = new Set();
+
+                const addImageToGallery = (src, alt) => {
+                    if (!src || seenSources.has(src)) return;
+                    seenSources.add(src);
+                    gallerySources.push(src);
+                    galleryAlts.push(alt || mainImageEl.alt || 'Hình sản phẩm');
+                };
+
+                addImageToGallery(mainImageEl.src, mainImageEl.alt);
+
+                thumbnailButtons.forEach(btn => {
+                    const imgEl = btn.querySelector('img');
+                    const src = btn.dataset.imageSrc || (imgEl ? imgEl.src : '');
+                    const alt = imgEl ? imgEl.alt : '';
+                    addImageToGallery(src, alt);
+                });
+
+                let currentImageIndex = gallerySources.indexOf(mainImageEl.src);
+                if (currentImageIndex === -1) currentImageIndex = 0;
+
+                let lightboxThumbnailButtons = [];
+
+                const syncActiveThumbnails = (activeSrc) => {
+                    thumbnailButtons.forEach(btn => {
+                        const imgEl = btn.querySelector('img');
+                        const btnSrc = btn.dataset.imageSrc || (imgEl ? imgEl.src : '');
+                        btn.classList.toggle('active', btnSrc === activeSrc);
+                    });
+                };
+
+                const syncLightboxThumbnails = (activeIndex) => {
+                    lightboxThumbnailButtons.forEach((btn, index) => {
+                        btn.classList.toggle('active', index === activeIndex);
+                    });
+                };
+
+                const renderLightboxThumbnails = () => {
+                    if (!lightboxThumbsContainer) return;
+                    lightboxThumbsContainer.innerHTML = '';
+                    gallerySources.forEach((src, index) => {
+                        const thumbButton = document.createElement('button');
+                        thumbButton.type = 'button';
+                        thumbButton.className = 'lightbox-thumbnail';
+                        thumbButton.dataset.index = index;
+                        thumbButton.innerHTML = `<img src="${src}" alt="${galleryAlts[index] || 'Hình sản phẩm'}">`;
+                        lightboxThumbsContainer.appendChild(thumbButton);
+                    });
+                    lightboxThumbnailButtons = Array.from(lightboxThumbsContainer.querySelectorAll('.lightbox-thumbnail'));
+                    syncLightboxThumbnails(currentImageIndex);
+                };
+
+                const goToImage = (index, options = {}) => {
+                    if (!gallerySources.length) return;
+                    if (index < 0) index = gallerySources.length - 1;
+                    if (index >= gallerySources.length) index = 0;
+                    currentImageIndex = index;
+
+                    if (options.updateMain !== false) {
+                        mainImageEl.src = gallerySources[index];
+                        const altText = galleryAlts[index] || 'Hình sản phẩm';
+                        mainImageEl.alt = altText;
+                        syncActiveThumbnails(gallerySources[index]);
+                    }
+
+                    if (lightboxEl && options.updateLightbox !== false && lightboxMainImage) {
+                        lightboxMainImage.src = gallerySources[index];
+                        lightboxMainImage.alt = galleryAlts[index] || 'Hình sản phẩm';
+                        syncLightboxThumbnails(index);
+                    }
+                };
+
+                const openLightbox = () => {
+                    if (!lightboxEl) return;
+                    renderLightboxThumbnails();
+                    lightboxEl.classList.add('active');
+                    lightboxEl.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                    goToImage(currentImageIndex, { updateMain: false });
+                    if (lightboxClose) {
+                        lightboxClose.focus({ preventScroll: true });
+                    }
+                };
+
+                const closeLightbox = () => {
+                    if (!lightboxEl) return;
+                    lightboxEl.classList.remove('active');
+                    lightboxEl.classList.add('hidden');
+                    document.body.style.overflow = '';
+                };
+
+                thumbnailButtons.forEach(btn => {
+                    btn.setAttribute('type', 'button');
+                    btn.addEventListener('click', () => {
+                        const imgEl = btn.querySelector('img');
+                        const src = btn.dataset.imageSrc || (imgEl ? imgEl.src : '');
+                        const index = gallerySources.indexOf(src);
+                        if (index !== -1) {
+                            goToImage(index);
+                        }
+                    });
+                });
+
+                if (lightboxThumbsContainer) {
+                    lightboxThumbsContainer.addEventListener('click', (event) => {
+                        const thumbBtn = event.target.closest('.lightbox-thumbnail');
+                        if (!thumbBtn) return;
+                        const index = Number(thumbBtn.dataset.index);
+                        if (!Number.isNaN(index)) {
+                            goToImage(index);
+                        }
+                    });
+                }
+
+                if (mainImageTrigger) {
+                    mainImageTrigger.addEventListener('click', openLightbox);
+                }
+
+                if (lightboxPrev) {
+                    lightboxPrev.addEventListener('click', () => goToImage(currentImageIndex - 1));
+                }
+
+                if (lightboxNext) {
+                    lightboxNext.addEventListener('click', () => goToImage(currentImageIndex + 1));
+                }
+
+                if (lightboxClose) {
+                    lightboxClose.addEventListener('click', closeLightbox);
+                }
+
+                if (lightboxEl) {
+                    lightboxEl.addEventListener('click', (event) => {
+                        if (event.target === lightboxEl) {
+                            closeLightbox();
+                        }
+                    });
+                }
+
+                document.addEventListener('keydown', (event) => {
+                    if (!lightboxEl || !lightboxEl.classList.contains('active')) return;
+                    if (event.key === 'Escape') {
+                        closeLightbox();
+                    } else if (event.key === 'ArrowRight') {
+                        goToImage(currentImageIndex + 1);
+                    } else if (event.key === 'ArrowLeft') {
+                        goToImage(currentImageIndex - 1);
+                    }
+                });
+
+                // Đồng bộ trạng thái ban đầu
+                goToImage(currentImageIndex, { updateLightbox: false });
+            }
+
+            // --- RELATED PRODUCTS SWIPER ---
+            const relatedSwiperEl = document.querySelector('.related-swiper');
+            if (relatedSwiperEl && typeof Swiper !== 'undefined') {
+                new Swiper(relatedSwiperEl, {
+                    slidesPerView: 1.1,
+                    spaceBetween: 16,
+                    loop: true,
+                    navigation: {
+                        nextEl: relatedSwiperEl.querySelector('.swiper-button-next'),
+                        prevEl: relatedSwiperEl.querySelector('.swiper-button-prev'),
+                    },
+                    breakpoints: {
+                        640: {
+                            slidesPerView: 2,
+                            spaceBetween: 18,
+                        },
+                        1024: {
+                            slidesPerView: 3,
+                            spaceBetween: 20,
+                        },
+                        1280: {
+                            slidesPerView: 4,
+                            spaceBetween: 24,
+                        },
+                    },
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
