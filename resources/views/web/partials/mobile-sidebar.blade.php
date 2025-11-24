@@ -1,4 +1,4 @@
-<div id="mobile-sidebar" class="fixed top-0 left-0 w-64 h-full bg-white shadow-2xl z-[60] 
+<div id="mobile-sidebar" class="fixed top-0 left-0 w-[80%] h-full bg-white shadow-2xl z-[60] 
         transform -translate-x-full transition-transform duration-300 lg:hidden">
     <div class="p-4 flex justify-end items-center border-b">
         <button id="close-sidebar-btn" class="text-3xl text-gray-700">&times;</button>
@@ -8,33 +8,113 @@
             <span class="inline-block mr-2 text-lg">🏷️</span> ĐANG GIẢM GIÁ
         </div>
         <ul class="text-gray-700">
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">TRANG CHỦ</a></li>
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">GIỚI THIỆU</a></li>
-            <li class="border-b">
-                <div class="p-3 flex justify-between items-center font-bold" id="toggle-tròng-kính">
-                    TRÒNG KÍNH <span
-                        class="text-2xl align-middle transform transition-transform duration-200">^</span>
-                </div>
-                <ul id="submenu-tròng-kính" class="bg-gray-50 text-sm p-2 hidden">
-                    <li class="p-2 font-bold">TRÒNG KÍNH THEO TÍNH NĂNG</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đổi màu</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống ánh sáng xanh</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính cận siêu mỏng</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đơn tròng</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính hai tròng</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính đa tròng</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính chống bể</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính mắt có độ</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng kính Polarized phân cực</li>
-                    <li class="pl-4 py-1 hover:bg-gray-200">Tròng Kính Kiểm Soát Cận Thị</li>
-                    <li class="p-2 font-bold mt-2 border-t">CHIẾT SUẤT TRÒNG KÍNH</li>
-                </ul>
+            <li class="p-3 border-b hover:bg-gray-100">
+                <a href="{{ route('home') }}">TRANG CHỦ</a>
             </li>
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">GỌNG KÍNH</a></li>
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">KÍNH MÁT</a></li>
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">CONTACT LENS</a></li>
-            <li class="p-3 border-b hover:bg-gray-100"><a href="#">ĐỐI TÁC</a></li>
-        </ul>
+            <li class="p-3 border-b hover:bg-gray-100">
+                <a href="#">GIỚI THIỆU</a>
+            </li>
+            
+            @if(isset($categories) && $categories->count() > 0)
+                @foreach($categories as $category)
+                    @php
+                        $hasChildren = isset($category->chillParent) && $category->chillParent->count() > 0;
+                        $toggleId = 'toggle-category-' . $category->id;
+                        $submenuId = 'submenu-category-' . $category->id;
+                    @endphp
+                    @if($hasChildren)
+                        <li class="border-b">
+                            <div class="p-3 flex justify-between items-center font-bold">
+                                <a href="{{ $category->alias ? route('product.category', $category->alias) : '#' }}" 
+                                   class="category-text flex-1 hover:text-red-600 transition-colors">
+                                    {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                                </a>
+                                <button class="toggle-category-btn p-1 hover:text-red-600 transition-colors" 
+                                        data-submenu-id="{{ $submenuId }}">
+                                    <svg class="w-5 h-5 toggle-arrow transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <ul id="{{ $submenuId }}" class="bg-gray-50 text-sm hidden pl-4">
+                                @foreach($category->chillParent as $child)
+                                    @php
+                                        $hasGrandChildren = isset($child->childLevelParent) && $child->childLevelParent->count() > 0;
+                                        $childToggleId = 'toggle-child-' . $child->id;
+                                        $childSubmenuId = 'submenu-child-' . $child->id;
+                                    @endphp
+                                    @if($hasGrandChildren)
+                                        <li class="border-b border-gray-200">
+                                            <div class="p-2 flex justify-between items-center font-semibold">
+                                                <a href="{{ $child->alias ? route('product.category', $child->alias) : '#' }}" 
+                                                   class="child-text flex-1 hover:text-red-600 transition-colors">
+                                                    {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                                </a>
+                                                <button class="toggle-child-btn p-1 hover:text-red-600 transition-colors" 
+                                                        data-submenu-id="{{ $childSubmenuId }}">
+                                                    <svg class="w-5 h-5 toggle-arrow transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <ul id="{{ $childSubmenuId }}" class="bg-gray-100 pl-6 hidden">
+                                                @php
+                                                    $itemsWithIcon = $child->childLevelParent->filter(function($item) {
+                                                        return isset($item->show_icon) && $item->show_icon == 1 && !empty($item->icon);
+                                                    });
+                                                    $itemsWithoutIcon = $child->childLevelParent->filter(function($item) {
+                                                        return !isset($item->show_icon) || $item->show_icon != 1 || empty($item->icon);
+                                                    });
+                                                @endphp
+                                                
+                                                @if($itemsWithIcon->count() > 0)
+                                                    <li class="py-2 border-b border-gray-200">
+                                                        <div class="grid grid-cols-5 gap-0 mb-2">
+                                                            @foreach($itemsWithIcon as $grandChild)
+                                                                <button type="button" 
+                                                                        aria-label="{{ $grandChild->name ?? $grandChild->title ?? 'Icon' }}"
+                                                                        onclick="window.location.href='{{ $grandChild->alias ? route('product.category', $grandChild->alias) : '#' }}'"
+                                                                        class="w-10 h-10 rounded-md border border-gray-200 shadow-sm bg-cover bg-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 hover:-translate-y-0.5 hover:shadow-md flex-shrink-0"
+                                                                        style="background-image: url('{{ $grandChild->getIconImages() }}'); background-size: cover; background-position: center; background-repeat: no-repeat; max-width: 40px; max-height: 40px;">
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    </li>
+                                                @endif
+                                                
+                                                @if($itemsWithoutIcon->count() > 0)
+                                                    @foreach($itemsWithoutIcon as $grandChild)
+                                                        <li class="py-2 border-b border-gray-200 last:border-b-0">
+                                                            <a href="{{ $grandChild->alias ? route('product.category', $grandChild->alias) : '#' }}" 
+                                                               class="block hover:text-red-600">
+                                                                {{ $grandChild->name ?? $grandChild->title ?? 'Item' }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                @endif
+                                            </ul>
+                                        </li>
+                                    @else
+                                        <li class="py-2 px-2 border-b border-gray-200 hover:bg-gray-200">
+                                            <a href="{{ $child->alias ? route('product.category', $child->alias) : '#' }}" 
+                                               class="block font-semibold">
+                                                {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </li>
+                    @else
+                        <li class="p-3 border-b hover:bg-gray-100">
+                            <a href="{{ $category->alias ? route('product.category', $category->alias) : '#' }}">
+                                {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                            </a>
+                        </li>
+                    @endif
+                @endforeach
+                @endif
+                
     </div>
 </div>
 

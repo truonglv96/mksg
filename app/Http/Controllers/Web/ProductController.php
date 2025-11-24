@@ -20,12 +20,12 @@ class ProductController extends Controller
     /**
      * Trang chi tiết sản phẩm
      */
-    public function detail($id = null)
+    public function detail($alias = null)
     {
         return view('web.page.products.detail', [
             'title' => 'Chi Tiết Sản Phẩm - Mắt Kính Sài Gòn',
             'type' => 'detail',
-            'id' => $id,
+            'alias' => $alias,
         ]);
     }
 
