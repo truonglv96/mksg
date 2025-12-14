@@ -2,8 +2,8 @@ pages:
   image: node:22-alpine
   stage: deploy
   script:
-    # Cài đặt dependencies
-    - npm ci
+    # Cài đặt dependencies (npm install sẽ tự tạo package-lock.json nếu chưa có)
+    - npm install
     # Build assets với Vite
     - npm run build
     # Chuẩn bị thư mục public cho GitLab Pages
