@@ -1,9 +1,16 @@
 pages:
-  image: alpine:latest
+  image: node:22-alpine
   stage: deploy
   script:
-    - mkdir .public
-    - cp -r public/* .public
+    # Cài đặt dependencies
+    - npm ci
+    # Build assets với Vite
+    - npm run build
+    # Chuẩn bị thư mục public cho GitLab Pages
+    - mkdir -p .public
+    # Copy các file static vào .public
+    - cp -r public/* .public/ 2>/dev/null || true
+    # Di chuyển .public thành public (GitLab Pages yêu cầu)
     - mv .public public
   artifacts:
     paths:
