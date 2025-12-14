@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use DB;
+use Illuminate\Support\Facades\DB;
 class Brand extends Model
 {
     use HasFactory;
@@ -136,5 +136,35 @@ class Brand extends Model
                         ->where('brand.id', $idBrand)
                         ->orderBy('products.id', 'desc')
                         ->paginate($limit);
+    }
+
+    public static function getBrandsByCategoryPath($categoryIds, $lastCategoryId) {
+        if (empty($categoryIds) || empty($lastCategoryId)) {
+            return collect();
+        }
+        
+        // Lấy product IDs thuộc category cuối cùng (không cần thuộc tất cả categories trong path)
+        $productIds = \App\Models\Products::select('products.id')
+            ->join('product_categories', 'product_categories.productID', '=', 'products.id')
+            ->where('product_categories.categoryID', $lastCategoryId)
+            ->where('products.hidden', 1)
+            ->distinct('products.id')
+            ->pluck('id');
+        
+        // Nếu không có products, trả về empty collection
+        if ($productIds->isEmpty()) {
+            return collect();
+        }
+        
+        // Chỉ lấy brands từ những products thuộc category cuối cùng
+        return Brand::select('brand.*', DB::raw('COUNT(DISTINCT products.id) as product_count'))
+            ->join('products', 'products.brand_id', '=', 'brand.id')
+            ->whereIn('products.id', $productIds->toArray())
+            ->where('products.hidden', 1)
+            ->where('brand.hidden', 1)
+            ->groupBy('brand.id', 'brand.name', 'brand.logo', 'brand.weight', 'brand.alias')
+            ->having('product_count', '>', 0)
+            ->orderBy('brand.weight', 'ASC')
+            ->get();
     }
 }

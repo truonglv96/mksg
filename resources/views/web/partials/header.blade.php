@@ -1,10 +1,20 @@
 <header class="shadow-md sticky top-0 bg-white z-50">
+    <div class="container mx-auto">
+    <marquee style="">
+        <div class="float-left">
+            <p>
+                {!! $settings->branch_address !!}
+            </p>
+        </div>
+    </marquee>
+    </div>
     <div class="container mx-auto px-4 py-3 flex justify-between items-center lg:hidden">
+    
         <button id="mobile-menu-btn" class="text-3xl text-gray-700">☰</button>
         <div class="flex flex-col items-center flex-shrink-0">
-            <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
-                alt="Mắt Kính Hàng Hiệu" class="h-6">
-            <span class="text-xs font-serif font-medium mt-0.5 text-gray-600">LUXURY STORE</span>
+            <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="Mắt Kính Hàng Hiệu"
+                class="h-6">
+            <span class="text-xs font-serif font-medium mt-0.5 text-gray-600">Mắt Kính Sài Gòn</span>
         </div>
         <div class="flex items-center space-x-4">
             <button class="text-gray-700">
@@ -29,80 +39,111 @@
     <nav class="hidden lg:block bg-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center py-3">
             <div class="flex items-center">
-                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png"
-                    alt="Mắt Kính Sài Gòn" class="h-8 mr-3">
+                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="Mắt Kính Sài Gòn"
+                    class="h-8 mr-3">
             </div>
             <ul class="flex space-x-6 text-sm font-medium">
-                <li><a href="#" class="hover:text-red-600">THƯƠNG HIỆU</a></li>
-                <li><a href="#" class="hover:text-red-600">KIẾN THỨC</a></li>
-                <li class="has-mega-menu relative">
-                    <a href="#" class="text-red-600 font-bold">TRÒNG KÍNH</a>
-                    <div class="mega-menu-content bg-white shadow-xl py-6">
-                        <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
-                            <div class="col-span-2">
-                                <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG</h4>
-                                <ul class="space-y-2 text-sm">
-                                    <li>Hai Tròng</li>
-                                    <li>Đổi Màu</li>
-                                    <li>Chống Bể</li>
-                                    <li>Siêu Mỏng</li>
-                                    <li>Siêu Cứng</li>
-                                    <li>Kính Mắt Có Độ</li>
-                                    <li>Tròng Kính Thời Trang</li>
-                                </ul>
-                            </div>
-                            <div class="col-span-2">
-                                <h4 class="font-bold mb-3 text-red-600">CHIẾT SUẤT</h4>
-                                <ul class="space-y-2 text-sm">
-                                    <li>Chiết suất 1.50</li>
-                                    <li>Chiết suất 1.53</li>
-                                    <li>Chiết suất 1.56</li>
-                                    <li>Chiết suất 1.58</li>
-                                    <li>Chiết suất 1.59</li>
-                                    <li>Chiết suất 1.60</li>
-                                    <li>Chiết suất 1.67</li>
-                                    <li>Chiết suất 1.71</li>
-                                    <li>Chiết suất 1.74</li>
-                                </ul>
-                            </div>
-                            <div class="col-span-2">
-                                <h4 class="font-bold mb-3 text-red-600">ÁNH SÁNG XANH</h4>
-                                <ul class="space-y-2 text-sm">
-                                    <li>Các Loại Tròng Ánh Sáng Xanh</li>
-                                    <li>Lọc Ánh Sáng Xanh Essilor</li>
-                                    <li>Lọc Ánh Sáng Xanh Zeiss</li>
-                                    <li>Cắt Ánh Sáng Xanh + UV</li>
-                                </ul>
-                            </div>
-                            <div class="col-span-3">
-                                <h4 class="font-bold mb-3 text-red-600">TÍNH NĂNG CAO CẤP</h4>
-                                <ul class="space-y-2 text-sm">
-                                    <li>Đơn Tròng ZEISS SmartLife</li>
-                                    <li>AntiVirus Platinum UV</li>
-                                    <li>Zeiss DuraVision Platinum</li>
-                                    <li>Kiểm Soát Cận Thị</li>
-                                </ul>
-                            </div>
-                            <div class="col-span-3">
-                                <h4 class="font-bold mb-3 text-red-600">KÍNH ĐA TRÒNG</h4>
-                                <ul class="space-y-2 text-sm">
-                                    <li>Các Loại Đa Tròng</li>
-                                    <li>Đa Tròng Đức Zeiss</li>
-                                    <li>Đa Tròng Nhật Levalens</li>
-                                    <li>Đa Tròng Pháp Essilor</li>
-                                    <li>Đa Tròng Hàn Quốc Chemi</li>
-                                    <li>Đa Tròng Varilux X Series</li>
-                                    <li>Đa Tròng Thái Lan Excelite</li>
-                                    <li>Đa Tròng Singapore Zinimy</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-                <li><a href="#" class="hover:text-red-600">GỌNG KÍNH</a></li>
-                <li><a href="#" class="hover:text-red-600">KÍNH MÁT</a></li>
-                <li><a href="#" class="hover:text-red-600">CONTACT LENS</a></li>
-                <li><a href="#" class="hover:text-red-600">ĐỐI TÁC</a></li>
+                <li><a href="{{ route('home') }}" class="text-red-600 font-bold hover:text-red-600">TRANG CHỦ</a></li>
+                @if(isset($brands) && $brands->count() > 0)
+                    <li><a href="#" class="text-red-600 font-bold hover:text-red-600">THƯƠNG HIỆU</a></li>
+                @endif
+
+                @if(isset($categories) && $categories->count() > 0)
+                    @foreach($categories as $category)
+                        @php
+                            $hasChildren = isset($category->chillParent) && $category->chillParent->count() > 0;
+                            $childCount = $hasChildren ? $category->chillParent->count() : 0;
+                            // Tính col-span dựa trên số lượng children (tối đa 6 cột)
+                            $colClass = 'col-span-2'; // Mặc định 2 cột
+                            if ($childCount == 1)
+                                $colClass = 'col-span-12';
+                            elseif ($childCount == 2)
+                                $colClass = 'col-span-6';
+                            elseif ($childCount == 3)
+                                $colClass = 'col-span-4';
+                            elseif ($childCount == 4)
+                                $colClass = 'col-span-3';
+                            elseif ($childCount == 5)
+                                $colClass = 'col-span-2';
+                            elseif ($childCount >= 6)
+                                $colClass = 'col-span-2';
+                        @endphp
+                        <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
+                            <a href="{{ $category->alias ? url('/san-pham/' . $category->alias) : '#' }}"
+                                class="{{ $hasChildren ? 'text-red-600 font-bold' : 'text-gray-600 font-bold category-link' }}">
+                                {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                            </a>
+                            @if($hasChildren)
+                                <div class="mega-menu-content bg-white shadow-xl py-6 group-hover:block">
+                                    <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
+                                        @foreach($category->chillParent as $child)
+                                            <div class="{{ $colClass }}">
+                                                <a href="{{ $child->alias ? url('/san-pham/' . $category->alias . '/' . $child->alias) : '#' }}"
+                                                    class="font-bold mb-3 text-red-600 hover:text-red-700 transition-colors block">
+                                                    {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                                </a>
+                                                @if(isset($child->childLevelParent) && $child->childLevelParent->count() > 0)
+                                                    @php
+                                                        $itemsWithIcon = $child->childLevelParent->filter(function ($item) {
+                                                            return isset($item->show_icon) && $item->show_icon == 1 && !empty($item->icon);
+                                                        });
+                                                        $itemsWithoutIcon = $child->childLevelParent->filter(function ($item) {
+                                                            return !isset($item->show_icon) || $item->show_icon != 1 || empty($item->icon);
+                                                        });
+                                                    @endphp
+
+                                                    @if($itemsWithIcon->count() > 0)
+                                                        <div class="grid grid-cols-10 gap-0 mb-3 w-full overflow-hidden">
+                                                            @foreach($itemsWithIcon as $grandChild)
+                                                                @php
+                                                                    $fullPath = $category->alias . '/' . $child->alias . '/' . $grandChild->alias;
+                                                                @endphp
+                                                                <button type="button"
+                                                                    aria-label="{{ $grandChild->name ?? $grandChild->title ?? 'Icon' }}"
+                                                                    onclick="window.location.href='{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}'"
+                                                                    class="w-10 h-10 rounded-md border border-gray-200 shadow-sm bg-cover bg-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 hover:-translate-y-0.5 hover:shadow-md flex-shrink-0"
+                                                                    style="background-image: url('{{ $grandChild->getIconImages() }}'); background-size: cover; background-position: center; background-repeat: no-repeat; max-width: 40px; max-height: 40px;">
+                                                                </button>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+
+                                                    @if($itemsWithoutIcon->count() > 0)
+                                                        <ul class="space-y-2 text-sm">
+                                                            @foreach($itemsWithoutIcon as $grandChild)
+                                                                @php
+                                                                    $fullPath = $category->alias . '/' . $child->alias . '/' . $grandChild->alias;
+                                                                @endphp
+                                                                <li>
+                                                                    <a href="{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}"
+                                                                        class="hover:text-red-600">
+                                                                        {{ $grandChild->name ?? $grandChild->title ?? 'Item' }}
+                                                                    </a>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    @endif
+                                                @else
+                                                    <ul class="space-y-2 text-sm">
+                                                        <li>
+                                                            @php
+                                                                $childPath = $category->alias . '/' . $child->alias;
+                                                            @endphp
+                                                            <a href="{{ $child->alias ? url('/san-pham/' . $childPath) : '#' }}"
+                                                                class="hover:text-red-600">
+                                                                Xem tất cả
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </li>
+                    @endforeach
+                @endif
             </ul>
             <div class="flex items-center space-x-4">
                 <button class="text-xl text-gray-600">
@@ -125,4 +166,3 @@
         </div>
     </nav>
 </header>
-

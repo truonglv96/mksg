@@ -20,38 +20,128 @@
             const mobileSidebar = document.getElementById('mobile-sidebar');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-            const toggleTrongKinh = document.getElementById('toggle-tròng-kính');
-            const submenuTrongKinh = document.getElementById('submenu-tròng-kính');
 
             // Mở Sidebar
+            if (mobileMenuBtn) {
             mobileMenuBtn.addEventListener('click', () => {
                 mobileSidebar.classList.remove('-translate-x-full');
             });
+            }
 
             // Đóng Sidebar
+            if (closeSidebarBtn) {
             closeSidebarBtn.addEventListener('click', () => {
                 mobileSidebar.classList.add('-translate-x-full');
             });
+            }
 
-            // Toggle Sub-menu Tròng Kính
-            if (toggleTrongKinh && submenuTrongKinh) {
-                const arrow = toggleTrongKinh.querySelector('span');
+            // Toggle Sub-menu cho tất cả categories và children (Event Delegation)
+            if (mobileSidebar) {
+                mobileSidebar.addEventListener('click', (e) => {
+                    // Xử lý toggle cho category (level 1)
+                    const categoryToggleBtn = e.target.closest('.toggle-category-btn');
+                    if (categoryToggleBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const submenuId = categoryToggleBtn.getAttribute('data-submenu-id');
+                        const submenu = document.getElementById(submenuId);
+                        const arrow = categoryToggleBtn.querySelector('.toggle-arrow');
+                        
+                        // Tìm category text link từ parent container
+                        const parentLi = categoryToggleBtn.closest('li');
+                        const categoryText = parentLi ? parentLi.querySelector('.category-text') : null;
 
-                toggleTrongKinh.addEventListener('click', () => {
-                    const isHidden = submenuTrongKinh.classList.toggle('hidden');
+                        if (submenu && arrow) {
+                            const isHidden = submenu.classList.toggle('hidden');
 
+                            // Toggle arrow rotation
+                            if (isHidden) {
+                                arrow.classList.remove('rotate-180');
+                            } else {
+                                arrow.classList.add('rotate-180');
+                            }
+
+                            // Toggle active state (màu đỏ) cho link
+                            if (categoryText) {
+                                // Remove active từ tất cả category links khác
+                                const allCategoryLinks = mobileSidebar.querySelectorAll('.category-text');
+                                allCategoryLinks.forEach(link => {
+                                    link.classList.remove('text-red-600');
+                                });
+
+                                // Add active cho link hiện tại
+                                if (!isHidden) {
+                                    categoryText.classList.add('text-red-600');
+                                } else {
+                                    categoryText.classList.remove('text-red-600');
+                                }
+                            }
+                        }
+                        return;
+                    }
+
+                    // Xử lý toggle cho child (level 2)
+                    const childToggleBtn = e.target.closest('.toggle-child-btn');
+                    if (childToggleBtn) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const submenuId = childToggleBtn.getAttribute('data-submenu-id');
+                        const submenu = document.getElementById(submenuId);
+                        const arrow = childToggleBtn.querySelector('.toggle-arrow');
+                        
+                        // Tìm child text link từ parent container
+                        const parentLi = childToggleBtn.closest('li');
+                        const childText = parentLi ? parentLi.querySelector('.child-text') : null;
+
+                        if (submenu && arrow) {
+                            const isHidden = submenu.classList.toggle('hidden');
+
+                            // Toggle arrow rotation
                     if (isHidden) {
                         arrow.classList.remove('rotate-180');
-                        arrow.textContent = '^';
                     } else {
                         arrow.classList.add('rotate-180');
-                        arrow.textContent = 'v'; // Thay đổi icon khi mở
+                            }
+
+                            // Toggle active state (màu đỏ) cho link
+                            if (childText) {
+                                // Remove active từ tất cả child links khác trong cùng parent
+                                const parentSubmenu = childToggleBtn.closest('ul');
+                                if (parentSubmenu) {
+                                    const allChildLinks = parentSubmenu.querySelectorAll('.child-text');
+                                    allChildLinks.forEach(link => {
+                                        link.classList.remove('text-red-600');
+                                    });
+                                }
+
+                                // Add active cho link hiện tại
+                                if (!isHidden) {
+                                    childText.classList.add('text-red-600');
+                                } else {
+                                    childText.classList.remove('text-red-600');
+                                }
+                            }
+                        }
+                        return;
                     }
                 });
-                // Khởi tạo: Đảm bảo sub-menu ẩn khi mới load
-                submenuTrongKinh.classList.add('hidden');
+
+                // Khởi tạo: Đảm bảo tất cả sub-menu ẩn khi mới load
+                const allCategorySubmenus = mobileSidebar.querySelectorAll('[id^="submenu-category-"]');
+                allCategorySubmenus.forEach(submenu => {
+                    submenu.classList.add('hidden');
+                });
+
+                const allChildSubmenus = mobileSidebar.querySelectorAll('[id^="submenu-child-"]');
+                allChildSubmenus.forEach(submenu => {
+                    submenu.classList.add('hidden');
+                });
+
+                // Khởi tạo arrows (SVG không cần textContent)
+                const allArrows = mobileSidebar.querySelectorAll('.toggle-arrow');
+                allArrows.forEach(arrow => {
                 arrow.classList.remove('rotate-180');
-                arrow.textContent = '^';
+                });
             }
 
             // --- LOGIC FILTER SẢN PHẨM THEO DANH MỤC VÀ KHỞI TẠO SWIPER ---
@@ -67,11 +157,12 @@
                     if (tab.getAttribute('data-category') === category) {
                         tab.classList.add('active');
                         tab.classList.remove('border-transparent');
-                        tab.classList.add('border-red-600');
+                        tab.style.borderColor = '#ed1c24';
+                        tab.style.color = '#ed1c24';
                     } else {
                         tab.classList.remove('active');
-                        tab.classList.remove('border-red-600');
-                        tab.classList.add('border-transparent');
+                        tab.style.borderColor = 'transparent';
+                        tab.style.color = '';
                     }
                 });
 
@@ -124,14 +215,27 @@
                 });
             });
 
-            // Khởi tạo với danh mục mặc định (TRÒNG KÍNH)
-            filterProducts('trong-kinh');
+            // Khởi tạo với danh mục mặc định (tab đầu tiên có class active)
+            const firstActiveTab = document.querySelector('.product-tab.active');
+            if (firstActiveTab) {
+                const defaultCategory = firstActiveTab.getAttribute('data-category');
+                filterProducts(defaultCategory);
+            } else if (productTabs.length > 0) {
+                // Nếu không có tab nào active, lấy tab đầu tiên
+                const firstTab = productTabs[0];
+                const defaultCategory = firstTab.getAttribute('data-category');
+                filterProducts(defaultCategory);
+            }
 
             // --- LOGIC GIỎ HÀNG ---
             let cart = [];
 
             const buildCartItemKey = (item) => {
-                return [item.name, item.color || '', item.lens || ''].join('||');
+                // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lens hoặc lensLabel
+                const optionsKey = item.selectedOptions && item.selectedOptions.length > 0 
+                    ? item.selectedOptions.sort().join(',') 
+                    : (item.lens || item.lensLabel || '');
+                return [item.name, item.color || '', optionsKey].join('||');
             };
 
             // Load giỏ hàng từ localStorage
@@ -234,33 +338,46 @@
                     } else {
                         cartItems.innerHTML = cart.map(item => {
                             const itemKey = encodeURIComponent(buildCartItemKey(item));
-                            const optionDetails = [
-                                item.color ? `Màu: ${item.color}` : null,
-                                item.lensLabel ? `Gói tròng: ${item.lensLabel}` : (item.lens ? `Gói tròng: ${item.lens}` : null)
-                            ].filter(Boolean).join(' • ');
+                            
+                            // Xây dựng option details - ưu tiên selectedOptions (multi-select), sau đó fallback về lensLabel
+                            const optionParts = [];
+                            if (item.color) {
+                                optionParts.push(`Màu: ${item.color}`);
+                            }
+                            
+                            // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lensLabel hoặc lens
+                            if (item.selectedOptions && item.selectedOptions.length > 0) {
+                                optionParts.push(`Gói tròng: ${item.selectedOptions.join(', ')}`);
+                            } else if (item.lensLabel) {
+                                optionParts.push(`Gói tròng: ${item.lensLabel}`);
+                            } else if (item.lens) {
+                                optionParts.push(`Gói tròng: ${item.lens}`);
+                            }
+                            
+                            const optionDetails = optionParts.join(' • ');
 
                             return `
                                 <div class="cart-item flex gap-3 mb-4 pb-4 border-b" data-item-key="${itemKey}">
-                                    <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-sm mb-1">${item.name}</h4>
+                                <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-sm mb-1">${item.name}</h4>
                                         <p class="text-xs text-gray-500">${item.brand || ''}</p>
                                         ${optionDetails ? `<p class="text-xs text-gray-500 mt-1">${optionDetails}</p>` : ''}
                                         <div class="flex justify-between items-center mt-2">
-                                            <div class="flex items-center gap-2">
-                                                <button class="decrease-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">-</button>
-                                                <span class="text-sm font-medium">${item.quantity}</span>
-                                                <button class="increase-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">+</button>
-                                            </div>
-                                            <span class="text-red-600 font-bold text-sm">${(item.price * item.quantity).toLocaleString('vi-VN')} VNĐ</span>
+                                        <div class="flex items-center gap-2">
+                                            <button class="decrease-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">-</button>
+                                            <span class="text-sm font-medium">${item.quantity}</span>
+                                            <button class="increase-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">+</button>
                                         </div>
+                                        <span class="text-red-600 font-bold text-sm">${(item.price * item.quantity).toLocaleString('vi-VN')} VNĐ</span>
                                     </div>
-                                    <button class="remove-btn text-gray-400 hover:text-red-600">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
                                 </div>
+                                <button class="remove-btn text-gray-400 hover:text-red-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
                             `;
                         }).join('');
                     }
@@ -316,6 +433,22 @@
                 cartOverlay.addEventListener('click', closeCartFunc);
             }
 
+            // Xử lý button "Thanh Toán" trong cart dropdown
+            document.addEventListener('click', function (e) {
+                const checkoutBtn = e.target.closest('.cart-checkout-btn');
+                if (!checkoutBtn) {
+                    return;
+                }
+
+                e.preventDefault();
+                
+                // Đóng cart dropdown
+                closeCartFunc();
+                
+                // Chuyển đến trang giỏ hàng
+                window.location.href = '/gio-hang';
+            });
+
             // Event delegation cho các buttons trong giỏ hàng
             const cartItemsEl = document.getElementById('cart-items');
             if (cartItemsEl) {
@@ -358,17 +491,31 @@
                     const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
                     const image = document.getElementById('main-product-image')?.src || '';
                     const color = productSummary.dataset.selectedColor || productSummary.querySelector('.color-chip.active')?.dataset.color || '';
-                    const lens = productSummary.dataset.selectedOption || productSummary.querySelector('.option-pill.active')?.dataset.option || '';
-                    const lensLabel = productSummary.dataset.selectedOptionLabel || productSummary.querySelector('.option-pill.active .font-semibold')?.textContent.trim() || '';
+                    
+                    // Lấy tất cả các option đã chọn (multi-select)
+                    const activeOptionPills = Array.from(productSummary.querySelectorAll('.option-pill.active'));
+                    const selectedOptions = activeOptionPills.map(pill => {
+                        return pill.querySelector('.font-semibold')?.textContent.trim() || pill.dataset.option || '';
+                    }).filter(Boolean);
+                    
+                    // Giữ lại để tương thích với code cũ
+                    const lens = selectedOptions.length > 0 ? selectedOptions[0] : '';
+                    const lensLabel = selectedOptions.join(', '); // Tất cả các option đã chọn
+                    
+                    // Lấy product ID
+                    const productId = productSummary.dataset.productId || productSummary.getAttribute('data-product-id') || '';
 
                     return {
+                        id: parseInt(productId) || 0,
+                        productId: parseInt(productId) || 0,
                         name,
                         brand,
                         price,
                         image,
                         color,
                         lens,
-                        lensLabel
+                        lensLabel,
+                        selectedOptions: selectedOptions // Mảng tất cả các option đã chọn
                     };
                 }
 
@@ -398,12 +545,12 @@
 
                 // Kiểm tra nếu button nằm trong product-card (sản phẩm liên quan, danh sách sản phẩm)
                 const productCard = button.closest('.product-card');
-                if (productCard) {
-                    const nameEl = productCard.querySelector('h3');
+                    if (productCard) {
+                        const nameEl = productCard.querySelector('h3');
                     const brandEl = productCard.querySelector('.product-brand, .text-gray-500');
                     const priceEl = findPriceElement(productCard);
-                    const imageEl = productCard.querySelector('.product-img-main') || productCard.querySelector('img');
-
+                        const imageEl = productCard.querySelector('.product-img-main') || productCard.querySelector('img');
+                        
                     if (nameEl && priceEl && imageEl) {
                         const name = nameEl.textContent.trim();
                         const brand = brandEl ? brandEl.textContent.trim() : '';
@@ -431,13 +578,13 @@
                     const brandEl = swiperSlide.querySelector('.product-brand, .text-gray-500');
                     const priceEl = findPriceElement(swiperSlide);
                     const imageEl = swiperSlide.querySelector('.product-img-main') || swiperSlide.querySelector('img');
-
-                    if (nameEl && priceEl && imageEl) {
-                        const name = nameEl.textContent.trim();
-                        const brand = brandEl ? brandEl.textContent.trim() : '';
-                        const priceText = priceEl.textContent.trim();
-                        const price = parseInt(priceText.replace(/[^\d]/g, ''));
-                        const image = imageEl.src;
+                        
+                        if (nameEl && priceEl && imageEl) {
+                            const name = nameEl.textContent.trim();
+                            const brand = brandEl ? brandEl.textContent.trim() : '';
+                            const priceText = priceEl.textContent.trim();
+                            const price = parseInt(priceText.replace(/[^\d]/g, ''));
+                            const image = imageEl.src;
 
                         return {
                             name,
@@ -468,6 +615,31 @@
 
                 if (productData && productData.name && productData.price && productData.image) {
                     addToCart(productData);
+                } else {
+                    console.warn('Không thể lấy thông tin sản phẩm:', productData);
+                }
+            });
+
+            // Xử lý button "Mua ngay" - thêm vào giỏ và chuyển đến trang giỏ hàng
+            document.addEventListener('click', function (e) {
+                const buyNowButton = e.target.closest('.buy-now-btn');
+                if (!buyNowButton) {
+                    return;
+                }
+
+                e.preventDefault();
+
+                // Lấy thông tin sản phẩm từ button
+                const productData = getProductDataFromButton(buyNowButton);
+
+                if (productData && productData.name && productData.price && productData.image) {
+                    // Thêm sản phẩm vào giỏ hàng
+                    addToCart(productData);
+                    
+                    // Chuyển đến trang giỏ hàng sau khi thêm
+                    setTimeout(() => {
+                        window.location.href = '/gio-hang';
+                    }, 300); // Delay nhỏ để đảm bảo cart đã được lưu
                 } else {
                     console.warn('Không thể lấy thông tin sản phẩm:', productData);
                 }
@@ -549,7 +721,7 @@
             // Slider Brands - Chạy liên tục không dừng
             new Swiper('.brands-slider', {
                 slidesPerView: 2,
-                spaceBetween: 30,
+                spaceBetween: 5,
                 loop: true,
                 centeredSlides: true,
                 allowTouchMove: true,
@@ -563,15 +735,15 @@
                 breakpoints: {
                     480: {
                         slidesPerView: 3,
-                        spaceBetween: 40,
+                        spaceBetween: 8,
                     },
                     768: {
                         slidesPerView: 4,
-                        spaceBetween: 50,
+                        spaceBetween: 10,
                     },
                     1024: {
                         slidesPerView: 5,
-                        spaceBetween: 60,
+                        spaceBetween: 12,
                     }
                 }
             });
@@ -625,18 +797,59 @@
                     productSummary.dataset.selectedColor = color;
                 };
 
-                const setSelectedOption = (pill) => {
-                    optionPills.forEach(btn => {
-                        btn.classList.toggle('active', btn === pill);
-                        btn.setAttribute('aria-pressed', btn === pill ? 'true' : 'false');
+                // Option pills - multi-select với tính giá tổng
+                const priceElement = productSummary.querySelector('[data-product-price]');
+                const selectedOptionsLabel = document.getElementById('selected-options-list');
+                const basePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
+
+                // Tính tổng giá của tất cả các option đã chọn
+                const calculateTotalPrice = () => {
+                    let totalOptionPrice = 0;
+                    const selectedOptions = [];
+                    
+                    optionPills.forEach(pill => {
+                        if (pill.classList.contains('active')) {
+                            const optionPrice = parseFloat(pill.dataset.optionPrice) || 0;
+                            totalOptionPrice += optionPrice;
+                            const optionTitle = pill.querySelector('.font-semibold')?.textContent.trim() || pill.dataset.option;
+                            selectedOptions.push(optionTitle);
+                        }
                     });
-                    const option = pill?.dataset.option || '';
-                    const optionTitle = pill?.querySelector('.font-semibold')?.textContent.trim() || option;
-                    if (selectedOptionLabel) {
-                        selectedOptionLabel.textContent = optionTitle;
+                    
+                    return { totalOptionPrice, selectedOptions };
+                };
+
+                const updatePriceAndLabel = () => {
+                    const { totalOptionPrice, selectedOptions } = calculateTotalPrice();
+                    const totalPrice = basePrice + totalOptionPrice;
+                    
+                    if (priceElement) {
+                        priceElement.textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + ' VNĐ';
                     }
-                    productSummary.dataset.selectedOption = option;
-                    productSummary.dataset.selectedOptionLabel = optionTitle;
+                    
+                    if (selectedOptionsLabel) {
+                        if (selectedOptions.length > 0) {
+                            selectedOptionsLabel.textContent = selectedOptions.join(', ');
+                        } else {
+                            selectedOptionsLabel.textContent = 'Chưa chọn';
+                        }
+                    }
+                };
+
+                const toggleOption = (pill) => {
+                    const isCurrentlyActive = pill.classList.contains('active');
+                    
+                    if (isCurrentlyActive) {
+                        pill.classList.remove('active');
+                        pill.classList.remove('border-red-400', 'bg-red-50');
+                        pill.setAttribute('aria-pressed', 'false');
+                    } else {
+                        pill.classList.add('active');
+                        pill.classList.add('border-red-400', 'bg-red-50');
+                        pill.setAttribute('aria-pressed', 'true');
+                    }
+                    
+                    updatePriceAndLabel();
                 };
 
                 // Initialize defaults
@@ -644,17 +857,31 @@
                     const defaultChip = colorChips.find(chip => chip.classList.contains('active')) || colorChips[0];
                     setSelectedColor(defaultChip);
                 }
+                
                 if (optionPills.length) {
-                    const defaultOption = optionPills.find(pill => pill.classList.contains('active')) || optionPills[0];
-                    setSelectedOption(defaultOption);
+                    // Mặc định chọn option đầu tiên nếu chưa có option nào được chọn
+                    const hasActiveOption = optionPills.some(pill => pill.classList.contains('active'));
+                    if (!hasActiveOption && optionPills[0]) {
+                        optionPills[0].classList.add('active', 'border-red-400', 'bg-red-50');
+                        optionPills[0].setAttribute('aria-pressed', 'true');
+                    }
+                    updatePriceAndLabel();
                 }
 
                 colorChips.forEach(chip => {
-                    chip.addEventListener('click', () => setSelectedColor(chip));
+                    chip.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedColor(chip);
+                    });
                 });
 
                 optionPills.forEach(pill => {
-                    pill.addEventListener('click', () => setSelectedOption(pill));
+                    pill.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleOption(pill);
+                    });
                 });
             }
 

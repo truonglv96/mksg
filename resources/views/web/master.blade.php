@@ -7,6 +7,17 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Quicksand', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
@@ -15,7 +26,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('styles')
 </head>
-<body>
+<body class="md:pb-0 pb-20">
     @include('web.partials.header')
     
     @include('web.partials.cart')
@@ -27,6 +38,7 @@
     </main>
     
     @include('web.partials.footer')
+    @include('web.partials.mobile-contact-bar')
     <a class="top_button" href="#" style="display: block;">&nbsp;</a>
     <!-- Swiper JS -->
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>

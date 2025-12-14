@@ -22,9 +22,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Share data với master layout
-        View::composer('web.master', MasterComposer::class);
+        // View::composer('web.master', MasterComposer::class);
         
         // Hoặc nếu muốn share với tất cả views trong web
-        // View::composer('web.*', MasterComposer::class);
+        View::composer('web.*', MasterComposer::class);
     }
 }

@@ -19,6 +19,21 @@
         <span class="text-gray-700 font-medium">Giỏ hàng</span>
     </nav>
 
+    <!-- Success Message -->
+    <div id="order-success-message" class="order-success-message hidden">
+        <div class="order-success-content">
+            <div class="order-success-icon">
+                <svg class="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            {!! $settings->order_success !!}
+            <div class="order-success-actions">
+                <a href="{{ route('product.category') }}" class="btn-primary">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+    </div>
+
     <section id="order-section" class="order-section">
         <div class="order-header">
             <h1>Thông tin đơn hàng</h1>
@@ -44,6 +59,7 @@
                     <button type="button" class="checkout-modal__close" id="checkout-modal-close" aria-label="Đóng">&times;</button>
                 </div>
                 <form id="checkout-form" class="checkout-modal__form">
+                    @csrf
                     <div class="checkout-form-grid">
                         <div class="checkout-form-group">
                             <label for="checkout-name">Họ và tên</label>
@@ -74,22 +90,25 @@
                             <label for="checkout-city">Thành phố</label>
                             <select id="checkout-city" name="city" required>
                                 <option value="" disabled selected>Chọn thành phố</option>
-                                <option value="hcm">TP. Hồ Chí Minh</option>
-                                <option value="hn">Hà Nội</option>
-                                <option value="dn">Đà Nẵng</option>
-                                <option value="brvt">Bà Rịa - Vũng Tàu</option>
-                                <option value="other">Khác</option>
+                                @if(isset($cities) && $cities->count() > 0)
+                                    @foreach($cities as $city)
+                                        <option value="{{ $city->id }}">
+                                            {{ $city->name }}
+                                        </option>
+                                    @endforeach
+                                @else
+                                    <option value="hcm">TP. Hồ Chí Minh</option>
+                                    <option value="hn">Hà Nội</option>
+                                    <option value="dn">Đà Nẵng</option>
+                                    <option value="brvt">Bà Rịa - Vũng Tàu</option>
+                                    <option value="other">Khác</option>
+                                @endif
                             </select>
                         </div>
                         <div class="checkout-form-group">
-                            <label for="checkout-district">Quận / Huyện</label>
-                            <select id="checkout-district" name="district" required>
+                            <label for="checkout-district">Xã / Quận</label>
+                            <select id="checkout-district" name="district" required disabled>
                                 <option value="" disabled selected>Chọn quận / huyện</option>
-                                <option value="quan1">Quận 1</option>
-                                <option value="quan3">Quận 3</option>
-                                <option value="binhthanh">Bình Thạnh</option>
-                                <option value="tanbinh">Tân Bình</option>
-                                <option value="other">Khác</option>
                             </select>
                         </div>
                     </div>
@@ -138,6 +157,80 @@
     </section>
 
 </main>
+
+<style>
+    .order-success-message {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .order-success-message.hidden {
+        display: none;
+    }
+    
+    .order-success-content {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .order-success-icon {
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .order-success-title {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #ed1c24;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+    }
+    
+    .order-success-text {
+        text-align: left;
+        color: #333;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+    
+    .order-success-text p {
+        margin-bottom: 1rem;
+    }
+    
+    .order-success-text p:last-child {
+        margin-bottom: 0;
+    }
+    
+    .order-success-text strong {
+        color: #000;
+        font-weight: 600;
+    }
+    
+    .order-success-actions {
+        margin-top: 2rem;
+    }
+    
+    .order-success-actions .btn-primary {
+        display: inline-block;
+        background-color: #ed1c24;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .order-success-actions .btn-primary:hover {
+        background-color: #c41e3a;
+    }
+</style>
+
 @endsection
 
 @push('scripts')
@@ -155,6 +248,7 @@
         const paymentOptionsEl = document.getElementById('checkout-payment-options');
         const orderEmptyState = document.getElementById('order-empty-state');
         const orderReceipt = document.getElementById('order-receipt');
+        const orderSuccessMessage = document.getElementById('order-success-message');
 
         let cart = [];
 
@@ -182,6 +276,14 @@
             updatePaymentNote();
             checkoutModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+            
+            // Reset dropdown quận/huyện khi mở modal
+            const districtSelect = document.getElementById('checkout-district');
+            if (districtSelect) {
+                districtSelect.innerHTML = '<option value="" disabled selected>Chọn quận / huyện</option>';
+                districtSelect.disabled = true;
+            }
+            
             const nameInput = checkoutForm?.querySelector('#checkout-name');
             if (nameInput) {
                 setTimeout(() => nameInput.focus(), 100);
@@ -192,6 +294,13 @@
             if (!checkoutModal) return;
             checkoutModal.classList.remove('active');
             document.body.style.overflow = '';
+            
+            // Reset dropdown quận/huyện khi đóng modal
+            const districtSelect = document.getElementById('checkout-district');
+            if (districtSelect) {
+                districtSelect.innerHTML = '<option value="" disabled selected>Chọn quận / huyện</option>';
+                districtSelect.disabled = true;
+            }
         }
 
         if (checkoutOverlay) {
@@ -206,6 +315,9 @@
             checkoutCancel.addEventListener('click', closeCheckoutModal);
         }
 
+        // Dữ liệu quận/huyện từ server
+        const districtsData = @json($districts ?? []);
+        
         if (checkoutForm) {
             const paymentRadios = checkoutForm.querySelectorAll('input[name="payment-method"]');
             paymentRadios.forEach(radio => {
@@ -213,17 +325,154 @@
             });
             updatePaymentNote();
 
-            checkoutForm.addEventListener('submit', (event) => {
+            // Xử lý load quận/huyện khi chọn thành phố
+            const citySelect = document.getElementById('checkout-city');
+            const districtSelect = document.getElementById('checkout-district');
+            
+            if (citySelect && districtSelect) {
+                citySelect.addEventListener('change', function() {
+                    const cityId = parseInt(this.value);
+                    
+                    // Reset dropdown quận/huyện
+                    districtSelect.innerHTML = '<option value="" disabled selected>Chọn quận / huyện</option>';
+                    districtSelect.disabled = true;
+                    
+                    if (!cityId) {
+                        return;
+                    }
+                    
+                    // Filter quận/huyện theo parent_id (cityId)
+                    const filteredDistricts = districtsData.filter(district => {
+                        return parseInt(district.parent_id) === cityId;
+                    });
+                    
+                    // Cập nhật dropdown quận/huyện
+                    if (filteredDistricts.length > 0) {
+                        filteredDistricts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district.id;
+                            option.textContent = district.name;
+                            districtSelect.appendChild(option);
+                        });
+                        districtSelect.disabled = false;
+                    } else {
+                        districtSelect.innerHTML = '<option value="" disabled selected>Không có dữ liệu</option>';
+                    }
+                });
+            }
+
+            checkoutForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                closeCheckoutModal();
-                alert('Thông tin đặt hàng đã được ghi nhận! Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.');
-                checkoutForm.reset();
-                updatePaymentNote();
+                
+                // Kiểm tra giỏ hàng có sản phẩm không
+                if (cart.length === 0) {
+                    alert('Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.');
+                    return;
+                }
+
+                // Lấy dữ liệu từ form
+                const formData = new FormData(checkoutForm);
+                const formObject = {};
+                formData.forEach((value, key) => {
+                    formObject[key] = value;
+                });
+
+                // Chuẩn bị dữ liệu cart items
+                const cartItems = cart.map(item => ({
+                    id: item.id || item.productId || 0,
+                    name: item.name || '',
+                    price: parseInt(item.price) || 0,
+                    quantity: parseInt(item.quantity) || 1,
+                    category: item.category || null,
+                    sale_off: item.saleOff || item.sale_off || null,
+                    color_id: item.colorId || item.color_id || null,
+                    lensLabel: item.lensLabel || null,
+                    selectedOptions: item.selectedOptions || null,
+                }));
+
+                // Chuẩn bị dữ liệu gửi lên server
+                const submitData = {
+                    ...formObject,
+                    cart: cartItems
+                };
+
+                // Disable submit button và hiển thị loading
+                const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton ? submitButton.textContent : '';
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Đang xử lý...';
+                }
+
+                try {
+                    // Lấy CSRF token từ form
+                    const csrfToken = checkoutForm.querySelector('input[name="_token"]')?.value || 
+                                      document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+                    // Gửi dữ liệu đến server
+                    const response = await fetch('/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(submitData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Xóa giỏ hàng sau khi đặt hàng thành công
+                        localStorage.removeItem('cart');
+                        cart = [];
+                        renderOrderSection();
+                        updateCartCount();
+
+                        // Đóng modal
+                        closeCheckoutModal();
+                        
+                        // Ẩn order section và hiển thị success message
+                        if (orderSection) {
+                            orderSection.classList.add('hidden');
+                        }
+                        if (orderSuccessMessage) {
+                            orderSuccessMessage.classList.remove('hidden');
+                            // Scroll to top để hiển thị success message
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                        
+                        // Reset form
+                        checkoutForm.reset();
+                        updatePaymentNote();
+                        
+                        // Reset dropdown quận/huyện
+                        if (districtSelect) {
+                            districtSelect.innerHTML = '<option value="" disabled selected>Chọn quận / huyện</option>';
+                            districtSelect.disabled = true;
+                        }
+                    } else {
+                        alert(result.message || 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.');
+                    }
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    alert('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.');
+                } finally {
+                    // Enable lại submit button
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalButtonText;
+                    }
+                }
             });
         }
 
         const buildCartItemKey = (item) => {
-            return [item.name, item.color || '', item.lens || ''].join('||');
+            // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lens hoặc lensLabel
+            const optionsKey = item.selectedOptions && item.selectedOptions.length > 0 
+                ? item.selectedOptions.sort().join(',') 
+                : (item.lens || item.lensLabel || '');
+            return [item.name, item.color || '', optionsKey].join('||');
         };
 
         // Load giỏ hàng từ localStorage
@@ -232,6 +481,17 @@
             if (savedCart) {
                 cart = JSON.parse(savedCart);
                 renderOrderSection();
+                updateCartCount(); // Cập nhật count trên header khi load trang
+                
+                // Ẩn success message nếu có sản phẩm trong giỏ hàng
+                if (cart.length > 0 && orderSuccessMessage) {
+                    orderSuccessMessage.classList.add('hidden');
+                    if (orderSection) {
+                        orderSection.classList.remove('hidden');
+                    }
+                }
+            } else {
+                updateCartCount(); // Cập nhật count ngay cả khi cart rỗng
             }
         }
 
@@ -240,11 +500,37 @@
             localStorage.setItem('cart', JSON.stringify(cart));
         }
 
+        // Cập nhật cart count trên header
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            const cartCountDesktop = document.getElementById('cart-count-desktop');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            if (cartCount) {
+                cartCount.textContent = totalItems;
+                if (totalItems > 0) {
+                    cartCount.classList.remove('hidden');
+                } else {
+                    cartCount.classList.add('hidden');
+                }
+            }
+            
+            if (cartCountDesktop) {
+                cartCountDesktop.textContent = totalItems;
+                if (totalItems > 0) {
+                    cartCountDesktop.classList.remove('hidden');
+                } else {
+                    cartCountDesktop.classList.add('hidden');
+                }
+            }
+        }
+
         // Xóa sản phẩm khỏi giỏ hàng
         function removeFromCart(itemKey) {
             cart = cart.filter(item => buildCartItemKey(item) !== itemKey);
             saveCart();
             renderOrderSection();
+            updateCartCount(); // Cập nhật count trên header
         }
 
         // Cập nhật số lượng sản phẩm
@@ -257,6 +543,7 @@
                     item.quantity = newQuantity;
                     saveCart();
                     renderOrderSection();
+                    updateCartCount(); // Cập nhật count trên header
                 }
             }
         }

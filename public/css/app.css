@@ -20,15 +20,51 @@
             width: min(85vw, calc(100vw - 2rem));
             max-width: 100vw;
             z-index: 50;
-            border-top: 4px solid #dc2626;
+            border-top: 4px solid #ed1c24;
             overflow-x: hidden;
             box-sizing: border-box;
             background: white;
+            padding-top: 15px;
+            margin-top: 10px;
+            pointer-events: auto;
         }
 
-        /* Tính toán top position dựa trên chiều cao của nav */
+        /* Tính toán top position dựa trên chiều cao của nav - thêm 10px để không che menu */
         .has-mega-menu:hover .mega-menu-content {
-            top: var(--nav-bottom, 100px);
+            top: calc(var(--nav-bottom, 100px) + 10px);
+        }
+        
+        /* Tạo "cầu nối" vô hình giữa link và menu để menu không bị đóng */
+        .has-mega-menu::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            height: 30px;
+            background: transparent;
+            z-index: 49;
+            display: none;
+            pointer-events: auto;
+        }
+        
+        .has-mega-menu:hover::after,
+        .has-mega-menu.group:hover::after {
+            display: block;
+        }
+        
+        /* Đảm bảo menu content nằm ngay dưới cầu nối nhưng không che chữ */
+        .has-mega-menu:hover .mega-menu-content,
+        .has-mega-menu.group:hover .mega-menu-content {
+            margin-top: 0px;
+            padding-top: 10px;
+        }
+        
+        /* Khi hover vào cầu nối, giữ menu mở */
+        .has-mega-menu::after:hover ~ .mega-menu-content,
+        .has-mega-menu:hover::after ~ .mega-menu-content {
+            display: block !important;
         }
 
         /* Ngăn body scroll ngang khi mega menu mở */
@@ -37,9 +73,16 @@
             max-width: 100vw;
         }
 
-        /* Kích hoạt hiển thị khi hover vào thẻ cha */
-        .has-mega-menu:hover .mega-menu-content {
-            display: block;
+        /* Kích hoạt hiển thị khi hover vào thẻ cha hoặc menu content */
+        .has-mega-menu:hover .mega-menu-content,
+        .mega-menu-content:hover {
+            display: block !important;
+        }
+        
+        /* Khi hover vào cầu nối, giữ menu mở */
+        .has-mega-menu::before:hover ~ .mega-menu-content,
+        .has-mega-menu:hover::before ~ .mega-menu-content {
+            display: block !important;
         }
 
         /* Loại bỏ padding của container bên trong mega menu */
@@ -78,7 +121,7 @@
 
         .category-swiper .swiper-button-next,
         .category-swiper .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
 
         /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
@@ -351,7 +394,7 @@
         /* Navigation buttons cho news */
         .news-slider .swiper-button-next,
         .news-slider .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
 
         /* CSS cho Banner Slider Full Màn Hình */
@@ -382,7 +425,7 @@
         }
 
         .banner-slider .swiper-pagination-bullet-active {
-            background: #dc2626;
+            background: #ed1c24;
             opacity: 1;
         }
 
@@ -403,12 +446,12 @@
         /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
         .product-slider .swiper-button-next,
         .product-slider .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
 
         /* Chỉnh lại vị trí của Pagination */
         .swiper-pagination-bullet-active {
-            background: #dc2626 !important;
+            background: #ed1c24 !important;
         }
 
         /* Cần thêm CSS cho mobile arrow để nó xoay */
@@ -434,7 +477,7 @@
             width: min(85vw, calc(100vw - 2rem));
             max-width: 100vw;
             z-index: 50;
-            border-top: 4px solid #dc2626;
+            border-top: 4px solid #ed1c24;
             overflow-x: hidden;
             box-sizing: border-box;
             background: white;
@@ -488,7 +531,7 @@
         .category-swiper .swiper-button-prev,
         .related-swiper .swiper-button-next,
         .related-swiper .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
         .category-swiper .swiper-slide,
@@ -566,21 +609,25 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .color-chip.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
             transform: translateY(-2px);
         }
         .option-pill {
             border: 1.5px solid transparent;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
         }
         .option-pill.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             background-color: #fef2f2;
             color: #b91c1c;
         }
         .thumbnail-button.active,
         .lightbox-thumbnail.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
         }
         .consult-form-card {
@@ -689,7 +736,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #ed1c24, #ed1c24);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .consult-form button[type="submit"] span {
@@ -716,7 +763,7 @@
             color: #6b7280;
         }
         .consult-form-help a {
-            color: #dc2626;
+            color: #ed1c24;
             font-weight: 600;
         }
         /* News page styles */
@@ -1158,7 +1205,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.92);
-            color: #dc2626;
+            color: #ed1c24;
             font-size: 1.5rem;
             font-weight: 600;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
@@ -1236,8 +1283,8 @@
         }
         /* Tab panels */
         .tab-button.active {
-            color: #dc2626;
-            border-bottom: 3px solid #dc2626;
+            color: #ed1c24;
+            border-bottom: 3px solid #ed1c24;
         }
         .tab-panel {
             display: none;
@@ -1426,11 +1473,11 @@
         /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
         .product-slider .swiper-button-next,
         .product-slider .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Chỉnh lại vị trí của Pagination */
         .swiper-pagination-bullet-active {
-            background: #dc2626 !important;
+            background: #ed1c24 !important;
         }
         /* Cần thêm CSS cho mobile arrow để nó xoay */
         #toggle-tròng-kính span {
@@ -1455,7 +1502,7 @@
             width: min(85vw, calc(100vw - 2rem));
             max-width: 100vw;
             z-index: 50;
-            border-top: 4px solid #dc2626;
+            border-top: 4px solid #ed1c24;
             overflow-x: hidden;
             box-sizing: border-box;
             background: white;
@@ -1504,7 +1551,7 @@
         }
         .category-swiper .swiper-button-next,
         .category-swiper .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
         .category-swiper .swiper-slide {
@@ -1671,11 +1718,11 @@
         /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
         .product-slider .swiper-button-next,
         .product-slider .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Chỉnh lại vị trí của Pagination */
         .swiper-pagination-bullet-active {
-            background: #dc2626 !important;
+            background: #ed1c24 !important;
         }
         /* Cần thêm CSS cho mobile arrow để nó xoay */
         #toggle-tròng-kính span {
@@ -1700,7 +1747,7 @@
             width: min(85vw, calc(100vw - 2rem));
             max-width: 100vw;
             z-index: 50;
-            border-top: 4px solid #dc2626;
+            border-top: 4px solid #ed1c24;
             overflow-x: hidden;
             box-sizing: border-box;
             background: white;
@@ -1754,7 +1801,7 @@
         .category-swiper .swiper-button-prev,
         .related-swiper .swiper-button-next,
         .related-swiper .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Đảm bảo các card sản phẩm có chiều cao bằng nhau */
         .category-swiper .swiper-slide,
@@ -1832,21 +1879,25 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .color-chip.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
             transform: translateY(-2px);
         }
         .option-pill {
             border: 1.5px solid transparent;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
         }
         .option-pill.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             background-color: #fef2f2;
             color: #b91c1c;
         }
         .thumbnail-button.active,
         .lightbox-thumbnail.active {
-            border-color: #dc2626;
+            border-color: #ed1c24;
             box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
         }
         .consult-form-card {
@@ -1955,7 +2006,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #ed1c24, #ed1c24);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .consult-form button[type="submit"] span {
@@ -1982,7 +2033,7 @@
             color: #6b7280;
         }
         .consult-form-help a {
-            color: #dc2626;
+            color: #ed1c24;
             font-weight: 600;
         }
         .form-field--select select {
@@ -2082,7 +2133,7 @@
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.92);
-            color: #dc2626;
+            color: #ed1c24;
             font-size: 1.5rem;
             font-weight: 600;
             box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
@@ -2160,8 +2211,8 @@
         }
         /* Tab panels */
         .tab-button.active {
-            color: #dc2626;
-            border-bottom: 3px solid #dc2626;
+            color: #ed1c24;
+            border-bottom: 3px solid #ed1c24;
         }
         .tab-panel {
             display: none;
@@ -2350,11 +2401,11 @@
         /* Hiển thị Swiper Navigation (mũi tên) rõ ràng trên desktop */
         .product-slider .swiper-button-next,
         .product-slider .swiper-button-prev {
-            color: #dc2626;
+            color: #ed1c24;
         }
         /* Chỉnh lại vị trí của Pagination */
         .swiper-pagination-bullet-active {
-            background: #dc2626 !important;
+            background: #ed1c24 !important;
         }
         /* Cần thêm CSS cho mobile arrow để nó xoay */
         #toggle-tròng-kính span {
@@ -2518,7 +2569,7 @@
     place-items: center;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #dc2626;
+    color: #ed1c24;
 }
 
 .order-quantity span {
@@ -2807,7 +2858,7 @@
 
 .order-receipt__header {
     padding: 1.75rem 2rem;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, #ed1c24, #ed1c24);
     color: #fff;
     display: flex;
     flex-wrap: wrap;
@@ -3122,4 +3173,259 @@
     .receipt-download-btn {
         display: inline-flex;
     }
+}
+
+/* Font Quicksand - Font chính xác từ website matkinhsaigon.com.vn */
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/fonts/quicksand/quicksand-300.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/fonts/quicksand/quicksand-400.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/fonts/quicksand/quicksand-500.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/fonts/quicksand/quicksand-600.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    src: url('/fonts/quicksand/quicksand-700.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Font Be Vietnam - Dùng cho text content (span, p) */
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-300.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-400.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-500.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-600.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-700.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Be Vietnam';
+    src: url('/fonts/be-vietnam/be-vietnam-800.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Áp dụng font Quicksand cho toàn bộ dự án (Font chính xác từ website matkinhsaigon.com.vn) */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+body, * {
+    font-family: 'Quicksand', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Text content (span, p) dùng Be Vietnam */
+span, p {
+    font-family: 'Be Vietnam', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Thẻ span: font-size 12pt, font-weight 400 */
+span {
+    font-size: 12pt !important;
+    font-weight: 400 !important;
+}
+
+/* Thẻ p: font-size 12pt, font-weight 400 */
+p {
+    font-size: 12pt !important;
+    font-weight: 400 !important;
+}
+
+/* Title cho sản phẩm, tin tức và các title khác */
+h1, h2, h3, h4, h5, h6,
+.product-title, .news-title, .title,
+#product-name, [class*="title"], [class*="name"],
+.product-name, .news-name, .item-title, .card-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    text-transform: capitalize !important;
+    line-height: 24px !important;
+    letter-spacing: 0.6px !important;
+    color: #000 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Category link hover color */
+.category-link {
+    transition: color 0.3s ease;
+}
+
+.category-link:hover {
+    color: #11b3f1 !important;
+}
+
+/* Grid icon alignment trong mega menu - đảm bảo các icon thẳng hàng đều nhau như trong hình (7 hàng x 10 cột) */
+.mega-menu-content .grid.grid-cols-10 {
+    display: grid !important;
+    grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    justify-items: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.mega-menu-content .grid.grid-cols-10 button {
+    margin: 0 !important;
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    flex-shrink: 0;
+    box-sizing: border-box !important;
+}
+
+/* Grid icon alignment trong mobile sidebar - 5 cột cho màn hình nhỏ */
+#mobile-sidebar .grid.grid-cols-5 {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    justify-items: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+#mobile-sidebar .grid.grid-cols-5 button {
+    margin: 0 !important;
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    flex-shrink: 0;
+    box-sizing: border-box !important;
+}
+
+/* Cải thiện font rendering cho các element quan trọng */
+h1, h2, h3, h4, h5, h6,
+a, li, td, th, label, input, textarea, select, button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tất cả thẻ a có cursor default */
+a {
+    cursor: default;
+}
+
+/* Tất cả thẻ h3 có cursor default */
+h3 {
+    cursor: default;
+}
+
+/* Hover effect cho title sản phẩm và tin tức */
+.product-title:hover,
+.news-title:hover {
+    color: #ed1c24 !important;
+}
+
+/* Mobile Contact Bar - Modern Design */
+.mobile-contact-bar {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Animation cho icon khi click */
+@keyframes iconBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.9); }
+}
+
+.mobile-contact-bar a:active .w-11 {
+    animation: iconBounce 0.2s ease;
+}
+
+/* CSS cho các tiêu đề section: Danh Mục Nổi Bật, Sản Phẩm Mới Nhất, Tin Tức Mới Nhất */
+.section-title {
+    font-weight: 500;
+    font-size: 30px !important;
+    line-height: 30px !important;
+    font-family: 'Quicksand', sans-serif;
+    text-transform: capitalize !important;
+}
+
+/* Global button color */
+button {
+    color: rgba(255, 255, 255, 1);
 }

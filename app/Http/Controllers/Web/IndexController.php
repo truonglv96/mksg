@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Slider;
+use App\Models\Category;
+use App\Models\Products;
+use App\Models\News;
+use App\Models\Brand;
 
 class IndexController extends Controller
 {
@@ -11,63 +16,22 @@ class IndexController extends Controller
      */
     public function index()
     {
-        return view('web.page.home.index', [
-            'title' => 'Mắt Kính Sài Gòn - Trang chủ'
-        ]);
+        $banners = Slider::where('hidden', 1)->orderBy('weight', 'asc')->get();
+        // Chỉ lấy category sản phẩm, loại trừ tin tức
+        $categoriesProduct = Category::where('parent_id', 0)
+            ->where('type', 'product')
+            ->where('hidden', 1)
+            ->orderBy('weight', 'asc')
+            ->get();
+        // Lấy sản phẩm theo từng category
+        $productsByCategory = [];
+        foreach ($categoriesProduct as $category) {
+            $productsByCategory[$category->alias] = Products::getAllProductByParentID($category->id);
+        }
+        $news = News::where('hidden', 1)->orderBy('created_at', 'desc')->limit(5)->get();
+        $brands = Brand::where('hidden', 1)->orderBy('weight', 'asc')->get();
+        return view('web.page.home.index', compact('banners', 'categoriesProduct', 'productsByCategory', 'news', 'brands'));
     }
 
-    /**
-     * Trang danh mục sản phẩm
-     */
-    public function productCategory()
-    {
-        return view('web.page.products.product-category', [
-            'title' => 'Sản Phẩm - Mắt Kính Sài Gòn',
-            'type' => 'category',
-        ]);
-    }
-
-    /**
-     * Trang chi tiết sản phẩm
-     */
-    public function productDetail()
-    {
-        return view('web.page.products.detail', [
-            'title' => 'Chi Tiết Sản Phẩm - Mắt Kính Sài Gòn',
-            'type' => 'detail',
-        ]);
-    }
-
-    /**
-     * Trang danh mục tin tức
-     */
-    public function newCategory()
-    {
-        return view('web.page.news.new-category', [
-            'title' => 'Tin Tức - Mắt Kính Sài Gòn',
-            'type' => 'category'
-        ]);
-    }
-
-    /**
-     * Trang chi tiết tin tức
-     */
-    public function newDetail()
-    {
-        return view('web.page.news.news-detail', [
-            'title' => 'Chi Tiết Tin Tức - Mắt Kính Sài Gòn',
-            'type' => 'detail',
-        ]);
-    }
-
-    /**
-     * Trang giỏ hàng
-     */
-    public function shoppingCart()
-    {
-        return view('web.page.products.shopping-cart', [
-            'title' => 'Giỏ Hàng - Mắt Kính Sài Gòn'
-        ]);
-    }
 }
 

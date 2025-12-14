@@ -12,6 +12,8 @@ class Page extends Model
 
     const IMAGE = 'img/page/';
 
+    const IS_ACTIVE = 1;
+
 
     public function getImage() {
         return asset('img/page/'. $this->image);

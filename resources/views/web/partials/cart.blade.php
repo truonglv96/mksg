@@ -23,7 +23,7 @@
                 <span id="cart-total-price" class="font-bold text-red-600 text-xl">0 VNĐ</span>
             </div>
             <button
-                class="w-full bg-red-600 text-white py-3 rounded font-medium hover:bg-red-700 transition-colors">
+                class="w-full bg-red-600 text-white py-3 rounded font-medium hover:bg-red-700 transition-colors cart-checkout-btn">
                 Thanh Toán
             </button>
         </div>

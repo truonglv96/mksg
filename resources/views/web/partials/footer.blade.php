@@ -1,40 +1,59 @@
-<footer class="bg-gray-100 border-t pt-8 pb-4 text-sm text-gray-700">
-    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div>
-            <h4 class="font-bold mb-3 text-red-600">CHÍNH SÁCH & QUY ĐỊNH</h4>
-            <ul class="space-y-2">
-                <li><a href="#" class="hover:text-red-600">Giới Thiệu</a></li>
-                <li><a href="#" class="hover:text-red-600">Chính sách bảo hành</a></li>
-                <li><a href="#" class="hover:text-red-600">Tuyển dụng</a></li>
-                <li><a href="#" class="hover:text-red-600">Quy trình Đổi trả/Hoàn tiền</a></li>
+<footer class="bg-gray-100 border-t pt-6 md:pt-8 pb-4 text-sm text-gray-700">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div class="mb-4 md:mb-0">
+            <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">CHÍNH SÁCH & QUY ĐỊNH</h4>
+            <ul class="space-y-0.5">
+                @if(isset($policies) && $policies->count() > 0)
+                @foreach($policies as $index => $policy)
+                <li><a href="{{ $policy->link }}" class="font-bold text-gray-900 hover:text-red-600 text-sm block py-0.5">{{ $index }}: {{ $policy->name }}</a></li>
+                @endforeach
+                @endif
             </ul>
         </div>
-        <div>
-            <h4 class="font-bold mb-3 text-red-600">QUY ĐỊNH PHÁP LÝ</h4>
-            <p><strong>CÔNG TY:</strong> MẮT KÍNH SÀI GÒN .COM</p>
-            <p>Địa chỉ: 301B Điện Biên Phủ, P.Xuân Hòa, TP.HCM</p>
-            <p>Mã số DN: 0313364999</p>
-            <p>Email: info@matkinhsaigon.com</p>
-            <p>Hotline: 0989.266.079</p>
-            <img src="logo_da_thong_bao.png" alt="Đã thông báo Bộ Công Thương" class="mt-3 h-10">
-        </div>
-        <div>
-            <h4 class="font-bold mb-3 text-red-600">KẾT NỐI VỚI CHÚNG TÔI</h4>
-            <div class="flex space-x-3 text-2xl mb-4">
-                <a href="#" class="hover:text-red-600"><img src="icon_facebook.png" alt="Facebook" class="h-6"></a>
-                <a href="#" class="hover:text-red-600"><img src="icon_youtube.png" alt="Youtube" class="h-6"></a>
+        <div class="mb-4 md:mb-0">
+            <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">QUY ĐỊNH PHÁP LÝ</h4>
+            <div class="font-bold text-gray-900 text-sm leading-relaxed">
+                {!! $settings->legal_regulations !!}
             </div>
-            <h4 class="font-bold mb-3 text-red-600">THỜI GIAN LÀM VIỆC</h4>
-            <p>Thứ Hai - Thứ Bảy: 07:30 - 20:00</p>
-            <p>Ngày Lễ & CN: 09:00 - 20:00</p>
         </div>
-        <div>
-            <h4 class="font-bold mb-3 text-red-600">BẢN ĐỒ</h4>
-            <img src="map_screenshot.jpg" alt="Bản đồ" class="w-full h-32 object-cover rounded">
+        <div class="mb-4 md:mb-0">
+            <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">KẾT NỐI VỚI CHÚNG TÔI</h4>
+            <div class="flex space-x-3 mb-4 md:mb-4">
+                <a href="{{ $settings->facebook }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconFB() }}" alt="Facebook" class="h-7 md:h-6 w-auto"></a>
+                <a href="{{ $settings->youtube }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconYoutube() }}" alt="Youtube" class="h-7 md:h-6 w-auto"></a>
+                <a href="{{ $settings->zalo }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconZalo() }}" alt="Zalo" class="h-7 md:h-6 w-auto"></a>
+                <a href="{{ $settings->email }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconEmail() }}" alt="Email" class="h-7 md:h-6 w-auto"></a>
+            </div>
+            <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">THỜI GIAN LÀM VIỆC</h4>
+            <div class="flex gap-2 md:gap-3 items-start">
+                <div class="flex-shrink-0 pt-1">
+                    <img src="{{ $settings->getIconTime() }}" alt="Time" class="h-6 w-6 md:h-6">
+                </div>
+                <div class="font-bold text-gray-900 text-sm leading-relaxed flex-1">
+                    {!! $settings->work_time !!}
+                </div>
+            </div>
+        </div>
+        <div class="mb-4 md:mb-0">
+            <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">BẢN ĐỒ</h4>
+            <div class="w-full overflow-hidden rounded">
+                {!! $settings->map !!}
+            </div>
         </div>
     </div>
-    <div class="text-center mt-8 pt-4 border-t border-gray-300">
-        &copy; 2025 Mắt Kính Sài Gòn. All Rights Reserved.
+    <div class="mt-6 md:mt-8 pt-4 border-t border-gray-300">
+        <div class="bg-red-800 py-3 px-4">
+            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-white text-xs md:text-sm text-center md:text-left">
+                    {!! $settings->copyright !!}
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <img src="{{ asset('img/tmp/visa.png') }}" alt="VISA" class="h-6 md:h-8 w-auto">
+                    <img src="{{ asset('img/tmp/master_card.png') }}" alt="MasterCard" class="h-6 md:h-8 w-auto">
+                    <img src="{{ asset('img/tmp/american_express.png') }}" alt="American Express" class="h-6 md:h-8 w-auto">
+                    <img src="{{ asset('img/tmp/paypal.png') }}" alt="PayPal" class="h-6 md:h-8 w-auto">
+                </div>
+            </div>
+        </div>
     </div>
 </footer>
-
