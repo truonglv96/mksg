@@ -25,7 +25,7 @@
                     @if($hasChildren)
                         <li class="border-b">
                             <div class="p-3 flex justify-between items-center font-bold">
-                                <a href="{{ $category->alias ? route('product.category', $category->alias) : '#' }}" 
+                                <a href="{{ $category->alias ? url('/san-pham/' . $category->alias) : '#' }}" 
                                    class="category-text flex-1 hover:text-red-600 transition-colors">
                                     {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                                 </a>
@@ -45,9 +45,12 @@
                                     @endphp
                                     @if($hasGrandChildren)
                                         <li class="border-b border-gray-200">
-                                            <div class="p-2 flex justify-between items-center font-semibold">
-                                                <a href="{{ $child->alias ? route('product.category', $child->alias) : '#' }}" 
-                                                   class="child-text flex-1 hover:text-red-600 transition-colors">
+                                            <div class="p-2 flex justify-between items-center">
+                                                @php
+                                                    $childPath = $category->alias . '/' . $child->alias;
+                                                @endphp
+                                                <a href="{{ $child->alias ? url('/san-pham/' . $childPath) : '#' }}" 
+                                                   class="child-text flex-1 font-bold text-red-600 hover:text-red-700 transition-colors">
                                                     {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
                                                 </a>
                                                 <button class="toggle-child-btn p-1 hover:text-red-600 transition-colors" 
@@ -71,9 +74,12 @@
                                                     <li class="py-2 border-b border-gray-200">
                                                         <div class="grid grid-cols-5 gap-0 mb-2">
                                                             @foreach($itemsWithIcon as $grandChild)
+                                                                @php
+                                                                    $fullPath = $category->alias . '/' . $child->alias . '/' . $grandChild->alias;
+                                                                @endphp
                                                                 <button type="button" 
                                                                         aria-label="{{ $grandChild->name ?? $grandChild->title ?? 'Icon' }}"
-                                                                        onclick="window.location.href='{{ $grandChild->alias ? route('product.category', $grandChild->alias) : '#' }}'"
+                                                                        onclick="window.location.href='{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}'"
                                                                         class="w-10 h-10 rounded-md border border-gray-200 shadow-sm bg-cover bg-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 hover:-translate-y-0.5 hover:shadow-md flex-shrink-0"
                                                                         style="background-image: url('{{ $grandChild->getIconImages() }}'); background-size: cover; background-position: center; background-repeat: no-repeat; max-width: 40px; max-height: 40px;">
                                                                 </button>
@@ -84,8 +90,11 @@
                                                 
                                                 @if($itemsWithoutIcon->count() > 0)
                                                     @foreach($itemsWithoutIcon as $grandChild)
+                                                        @php
+                                                            $fullPath = $category->alias . '/' . $child->alias . '/' . $grandChild->alias;
+                                                        @endphp
                                                         <li class="py-2 border-b border-gray-200 last:border-b-0">
-                                                            <a href="{{ $grandChild->alias ? route('product.category', $grandChild->alias) : '#' }}" 
+                                                            <a href="{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}" 
                                                                class="block hover:text-red-600">
                                                                 {{ $grandChild->name ?? $grandChild->title ?? 'Item' }}
                                                             </a>
@@ -96,8 +105,11 @@
                                         </li>
                                     @else
                                         <li class="py-2 px-2 border-b border-gray-200 hover:bg-gray-200">
-                                            <a href="{{ $child->alias ? route('product.category', $child->alias) : '#' }}" 
-                                               class="block font-semibold">
+                                            @php
+                                                $childPath = $category->alias . '/' . $child->alias;
+                                            @endphp
+                                            <a href="{{ $child->alias ? url('/san-pham/' . $childPath) : '#' }}" 
+                                               class="block font-bold text-red-600 hover:text-red-700 transition-colors">
                                                 {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
                                             </a>
                                         </li>
@@ -107,7 +119,7 @@
                         </li>
                     @else
                         <li class="p-3 border-b hover:bg-gray-100">
-                            <a href="{{ $category->alias ? route('product.category', $category->alias) : '#' }}">
+                            <a href="{{ $category->alias ? route('product.category.path', ['segments' => $category->alias]) : '#' }}">
                                 {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                             </a>
                         </li>

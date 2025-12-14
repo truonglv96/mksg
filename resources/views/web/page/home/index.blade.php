@@ -1,6 +1,6 @@
 @extends('web.master')
 
-@section('title', 'Mắt Kính Sài Gòn - Trang chủ')
+@section('title', config('texts.page_title'))
 
 @section('content')
 <!-- Banner Slider Full Màn Hình -->
@@ -22,7 +22,7 @@
 
     <section class="mb-12">
         <div class="mb-6">
-            <h1 class="section-title text-gray-800 mb-2">Danh Mục Nổi Bật</h1>
+            <h1 class="section-title text-gray-800 mb-2">{{ config('texts.featured_categories') }}</h1>
             <div class="h-1 w-20" style="background-color: #ed1c24;"></div>
         </div>
 
@@ -31,26 +31,26 @@
             <div
                 class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
                 <div class="text-5xl mb-3">👓</div>
-                <h3 class="font-bold text-lg mb-2">GỌNG KÍNH</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
+                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
             </div>
             <div
                 class="bg-amber-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
                 <div class="text-5xl mb-3">🔵</div>
-                <h3 class="font-bold text-lg mb-2">TRÒNG KÍNH</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_lenses') }}</h3>
+                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
             </div>
             <div
                 class="bg-pink-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
                 <div class="text-5xl mb-3">🕶️</div>
-                <h3 class="font-bold text-lg mb-2">KÍNH MÁT</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_sunglasses') }}</h3>
+                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
             </div>
             <div
                 class="bg-cyan-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
                 <div class="text-5xl mb-3">🎁</div>
-                <h3 class="font-bold text-lg mb-2">KHUYẾN MÃI</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_promotion') }}</h3>
+                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
             </div>
         </div>
 
@@ -61,32 +61,32 @@
                     <div
                         class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">👓</div>
-                        <h3 class="font-bold text-lg mb-2">GỌNG KÍNH</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
+                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
                     <div
                         class="bg-amber-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🔵</div>
-                        <h3 class="font-bold text-lg mb-2">TRÒNG KÍNH</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_lenses') }}</h3>
+                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
                     <div
                         class="bg-pink-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🕶️</div>
-                        <h3 class="font-bold text-lg mb-2">KÍNH MÁT</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_sunglasses') }}</h3>
+                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
                     <div
                         class="bg-cyan-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🎁</div>
-                        <h3 class="font-bold text-lg mb-2">KHUYẾN MÃI</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">Xem Ngay</a>
+                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_promotion') }}</h3>
+                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
             </div>
@@ -96,7 +96,7 @@
     <section class="mb-12">
         <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="section-title text-gray-800 mb-2">Sản Phẩm Mới Nhất</h1>
+                <h1 class="section-title text-gray-800 mb-2">{{ config('texts.newest_products') }}</h1>
                 <div class="h-1 w-20" style="background-color: #ed1c24;"></div>
             </div>
             <div class="flex items-center space-x-6" id="product-tabs">
@@ -149,13 +149,13 @@
                                     @endif
                                 </div>
                                 <div class="p-4">
-                                    <a href="{{ $product->alias ? route('product.detail', ['alias' => $product->alias]) : '#' }}">
+                                    <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
                                         <h3 class="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.5rem] product-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $product->name }}</h3>
                                     </a>
                                     <div class="mb-3 text-right">
-                                        <p class="font-bold text-lg leading-tight" style="color: #ed1c24;">{{ number_format($priceSale, 0, ',', '.') }} VNĐ</p>
+                                        <p class="font-bold text-lg leading-tight" style="color: #ed1c24;">{{ number_format($priceSale, 0, ',', '.') }} {{ config('texts.currency') }}</p>
                                         @if($price > $priceSale)
-                                        <p class="text-xs text-gray-400 line-through mt-0.5">{{ number_format($price, 0, ',', '.') }} VNĐ</p>
+                                        <p class="text-xs text-gray-400 line-through mt-0.5">{{ number_format($price, 0, ',', '.') }} {{ config('texts.currency') }}</p>
                                         @endif
                                     </div>
                                     <div class="flex gap-2">
@@ -164,7 +164,7 @@
                                             style="background-color: #ed1c24;" 
                                             onmouseover="this.style.backgroundColor='#d0171f'" 
                                             onmouseout="this.style.backgroundColor='#ed1c24'">
-                                            Thêm vào giỏ hàng
+                                            {{ config('texts.add_to_cart') }}
                                         </button>
                                         <a href="{{ $product->alias ? url('/san-pham/' . $product->alias) : '#' }}"
                                             class="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-100 transition-colors duration-200">
@@ -186,7 +186,7 @@
                         @else
                         <div class="swiper-slide">
                             <div class="text-center py-8 text-gray-500">
-                                <p>Chưa có sản phẩm nào trong danh mục này</p>
+                                <p>{{ config('texts.no_products_in_category') }}</p>
                             </div>
                         </div>
                         @endif
@@ -201,7 +201,7 @@
     <section class="mb-12">
         <div class="mb-6">
             <div>
-                <h1 class="section-title text-gray-800 mb-2">Tin Tức Mới Nhất</h1>
+                <h1 class="section-title text-gray-800 mb-2">{{ config('texts.newest_news') }}</h1>
                 <div class="h-1 w-20" style="background-color: #ed1c24;"></div>
             </div>
         </div>

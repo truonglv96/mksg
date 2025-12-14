@@ -615,6 +615,10 @@
         }
         .option-pill {
             border: 1.5px solid transparent;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
         }
         .option-pill.active {
             border-color: #ed1c24;
@@ -1881,6 +1885,10 @@
         }
         .option-pill {
             border: 1.5px solid transparent;
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
         }
         .option-pill.active {
             border-color: #ed1c24;
@@ -3415,4 +3423,9 @@ h3 {
     line-height: 30px !important;
     font-family: 'Quicksand', sans-serif;
     text-transform: capitalize !important;
+}
+
+/* Global button color */
+button {
+    color: rgba(255, 255, 255, 1);
 }

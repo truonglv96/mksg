@@ -21,6 +21,12 @@ class MasterComposer
         // Lấy data trực tiếp (có thể bật cache sau khi setup xong)
         $data = $this->getData();
 
+        // Không share brands cho product-category view (để controller tự quản lý)
+        $viewName = $view->getName();
+        if (str_contains($viewName, 'product-category')) {
+            unset($data['brands']);
+        }
+
         // Share data với view
         $view->with($data);
     }

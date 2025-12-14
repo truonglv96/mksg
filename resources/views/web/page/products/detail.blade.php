@@ -8,58 +8,58 @@
         <!-- Breadcrumb -->
         <nav class="text-sm text-gray-500 flex items-center gap-1 mb-6 overflow-x-auto whitespace-nowrap"
             aria-label="Breadcrumb">
-            <a href="home.html" class="hover:text-red-600 flex items-center gap-1">
+            <a href="{{ route('home') }}" class="hover:text-red-600 flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5.5a0.5 0.5 0 01-0.5-0.5V15a1 1 0 00-1-1h-4a1 1 0 00-1 1v5.5a0.5 0.5 0 01-0.5 0.5H4a1 1 0 01-1-1V9.75z" />
                 </svg>
                 Trang chủ
             </a>
+            @if(isset($mainCategory) && $mainCategory)
             <span>/</span>
-            <a href="product-category.html" class="hover:text-red-600">Gọng kính</a>
+            <a href="{{ route('product.category.path', ['segments' => $mainCategory->alias]) }}" class="hover:text-red-600">{{ $mainCategory->name }}</a>
+            @endif
             <span>/</span>
-            <span class="text-gray-700 font-medium">Helen Keller H83026 C1</span>
+            <span class="text-gray-700 font-medium">{{ isset($product) ? $product->name : 'Sản phẩm' }}</span>
         </nav>
 
         <!-- Product Summary -->
-        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10">
+        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10" data-product-id="{{ $product->id }}">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10">
                 <!-- Gallery -->
                 <div>
+                    @php
+                        $mainImage = isset($productImages) && $productImages ? $productImages->first() : null;
+                        $mainImageUrl = $mainImage ? asset('img/product/' . $mainImage->image) : asset('img/product/no-image.png');
+                    @endphp
                     <button type="button" id="lightbox-trigger"
                         class="relative w-full h-[420px] lg:h-[520px] flex items-center justify-center bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                         aria-label="Phóng to hình sản phẩm">
                         <img id="main-product-image"
-                            src="https://matkinhsaigon.com.vn/img/product/1636552509_0_img.png"
-                            alt="Gọng kính Helen Keller H83026 C1"
+                            src="{{ $mainImageUrl }}"
+                            alt="{{ $product->name }}"
                             class="max-h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-110">
-                        <span
-                            class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 text-xs font-semibold rounded-full shadow">
-                            -15%
-                        </span>
+                        @if(isset($product) && $product->price_sale && $product->price && $product->price > $product->price_sale)
+                            @php
+                                $discount = round((($product->price - $product->price_sale) / $product->price) * 100);
+                            @endphp
+                            <span
+                                class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 text-xs font-semibold rounded-full shadow">
+                                -{{ $discount }}%
+                            </span>
+                        @endif
                     </button>
+                    @if(isset($productImages) && $productImages && $productImages->count() > 0)
                     <div class="flex gap-3 mt-4 overflow-x-auto pb-1">
-                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552509_1_img.png"
+                        @foreach($productImages as $image)
+                        <button type="button" data-image-src="{{ asset('img/product/' . $image->image) }}"
                             class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
-                            <img src="https://matkinhsaigon.com.vn/img/product/1636552509_1_img.png"
-                                alt="Helen Keller H83026 C1 - Góc chính" class="w-full h-full object-cover">
+                            <img src="{{ asset('img/product/' . $image->image) }}"
+                                alt="{{ $product->name }} - Hình {{ $loop->iteration }}" class="w-full h-full object-cover">
                         </button>
-                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
-                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
-                            <img src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
-                                alt="Helen Keller H83026 C1 - Góc nghiên" class="w-full h-full object-cover">
-                        </button>
-                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552510_3_img.png"
-                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
-                            <img src="https://matkinhsaigon.com.vn/img/product/1636552510_3_img.png"
-                                alt="Helen Keller H83026 C1 - Cận cảnh bản lề" class="w-full h-full object-cover">
-                        </button>
-                        <button type="button" data-image-src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
-                            class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
-                            <img src="https://matkinhsaigon.com.vn/img/product/1636552511_5_img.png"
-                                alt="Helen Keller H83026 C1 - Phụ kiện kèm theo" class="w-full h-full object-cover">
-                        </button>
+                        @endforeach
                     </div>
+                    @endif
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                         <div
                             class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
@@ -97,96 +97,114 @@
                 <!-- Product content -->
                 <div class="space-y-5">
                     <div class="space-y-2">
-                        <p id="product-brand" class="uppercase tracking-wide text-xs font-semibold text-red-600">Helen Keller</p>
+                        <!-- @if($brand)
+                        <p id="product-brand" class="uppercase tracking-wide text-xs font-semibold text-red-600">{{ $brand->name }}</p>
+                        @endif -->
                         <h1 id="product-name" class="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-                            Gọng Kính Helen Keller H83026 C1
+                            {{ $product->name }}
                         </h1>
                         <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                            <div class="flex items-center gap-1 text-yellow-500">
+                            <!-- <div class="flex items-center gap-1 text-yellow-500">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.034a1 1 0 00-1.175 0l-2.802 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.463a1 1 0 00.95-.69l1.068-3.292z" />
                                 </svg>
                                 4.8 (128 đánh giá)
+                            </div> -->
+                            @if($product->code)
+                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <p>Mã SP: <span class="font-medium text-gray-700">{{ $product->code }}</span></p>
+                            @endif
+                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <p>Thương Hiệu: <span class="font-medium text-green-600">
+                                @if($brand && $brand->name)
+                                    {{ $brand->name }}
+                                @elseif($product->brand && $product->brand->name)
+                                    {{ $product->brand->name }}
+                                @endif
+                            </span></p>
+                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+                            <div class="social-sharing flex items-center">
+                                <script async defer crossorigin="anonymous"
+                                    src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v15.0"
+                                    nonce="IrDKTUDJ"></script>
+                                <div class="fb-share-button"
+                                    data-href="{{ route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias]) }}"
+                                    data-layout="button_count" data-size="large">
+                                    <a target="_blank"
+                                        href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
+                                        class="fb-xfbml-parse-ignore">Chia sẻ</a>
+                                </div>
                             </div>
-                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
-                            <p>Mã SP: <span class="font-medium text-gray-700">H83026-C1</span></p>
-                            <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
-                            <p>Tình trạng: <span class="font-medium text-green-600">Còn hàng</span></p>
                         </div>
                     </div>
 
                     <div class="price-card bg-red-50 border border-red-100 rounded-2xl p-4 sm:p-5 space-y-2">
                         <div class="flex items-center gap-2">
-                            <span class="price-current text-3xl font-bold text-red-600" data-product-price>1.105.000 VNĐ</span>
-                            <span class="price-old text-sm text-gray-500 line-through">1.300.000 VNĐ</span>
-                            <span class="price-saving text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full">Tiết kiệm 15%</span>
+                            @php
+                                $currentPrice = $product->price_sale ?? $product->price ?? 0;
+                                $oldPrice = $product->price ?? 0;
+                                $hasDiscount = $product->price_sale && $product->price && $product->price > $product->price_sale;
+                            @endphp
+                            <span class="price-current text-3xl font-bold text-red-600" data-product-price data-base-price="{{ $currentPrice }}">{{ number_format($currentPrice, 0, ',', '.') }} VNĐ</span>
+                            @if($hasDiscount)
+                            <span class="price-old text-sm text-gray-500 line-through">{{ number_format($oldPrice, 0, ',', '.') }} VNĐ</span>
+                            @php
+                                $savingPercent = round((($oldPrice - $currentPrice) / $oldPrice) * 100);
+                            @endphp
+                            <span class="price-saving text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full">Tiết kiệm {{ $savingPercent }}%</span>
+                            @endif
                         </div>
                     </div>
 
                     <div class="space-y-4">
+                        @if(isset($productColors) && $productColors && $productColors->count() > 0)
                         <div>
                             <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Màu gọng</p>
                             <div class="flex flex-wrap gap-3">
-                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 active"
-                                    data-color="Đen bóng" style="background: linear-gradient(135deg, #0f172a 50%, #f8fafc 50%);" aria-label="Đen bóng" aria-pressed="true">
+                                @foreach($productColors as $index => $color)
+                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 {{ $index === 0 ? 'active' : '' }}"
+                                    data-color="{{ $color->name }}" 
+                                    data-color-id="{{ $color->id }}"
+                                    @if($color->url_img)
+                                    style="background-image: url('{{ asset('img/color/' . $color->url_img) }}');"
+                                    @endif
+                                    aria-label="{{ $color->name }}" 
+                                    aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
                                 </button>
-                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    data-color="Vàng kim nhã" style="background: linear-gradient(135deg, #facc15 50%, #fde68a 50%);" aria-label="Vàng kim nhã" aria-pressed="false">
-                                </button>
-                                <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    data-color="Bạc ánh gương" style="background: linear-gradient(135deg, #e5e7eb 50%, #9ca3af 50%);" aria-label="Bạc ánh gương" aria-pressed="false">
-                                </button>
+                                @endforeach
                             </div>
-                            <p id="selected-color" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">Đen bóng</span></p>
+                            <p id="selected-color" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">{{ $productColors->first()->name ?? '' }}</span></p>
                         </div>
+                        @endif
 
+                        @if(isset($discountedCombos) && $discountedCombos && $discountedCombos->count() > 0)
                         <div>
                             <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Chọn gói tròng kính</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition active"
-                                    data-option="1.56 chống UV" aria-pressed="true">
-                                    <p class="font-semibold text-gray-800">Tròng 1.56 Chống UV</p>
-                                    <p class="text-xs text-gray-500 mt-1">Bảo vệ mắt cơ bản, phù hợp sử dụng hàng ngày</p>
+                                @foreach($discountedCombos as $index => $combo)
+                                <button type="button" 
+                                    class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition {{ $index === 0 ? 'active border-red-400 bg-red-50' : '' }}"
+                                    data-option="{{ $combo->name }}" 
+                                    data-combo-id="{{ $combo->id }}"
+                                    data-option-price="{{ $combo->price ?? 0 }}"
+                                    aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
+                                    <p class="font-semibold text-gray-800">{{ $combo->name }}</p>
+                                    @if($combo->description)
+                                    <p class="text-xs text-gray-500 mt-1">{{ $combo->description }}</p>
+                                    @endif
+                                    @if($combo->price && $combo->price > 0)
+                                    <p class="text-xs font-semibold text-red-600 mt-1">+{{ number_format($combo->price, 0, ',', '.') }} VNĐ</p>
+                                    @endif
                                 </button>
-                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
-                                    data-option="1.56 chống ánh sáng xanh" aria-pressed="false">
-                                    <p class="font-semibold text-gray-800">Tròng 1.56 Chống Ánh Sáng Xanh</p>
-                                    <p class="text-xs text-gray-500 mt-1">Giảm mỏi mắt khi dùng máy tính, điện thoại</p>
-                                </button>
-                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
-                                    data-option="1.60 siêu mỏng đổi màu" aria-pressed="false">
-                                    <p class="font-semibold text-gray-800">Tròng 1.60 Siêu Mỏng Đổi Màu</p>
-                                    <p class="text-xs text-gray-500 mt-1">Mỏng nhẹ, chuyển màu nhanh khi ra nắng</p>
-                                </button>
-                                <button type="button" class="option-pill rounded-xl px-4 py-3 text-left bg-gray-50 hover:border-red-400 hover:bg-red-50 transition"
-                                    data-option="1.67 chiết suất cao smartlife" aria-pressed="false">
-                                    <p class="font-semibold text-gray-800">Tròng 1.67 ZEISS SmartLife</p>
-                                    <p class="text-xs text-gray-500 mt-1">Công nghệ mới nhất, bảo vệ tối ưu, bảo hành 24 tháng</p>
-                                </button>
+                                @endforeach
                             </div>
-                            <p id="selected-option" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">Tròng 1.56 Chống UV</span></p>
+                            <p id="selected-option" class="mt-2 text-xs text-gray-500">
+                                Đã chọn: <span class="font-medium text-gray-700" id="selected-options-list">{{ $discountedCombos->first()->name ?? '' }}</span>
+                            </p>
                         </div>
+                        @endif
                     </div>
-
-                    <ul class="benefits-list space-y-2 text-sm text-gray-600">
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1 text-red-500">✔</span>
-                            Thiết kế mắt mèo thanh lịch, phù hợp gương mặt trái xoan, tròn và hình trái tim.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1 text-red-500">✔</span>
-                            Chất liệu hợp kim siêu nhẹ kết hợp đệm mũi silicon êm ái, đeo lâu không đau.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1 text-red-500">✔</span>
-                            Bản lề lò xo linh hoạt, hạn chế gãy gọng, giữ form chuẩn trong quá trình sử dụng.
-                        </li>
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1 text-red-500">✔</span>
-                            Tặng kèm hộp + khăn lau chính hãng Helen Keller.
-                        </li>
-                    </ul>
 
                     <div class="cta-buttons flex flex-col sm:flex-row gap-3">
                         <button
@@ -194,7 +212,7 @@
                             Thêm vào giỏ hàng
                         </button>
                         <button
-                            class="flex-1 border border-red-600 text-red-600 py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-50 transition">
+                            class="flex-1 border border-red-600 text-red-600 py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-50 transition buy-now-btn">
                             Mua ngay
                         </button>
                     </div>
@@ -269,108 +287,87 @@
         <section class="product-tabs bg-white border border-gray-100 rounded-2xl shadow-sm mb-10">
             <div class="flex items-center gap-6 px-4 sm:px-6 border-b overflow-x-auto">
                 <button class="tab-button active py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-description">Mô tả sản phẩm</button>
+                    data-tab-target="tab-description">{{ $content->name ?? 'Mô tả sản phẩm' }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-specs">Thông số kỹ thuật</button>
+                    data-tab-target="tab-specs">{{ $tech->name ?? 'Thông số kỹ thuật' }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-services">Dịch vụ &amp; bảo hành</button>
+                    data-tab-target="tab-services">{{ $service->name ?? 'Dịch vụ &amp; bảo hành' }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-faq">Câu hỏi thường gặp</button>
+                    data-tab-target="tab-faq">{{ $tutorial->name ?? 'Câu hỏi thường gặp' }}</button>
+                <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-address">{{ $address_sale->name ?? 'Địa chỉ bán hàng' }}</button>
+                <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
+                    data-tab-target="tab-time">{{ $open_time->name ?? 'Giờ làm việc' }}</button>
             </div>
             <div class="p-6 space-y-6">
                 <div id="tab-description" class="tab-panel active space-y-4 text-sm leading-relaxed text-gray-700">
-                    <p><strong>Helen Keller H83026 C1</strong> mang ngôn ngữ thiết kế mắt mèo thanh lịch, bo cong mềm mại giúp
-                        tôn lên những đường nét nữ tính. Thân gọng hợp kim Titanium phủ sơn tĩnh điện cao cấp giúp bề mặt
-                        giữ màu lâu, chống trầy xước và chống ăn mòn tốt hơn.</p>
-                    <p>Phần ve mũi sử dụng đệm silicon trong suốt, bám nhẹ, hạn chế trượt. Bản lề lò xo linh hoạt giúp mở rộng
-                        tối đa, ôm sát mọi form mặt mà không gây khó chịu. Đây là lựa chọn tối ưu cho dân văn phòng,
-                        doanh nhân và những ai tìm kiếm chiếc kính vừa tinh tế khi đi làm vừa nổi bật khi đi chơi.</p>
-                    <ul class="list-disc pl-5 space-y-2">
-                        <li>Kích thước chuẩn châu Á, dễ dàng cho việc lắp tròng độ hoặc tròng không độ.</li>
-                        <li>Tương thích với mọi loại tròng: cận, viễn, loạn, lọc ánh sáng xanh, đổi màu.</li>
-                        <li>Phụ kiện chính hãng đi kèm: hộp kính Helen Keller, khăn lau microfiber, phiếu bảo hành.</li>
-                    </ul>
+                    @if(isset($content) && isset($content->text) && $content->text)
+                        {!! $content->text !!}
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu mô tả sản phẩm.</p>
+                        </div>
+                    @endif
                 </div>
 
                 <div id="tab-specs" class="tab-panel">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700">
-                        <div>
-                            <h4 class="font-semibold text-gray-800 mb-2 uppercase">Thông số chi tiết</h4>
-                            <dl class="space-y-2">
-                                <div class="flex justify-between">
-                                    <dt>Chiều rộng tròng (Lens Width)</dt>
-                                    <dd class="font-medium text-gray-900">52 mm</dd>
-                                </div>
-                                <div class="flex justify-between">
-                                    <dt>Cầu mũi (Bridge)</dt>
-                                    <dd class="font-medium text-gray-900">17 mm</dd>
-                                </div>
-                                <div class="flex justify-between">
-                                    <dt>Chiều dài càng (Temple)</dt>
-                                    <dd class="font-medium text-gray-900">140 mm</dd>
-                                </div>
-                                <div class="flex justify-between">
-                                    <dt>Chất liệu gọng</dt>
-                                    <dd class="font-medium text-gray-900">Hợp kim Titanium phủ sơn</dd>
-                                </div>
-                                <div class="flex justify-between">
-                                    <dt>Trọng lượng</dt>
-                                    <dd class="font-medium text-gray-900">~18 gram (không tròng)</dd>
-                                </div>
-                            </dl>
+                    @if(isset($tech) && isset($tech->text) && $tech->text)
+                        <div class="text-sm text-gray-700">
+                            {!! $tech->text !!}
                         </div>
-                        <div>
-                            <h4 class="font-semibold text-gray-800 mb-2 uppercase">Phụ kiện &amp; bảo hành</h4>
-                            <ul class="space-y-2">
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-0.5">•</span>
-                                    Hộp kính Helen Keller chính hãng, giấy bảo hành 12 tháng.
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-0.5">•</span>
-                                    Khăn lau microfiber, lọ vệ sinh kính (áp dụng đơn hàng online).
-                                </li>
-                                <li class="flex items-start gap-2">
-                                    <span class="text-red-500 mt-0.5">•</span>
-                                    Thẻ ưu đãi giảm 10% cho lần mua tròng kính kế tiếp.
-                                </li>
-                            </ul>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu thông số kỹ thuật.</p>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 <div id="tab-services" class="tab-panel">
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm text-gray-700">
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🔧 Điều chỉnh trọn đời</h4>
-                            <p>Miễn phí căn chỉnh form, thay ốc, vệ sinh, chăm sóc kính tại mọi showroom của Mắt Kính Sài Gòn.</p>
+                    @if(isset($service) && isset($service->text) && $service->text)
+                        <div class="text-sm text-gray-700">
+                            {!! $service->text !!}
                         </div>
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🛡️ Bảo hành chính hãng</h4>
-                            <p>Bảo hành 12 tháng đối với gọng, hỗ trợ 50% phí thay mới nếu gãy do vô tình trong 3 tháng đầu.</p>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu dịch vụ &amp; bảo hành.</p>
                         </div>
-                        <div class="p-4 border border-gray-100 rounded-xl bg-gray-50">
-                            <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">🎯 Chăm sóc sau bán</h4>
-                            <p>Nhắn tin nhắc vệ sinh kính định kỳ, tư vấn nâng cấp tròng miễn phí theo độ cận thay đổi.</p>
-                        </div>
-                    </div>
+                    @endif
                 </div>
 
                 <div id="tab-faq" class="tab-panel">
-                    <div class="space-y-4 text-sm text-gray-700">
-                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
-                            <summary class="font-semibold text-gray-800 cursor-pointer">Có được thử kính online không?</summary>
-                            <p class="mt-2">Bạn có thể đặt lịch tư vấn video call với chuyên viên. Chúng tôi sẽ đo gương mặt và gợi ý kích thước phù hợp, sau đó gửi ảnh phối kính trực tiếp cho bạn.</p>
-                        </details>
-                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
-                            <summary class="font-semibold text-gray-800 cursor-pointer">Nếu kính không hợp thì sao?</summary>
-                            <p class="mt-2">Trong vòng 7 ngày, bạn được đổi sản phẩm khác hoặc hoàn lại 100% tiền gọng (tròng kính tùy chính sách từng loại).</p>
-                        </details>
-                        <details class="border border-gray-100 rounded-xl px-4 py-3 bg-gray-50">
-                            <summary class="font-semibold text-gray-800 cursor-pointer">Có hỗ trợ đo mắt miễn phí không?</summary>
-                            <p class="mt-2">Có. Bạn chỉ cần đặt lịch trước qua hotline 0888 368 889 để tránh phải chờ đợi. Đo mắt hoàn toàn miễn phí, kể cả khi bạn chưa mua hàng ngay.</p>
-                        </details>
-                    </div>
+                    @if(isset($tutorial) && isset($tutorial->text) && $tutorial->text)
+                        <div class="text-sm text-gray-700">
+                            {!! $tutorial->text !!}
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu câu hỏi thường gặp.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <div id="tab-address" class="tab-panel">
+                    @if(isset($address_sale) && isset($address_sale->text) && $address_sale->text)
+                        <div class="text-sm text-gray-700">
+                            {!! $address_sale->text !!}
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu địa chỉ bán hàng.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <div id="tab-time" class="tab-panel">
+                    @if(isset($open_time) && isset($open_time->text) && $open_time->text)
+                        <div class="text-sm text-gray-700">
+                            {!! $open_time->text !!}
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500">
+                            <p>Không có dữ liệu giờ làm việc.</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -381,12 +378,24 @@
                 <div class="max-w-xl">
                     <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">Trải nghiệm trực tiếp tại showroom Mắt Kính Sài Gòn</h2>
                     <p class="text-sm text-gray-600 mb-4">Hệ thống cửa hàng phủ khắp TP.HCM, phục vụ đo mắt chuẩn quốc tế, lắp kính lấy nhanh và chăm sóc sau bán tận tâm.</p>
-                    <ul class="space-y-3 text-sm text-gray-700">
+                    @if(isset($address_sale) && isset($address_sale->text) && $address_sale->text)
+                        <div class="text-sm text-gray-700 mb-4">
+                            {!! $address_sale->text !!}
+                        </div>
+                    @else
+                    <ul class="space-y-3 text-sm text-gray-700 font-sans">
                         <li><strong>Showroom 1:</strong> 301B Điện Biên Phủ, P. Xuân Hòa, TP.HCM</li>
                         <li><strong>Showroom 2:</strong> 245C Xô Viết Nghệ Tĩnh, Phường Gia Định, TP.HCM</li>
                         <li><strong>Showroom 3:</strong> 90 Nguyễn Hữu Thọ, Phường Bà Rịa, TP.HCM</li>
-                        <li><strong>Giờ làm việc:</strong> Thứ 2 - Thứ 7: 08h00 - 20h30 | CN &amp; Lễ: 08h30 - 20h00</li>
                     </ul>
+                    @endif
+                    @if(isset($open_time) && isset($open_time->text) && $open_time->text)
+                        <div class="text-sm text-gray-700 mt-4">
+                            {!! $open_time->text !!}
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-700 mt-4"><strong>Giờ làm việc:</strong> Thứ 2 - Thứ 7: 08h00 - 20h30 | CN &amp; Lễ: 08h30 - 20h00</p>
+                    @endif
                 </div>
                 <div class="flex-1 w-full">
                     <div class="consult-form-card h-full">
@@ -442,6 +451,7 @@
         </section>
 
         <!-- Related products -->
+        @if(isset($relatedProducts) && $relatedProducts && $relatedProducts->count() > 0)
         <section class="mb-12">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl md:text-2xl font-bold text-gray-900">Sản phẩm liên quan</h2>
@@ -449,217 +459,77 @@
             </div>
             <div class="swiper-container related-swiper">
                 <div class="swiper-wrapper">
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746522921-Trong_Kinh_Essilor_TransitionsGenS_HD_Graphite_Green_1.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S Graphite Green"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S Graphite Green - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                                <span
-                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">Mới</span>
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor Transitions Gen S Graphite Green</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">2.990.000 VNĐ</span>
-                                    <span class="text-xs text-gray-400 line-through block">3.100.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746521856-Trong_Kinh_Essilor_TransitionsGenS_HD_1.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                                <span
-                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">-6%</span>
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor Transitions Gen S Chống Ánh Sáng Xanh</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">1.890.000 VNĐ</span>
-                                    <span class="text-xs text-gray-400 line-through block">2.000.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
+                    @foreach($relatedProducts as $relatedProduct)
+                        @php
+                            $relatedImages = \App\Models\ProductImage::getTwoImageCategoryProduct($relatedProduct->id);
+                            $mainImage = $relatedImages->first();
+                            $hoverImage = $relatedImages->count() > 1 ? $relatedImages->get(1) : $mainImage;
+                            $mainImageUrl = $mainImage ? asset('img/product/' . $mainImage->image) : asset('img/product/no-image.png');
+                            $hoverImageUrl = $hoverImage ? asset('img/product/' . $hoverImage->image) : $mainImageUrl;
+                            $relatedBrand = $relatedProduct->brand_id ? \App\Models\Brand::find($relatedProduct->brand_id) : null;
+                            $relatedPrice = $relatedProduct->price_sale ?? $relatedProduct->price ?? 0;
+                            $relatedOldPrice = $relatedProduct->price ?? 0;
+                            $hasRelatedDiscount = $relatedProduct->price_sale && $relatedProduct->price && $relatedProduct->price > $relatedProduct->price_sale;
+                        @endphp
+                        <div class="swiper-slide group">
+                            <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
+                                <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}">
+                                    <div class="relative overflow-hidden">
+                                        <img src="{{ $mainImageUrl }}"
+                                            alt="{{ $relatedProduct->name }}"
+                                            class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                        @if($hoverImage && $hoverImage->id !== $mainImage->id)
+                                        <img src="{{ $hoverImageUrl }}"
+                                            alt="{{ $relatedProduct->name }} - Hover"
+                                            class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                        @endif
+                                        @if($hasRelatedDiscount)
+                                            @php
+                                                $relatedDiscount = round((($relatedOldPrice - $relatedPrice) / $relatedOldPrice) * 100);
+                                            @endphp
+                                            <span class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">-{{ $relatedDiscount }}%</span>
+                                        @endif
+                                    </div>
+                                </a>
+                                <div class="p-4 space-y-2">
+                                    @if($relatedBrand)
+                                    <p class="product-brand text-xs uppercase text-gray-500 font-semibold">{{ $relatedBrand->name }}</p>
+                                    @endif
+                                    <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">
+                                        <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}" class="hover:text-red-600">
+                                            {{ $relatedProduct->name }}
+                                        </a>
+                                    </h3>
+                                    <div class="text-right space-y-1">
+                                        <span class="text-red-600 font-bold text-base">{{ number_format($relatedPrice, 0, ',', '.') }} VNĐ</span>
+                                        @if($hasRelatedDiscount)
+                                        <span class="text-xs text-gray-400 line-through block">{{ number_format($relatedOldPrice, 0, ',', '.') }} VNĐ</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button
+                                            class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn"
+                                            data-product-id="{{ $relatedProduct->id }}"
+                                            data-product-name="{{ $relatedProduct->name }}"
+                                            data-product-price="{{ $relatedPrice }}">Thêm vào giỏ</button>
+                                        <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}"
+                                            class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746346945-Trong_Kinh_Essilor_TransitionsGenS_4.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S 1.67"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
-                                    alt="Tròng Kính Essilor Transitions Gen S 1.67 - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Essilor</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Essilor 1.67 Chống Bể Polycarbonate</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">2.490.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1741850921-Đổi_Màu_HoGa_161_Fashion_Khói_1.jpg"
-                                    alt="Tròng Kính Đổi Màu 1.61 Fashion"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1746522073-Trong_Kinh_Essilor_TransitionsGenS_HD_2.jpg"
-                                    alt="Tròng Kính Đổi Màu 1.61 Fashion - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">HoGa</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Tròng Kính Đổi Màu HoGa 1.61 Fashion Khói</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">1.450.000 VNĐ</span>
-                                    <span class="text-xs text-gray-400 line-through block">1.650.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1742799301-gong-kinh-helen-keller-h83026-c2p-1.jpg"
-                                    alt="Gọng Kính Helen Keller H83026 C2P"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1742799302-gong-kinh-helen-keller-h83026-c2p-2.jpg"
-                                    alt="Gọng Kính Helen Keller H83026 C2P - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                                <span
-                                    class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">Hot</span>
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Helen Keller</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Gọng Kính Helen Keller H83026 C2P</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">1.300.000 VNĐ</span>
-                                    <span class="text-xs text-gray-400 line-through block">1.450.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="swiper-slide group">
-                        <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                            <div class="relative overflow-hidden">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1742799333-gong-kinh-helen-keller-h82611-c1-1.jpg"
-                                    alt="Gọng Kính Helen Keller H82611 C1"
-                                    class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                <img src="https://matkinhsaigon.com.vn/img/product/1742799334-gong-kinh-helen-keller-h82611-c1-2.jpg"
-                                    alt="Gọng Kính Helen Keller H82611 C1 - Hover"
-                                    class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                            </div>
-                            <div class="p-4 space-y-2">
-                                <p class="product-brand text-xs uppercase text-gray-500 font-semibold">Helen Keller</p>
-                                <h3 class="text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.5rem]">Gọng Kính Helen Keller H82611 C1</h3>
-                                <div class="text-right space-y-1">
-                                    <span class="text-red-600 font-bold text-base">1.250.000 VNĐ</span>
-                                    <span class="text-xs text-gray-400 line-through block">1.400.000 VNĐ</span>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn">Thêm vào giỏ</button>
-                                    <button
-                                        class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-                <!-- <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div> -->
             </div>
         </section>
+        @endif
 
     </main>
 

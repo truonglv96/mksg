@@ -13,4 +13,20 @@ class Bill extends Model
 
     protected $primaryKey = 'bill_id';
     
+    public $incrementing = false;
+    
+    protected $fillable = [
+        'bill_id',
+        'product_id',
+        'category_name',
+        'sale_off',
+        'price',
+        'qty',
+        'color_id'
+    ];
+
+    public function product()
+    {
+        return $this->belongsTo(Products::class, 'product_id', 'id');
+    }
 }

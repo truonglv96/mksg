@@ -174,4 +174,23 @@ class Category extends Model
     public static function getParent() {
         return static::where('parent_id', '=', 0)->where('type', 'product')->orderBy('weight', 'asc')->get();
     }
+
+    /**
+     * Lấy full path từ root đến category hiện tại
+     */
+    public function getFullPath() {
+        $path = [$this->alias];
+        $current = Category::find($this->parent_id);
+        
+        while ($current && $current->parent_id > 0) {
+            array_unshift($path, $current->alias);
+            $current = Category::find($current->parent_id);
+        }
+        
+        if ($current && $current->parent_id == 0) {
+            array_unshift($path, $current->alias);
+        }
+        
+        return implode('/', $path);
+    }
 }

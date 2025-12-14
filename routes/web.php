@@ -11,7 +11,14 @@ Route::get('/', [IndexController::class, 'index'])->name('home');
 // Sản phẩm
 Route::prefix('san-pham')->name('product.')->group(function () {
     Route::get('/', [ProductController::class, 'category'])->name('category');
-    Route::get('/{alias}', [ProductController::class, 'detail'])->name('detail');
+    // Product detail với category path: /san-pham/{categoryPath}/{productAlias}
+    Route::get('/{categoryPath}/{productAlias}', [ProductController::class, 'detail'])
+        ->where('categoryPath', '[^/]+(/[^/]+)*')
+        ->name('detail');
+    // Route cho nested categories (phải đặt sau route detail)
+    Route::get('/{segments}', [ProductController::class, 'categoryPath'])
+        ->where('segments', '[^/]+(/[^/]+)*')
+        ->name('category.path');
 });
 
 // Tin tức
@@ -22,3 +29,4 @@ Route::prefix('tin-tuc')->name('new.')->group(function () {
 
 // Giỏ hàng
 Route::get('/gio-hang', [ProductController::class, 'shoppingCart'])->name('cart');
+Route::post('/checkout', [ProductController::class, 'checkout'])->name('checkout');

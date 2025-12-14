@@ -231,7 +231,11 @@
             let cart = [];
 
             const buildCartItemKey = (item) => {
-                return [item.name, item.color || '', item.lens || ''].join('||');
+                // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lens hoặc lensLabel
+                const optionsKey = item.selectedOptions && item.selectedOptions.length > 0 
+                    ? item.selectedOptions.sort().join(',') 
+                    : (item.lens || item.lensLabel || '');
+                return [item.name, item.color || '', optionsKey].join('||');
             };
 
             // Load giỏ hàng từ localStorage
@@ -334,10 +338,23 @@
                     } else {
                         cartItems.innerHTML = cart.map(item => {
                             const itemKey = encodeURIComponent(buildCartItemKey(item));
-                            const optionDetails = [
-                                item.color ? `Màu: ${item.color}` : null,
-                                item.lensLabel ? `Gói tròng: ${item.lensLabel}` : (item.lens ? `Gói tròng: ${item.lens}` : null)
-                            ].filter(Boolean).join(' • ');
+                            
+                            // Xây dựng option details - ưu tiên selectedOptions (multi-select), sau đó fallback về lensLabel
+                            const optionParts = [];
+                            if (item.color) {
+                                optionParts.push(`Màu: ${item.color}`);
+                            }
+                            
+                            // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lensLabel hoặc lens
+                            if (item.selectedOptions && item.selectedOptions.length > 0) {
+                                optionParts.push(`Gói tròng: ${item.selectedOptions.join(', ')}`);
+                            } else if (item.lensLabel) {
+                                optionParts.push(`Gói tròng: ${item.lensLabel}`);
+                            } else if (item.lens) {
+                                optionParts.push(`Gói tròng: ${item.lens}`);
+                            }
+                            
+                            const optionDetails = optionParts.join(' • ');
 
                             return `
                                 <div class="cart-item flex gap-3 mb-4 pb-4 border-b" data-item-key="${itemKey}">
@@ -416,6 +433,22 @@
                 cartOverlay.addEventListener('click', closeCartFunc);
             }
 
+            // Xử lý button "Thanh Toán" trong cart dropdown
+            document.addEventListener('click', function (e) {
+                const checkoutBtn = e.target.closest('.cart-checkout-btn');
+                if (!checkoutBtn) {
+                    return;
+                }
+
+                e.preventDefault();
+                
+                // Đóng cart dropdown
+                closeCartFunc();
+                
+                // Chuyển đến trang giỏ hàng
+                window.location.href = '/gio-hang';
+            });
+
             // Event delegation cho các buttons trong giỏ hàng
             const cartItemsEl = document.getElementById('cart-items');
             if (cartItemsEl) {
@@ -458,17 +491,31 @@
                     const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
                     const image = document.getElementById('main-product-image')?.src || '';
                     const color = productSummary.dataset.selectedColor || productSummary.querySelector('.color-chip.active')?.dataset.color || '';
-                    const lens = productSummary.dataset.selectedOption || productSummary.querySelector('.option-pill.active')?.dataset.option || '';
-                    const lensLabel = productSummary.dataset.selectedOptionLabel || productSummary.querySelector('.option-pill.active .font-semibold')?.textContent.trim() || '';
+                    
+                    // Lấy tất cả các option đã chọn (multi-select)
+                    const activeOptionPills = Array.from(productSummary.querySelectorAll('.option-pill.active'));
+                    const selectedOptions = activeOptionPills.map(pill => {
+                        return pill.querySelector('.font-semibold')?.textContent.trim() || pill.dataset.option || '';
+                    }).filter(Boolean);
+                    
+                    // Giữ lại để tương thích với code cũ
+                    const lens = selectedOptions.length > 0 ? selectedOptions[0] : '';
+                    const lensLabel = selectedOptions.join(', '); // Tất cả các option đã chọn
+                    
+                    // Lấy product ID
+                    const productId = productSummary.dataset.productId || productSummary.getAttribute('data-product-id') || '';
 
                     return {
+                        id: parseInt(productId) || 0,
+                        productId: parseInt(productId) || 0,
                         name,
                         brand,
                         price,
                         image,
                         color,
                         lens,
-                        lensLabel
+                        lensLabel,
+                        selectedOptions: selectedOptions // Mảng tất cả các option đã chọn
                     };
                 }
 
@@ -568,6 +615,31 @@
 
                 if (productData && productData.name && productData.price && productData.image) {
                     addToCart(productData);
+                } else {
+                    console.warn('Không thể lấy thông tin sản phẩm:', productData);
+                }
+            });
+
+            // Xử lý button "Mua ngay" - thêm vào giỏ và chuyển đến trang giỏ hàng
+            document.addEventListener('click', function (e) {
+                const buyNowButton = e.target.closest('.buy-now-btn');
+                if (!buyNowButton) {
+                    return;
+                }
+
+                e.preventDefault();
+
+                // Lấy thông tin sản phẩm từ button
+                const productData = getProductDataFromButton(buyNowButton);
+
+                if (productData && productData.name && productData.price && productData.image) {
+                    // Thêm sản phẩm vào giỏ hàng
+                    addToCart(productData);
+                    
+                    // Chuyển đến trang giỏ hàng sau khi thêm
+                    setTimeout(() => {
+                        window.location.href = '/gio-hang';
+                    }, 300); // Delay nhỏ để đảm bảo cart đã được lưu
                 } else {
                     console.warn('Không thể lấy thông tin sản phẩm:', productData);
                 }
@@ -725,18 +797,59 @@
                     productSummary.dataset.selectedColor = color;
                 };
 
-                const setSelectedOption = (pill) => {
-                    optionPills.forEach(btn => {
-                        btn.classList.toggle('active', btn === pill);
-                        btn.setAttribute('aria-pressed', btn === pill ? 'true' : 'false');
+                // Option pills - multi-select với tính giá tổng
+                const priceElement = productSummary.querySelector('[data-product-price]');
+                const selectedOptionsLabel = document.getElementById('selected-options-list');
+                const basePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
+
+                // Tính tổng giá của tất cả các option đã chọn
+                const calculateTotalPrice = () => {
+                    let totalOptionPrice = 0;
+                    const selectedOptions = [];
+                    
+                    optionPills.forEach(pill => {
+                        if (pill.classList.contains('active')) {
+                            const optionPrice = parseFloat(pill.dataset.optionPrice) || 0;
+                            totalOptionPrice += optionPrice;
+                            const optionTitle = pill.querySelector('.font-semibold')?.textContent.trim() || pill.dataset.option;
+                            selectedOptions.push(optionTitle);
+                        }
                     });
-                    const option = pill?.dataset.option || '';
-                    const optionTitle = pill?.querySelector('.font-semibold')?.textContent.trim() || option;
-                    if (selectedOptionLabel) {
-                        selectedOptionLabel.textContent = optionTitle;
+                    
+                    return { totalOptionPrice, selectedOptions };
+                };
+
+                const updatePriceAndLabel = () => {
+                    const { totalOptionPrice, selectedOptions } = calculateTotalPrice();
+                    const totalPrice = basePrice + totalOptionPrice;
+                    
+                    if (priceElement) {
+                        priceElement.textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + ' VNĐ';
                     }
-                    productSummary.dataset.selectedOption = option;
-                    productSummary.dataset.selectedOptionLabel = optionTitle;
+                    
+                    if (selectedOptionsLabel) {
+                        if (selectedOptions.length > 0) {
+                            selectedOptionsLabel.textContent = selectedOptions.join(', ');
+                        } else {
+                            selectedOptionsLabel.textContent = 'Chưa chọn';
+                        }
+                    }
+                };
+
+                const toggleOption = (pill) => {
+                    const isCurrentlyActive = pill.classList.contains('active');
+                    
+                    if (isCurrentlyActive) {
+                        pill.classList.remove('active');
+                        pill.classList.remove('border-red-400', 'bg-red-50');
+                        pill.setAttribute('aria-pressed', 'false');
+                    } else {
+                        pill.classList.add('active');
+                        pill.classList.add('border-red-400', 'bg-red-50');
+                        pill.setAttribute('aria-pressed', 'true');
+                    }
+                    
+                    updatePriceAndLabel();
                 };
 
                 // Initialize defaults
@@ -744,17 +857,31 @@
                     const defaultChip = colorChips.find(chip => chip.classList.contains('active')) || colorChips[0];
                     setSelectedColor(defaultChip);
                 }
+                
                 if (optionPills.length) {
-                    const defaultOption = optionPills.find(pill => pill.classList.contains('active')) || optionPills[0];
-                    setSelectedOption(defaultOption);
+                    // Mặc định chọn option đầu tiên nếu chưa có option nào được chọn
+                    const hasActiveOption = optionPills.some(pill => pill.classList.contains('active'));
+                    if (!hasActiveOption && optionPills[0]) {
+                        optionPills[0].classList.add('active', 'border-red-400', 'bg-red-50');
+                        optionPills[0].setAttribute('aria-pressed', 'true');
+                    }
+                    updatePriceAndLabel();
                 }
 
                 colorChips.forEach(chip => {
-                    chip.addEventListener('click', () => setSelectedColor(chip));
+                    chip.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedColor(chip);
+                    });
                 });
 
                 optionPills.forEach(pill => {
-                    pill.addEventListener('click', () => setSelectedOption(pill));
+                    pill.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleOption(pill);
+                    });
                 });
             }
 
