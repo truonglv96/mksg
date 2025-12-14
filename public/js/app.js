@@ -482,6 +482,22 @@
             function getProductDataFromButton(button) {
                 if (!button) return null;
 
+                // Ưu tiên: Kiểm tra data attributes trên button trước
+                if (button.dataset.productName && button.dataset.productPrice && button.dataset.productImage) {
+                    return {
+                        id: parseInt(button.dataset.productId) || 0,
+                        productId: parseInt(button.dataset.productId) || 0,
+                        name: button.dataset.productName,
+                        brand: button.dataset.productBrand || '',
+                        price: parseInt(button.dataset.productPrice) || 0,
+                        image: button.dataset.productImage,
+                        color: '',
+                        lens: '',
+                        lensLabel: '',
+                        selectedOptions: []
+                    };
+                }
+
                 // Kiểm tra nếu button nằm trong product summary (trang chi tiết sản phẩm)
                 const productSummary = document.getElementById('product-summary');
                 if (productSummary && productSummary.contains(button)) {
@@ -525,6 +541,38 @@
                     let priceEl = container.querySelector('.text-red-600.font-bold');
                     if (priceEl) return priceEl;
                     
+                    // Tìm element có font-bold và chứa số và "VNĐ" (ưu tiên)
+                    const boldElements = container.querySelectorAll('.font-bold, [style*="font-weight: bold"], [style*="font-weight:700"]');
+                    for (const el of boldElements) {
+                        const text = el.textContent.trim();
+                        if (text.includes('VNĐ') && /\d/.test(text)) {
+                            // Kiểm tra xem có phải giá chính không (không phải giá gạch ngang)
+                            if (!el.classList.contains('line-through') && !el.style.textDecoration.includes('line-through')) {
+                                return el;
+                            }
+                        }
+                    }
+                    
+                    // Tìm element có style color đỏ (#ed1c24 hoặc rgb(237, 28, 36)) và font-bold
+                    const allElements = container.querySelectorAll('*');
+                    for (const el of allElements) {
+                        const style = window.getComputedStyle(el);
+                        const color = style.color;
+                        const text = el.textContent.trim();
+                        // Kiểm tra màu đỏ (#ed1c24 = rgb(237, 28, 36))
+                        if (text && text.includes('VNĐ') && /\d/.test(text)) {
+                            if ((color.includes('237') && color.includes('28') && color.includes('36')) || 
+                                color.includes('rgb(237, 28, 36)') || 
+                                color.includes('#ed1c24')) {
+                                if (el.classList.contains('font-bold') || style.fontWeight >= 600) {
+                                    if (!el.classList.contains('line-through') && !style.textDecoration.includes('line-through')) {
+                                        return el;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     // Fallback: tìm tất cả .text-red-600 và chọn cái có chứa "VNĐ" và có font-bold
                     const priceElements = container.querySelectorAll('.text-red-600');
                     for (const el of priceElements) {
@@ -533,10 +581,13 @@
                         }
                     }
                     
-                    // Fallback cuối: tìm bất kỳ .text-red-600 nào có chứa "VNĐ"
-                    for (const el of priceElements) {
-                        if (el.textContent.includes('VNĐ')) {
-                            return el;
+                    // Fallback cuối: tìm bất kỳ element nào có chứa "VNĐ" và số (không phải giá gạch ngang)
+                    for (const el of allElements) {
+                        const text = el.textContent.trim();
+                        if (text.includes('VNĐ') && /\d/.test(text) && el.children.length === 0) {
+                            if (!el.classList.contains('line-through') && !window.getComputedStyle(el).textDecoration.includes('line-through')) {
+                                return el;
+                            }
                         }
                     }
                     
@@ -579,12 +630,12 @@
                     const priceEl = findPriceElement(swiperSlide);
                     const imageEl = swiperSlide.querySelector('.product-img-main') || swiperSlide.querySelector('img');
                         
-                        if (nameEl && priceEl && imageEl) {
-                            const name = nameEl.textContent.trim();
-                            const brand = brandEl ? brandEl.textContent.trim() : '';
-                            const priceText = priceEl.textContent.trim();
-                            const price = parseInt(priceText.replace(/[^\d]/g, ''));
-                            const image = imageEl.src;
+                    if (nameEl && priceEl && imageEl) {
+                        const name = nameEl.textContent.trim();
+                        const brand = brandEl ? brandEl.textContent.trim() : '';
+                        const priceText = priceEl.textContent.trim();
+                        const price = parseInt(priceText.replace(/[^\d]/g, ''));
+                        const image = imageEl.src;
 
                         return {
                             name,

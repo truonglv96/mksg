@@ -101,6 +101,19 @@ services:
             - '/dev/shm:/dev/shm'
         networks:
             - sail
+    gitlab-runner:
+        image: gitlab/gitlab-runner:latest
+        container_name: gitlab-runner
+        restart: unless-stopped
+        privileged: true
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'
+            - 'gitlab-runner-config:/etc/gitlab-runner'
+            - '.:/var/www/html'
+        networks:
+            - sail
+        environment:
+            - DOCKER_HOST=unix:///var/run/docker.sock
 networks:
     sail:
         driver: bridge
@@ -110,4 +123,6 @@ volumes:
     sail-redis:
         driver: local
     sail-meilisearch:
+        driver: local
+    gitlab-runner-config:
         driver: local

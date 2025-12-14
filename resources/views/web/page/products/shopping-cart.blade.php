@@ -537,14 +537,14 @@
         function updateQuantity(itemKey, newQuantity) {
             const item = cart.find(item => buildCartItemKey(item) === itemKey);
             if (item) {
-                if (newQuantity <= 0) {
-                    removeFromCart(itemKey);
-                } else {
-                    item.quantity = newQuantity;
-                    saveCart();
-                    renderOrderSection();
-                    updateCartCount(); // Cập nhật count trên header
+                // Giá trị tối thiểu là 1
+                if (newQuantity < 1) {
+                    newQuantity = 1;
                 }
+                item.quantity = newQuantity;
+                saveCart();
+                renderOrderSection();
+                updateCartCount(); // Cập nhật count trên header
             }
         }
 
@@ -768,32 +768,39 @@
                     checkoutButton.addEventListener('click', openCheckoutModal);
                 }
             }
+        }
 
-            // Event delegation cho các buttons trong order section
-            if (orderSection) {
-                orderSection.addEventListener('click', function (e) {
-                    const actionBtn = e.target.closest('.order-decrease, .order-increase, .order-remove-btn');
-                    if (!actionBtn) return;
+        // Event delegation cho các buttons trong order section - chỉ gắn một lần
+        if (orderSection) {
+            orderSection.addEventListener('click', function (e) {
+                const actionBtn = e.target.closest('.order-decrease, .order-increase, .order-remove-btn');
+                if (!actionBtn) return;
 
-                    const itemContainer = e.target.closest('[data-item-key]');
-                    if (!itemContainer) return;
+                const itemContainer = e.target.closest('[data-item-key]');
+                if (!itemContainer) return;
 
-                    const encodedKey = itemContainer.dataset.itemKey;
-                    if (!encodedKey) return;
+                const encodedKey = itemContainer.dataset.itemKey;
+                if (!encodedKey) return;
 
-                    const itemKey = decodeURIComponent(encodedKey);
-                    const item = cart.find(i => buildCartItemKey(i) === itemKey);
-                    if (!item) return;
+                const itemKey = decodeURIComponent(encodedKey);
+                const item = cart.find(i => buildCartItemKey(i) === itemKey);
+                if (!item) return;
 
-                    if (actionBtn.classList.contains('order-decrease')) {
-                        updateQuantity(itemKey, item.quantity - 1);
-                    } else if (actionBtn.classList.contains('order-increase')) {
-                        updateQuantity(itemKey, item.quantity + 1);
-                    } else if (actionBtn.classList.contains('order-remove-btn')) {
-                        removeFromCart(itemKey);
+                // Đọc số lượng hiện tại từ cart để đảm bảo chính xác
+                const currentQuantity = item.quantity;
+
+                if (actionBtn.classList.contains('order-decrease')) {
+                    // Giảm số lượng, giá trị tối thiểu là 1
+                    if (currentQuantity > 1) {
+                        updateQuantity(itemKey, currentQuantity - 1);
                     }
-                });
-            }
+                } else if (actionBtn.classList.contains('order-increase')) {
+                    // Tăng số lượng dần dần
+                    updateQuantity(itemKey, currentQuantity + 1);
+                } else if (actionBtn.classList.contains('order-remove-btn')) {
+                    removeFromCart(itemKey);
+                }
+            });
         }
 
         // Load giỏ hàng khi trang tải

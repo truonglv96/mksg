@@ -163,7 +163,12 @@
                                             class="flex-1 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors duration-200 min-h-[2.5rem] add-to-cart-btn" 
                                             style="background-color: #ed1c24;" 
                                             onmouseover="this.style.backgroundColor='#d0171f'" 
-                                            onmouseout="this.style.backgroundColor='#ed1c24'">
+                                            onmouseout="this.style.backgroundColor='#ed1c24'"
+                                            data-product-name="{{ $product->name }}"
+                                            data-product-price="{{ $priceSale }}"
+                                            data-product-image="{{ $mainImage }}"
+                                            data-product-brand="{{ $product->brand ?? '' }}"
+                                            data-product-id="{{ $product->id }}">
                                             {{ config('texts.add_to_cart') }}
                                         </button>
                                         <a href="{{ $product->alias ? url('/san-pham/' . $product->alias) : '#' }}"

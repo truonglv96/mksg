@@ -1,0 +1,116 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  PHP_VERSION: "8.4"
+  NODE_VERSION: "22"
+
+# Cache để tăng tốc độ build
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - vendor/
+    - node_modules/
+
+# Test stage
+test:php:
+  stage: test
+  image: php:${PHP_VERSION}-cli
+  tags:
+    - docker
+    - laravel
+  services:
+    - mysql:8.0
+  variables:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: testing
+    MYSQL_USER: test
+    MYSQL_PASSWORD: test
+    DB_HOST: mysql
+    DB_DATABASE: testing
+    DB_USERNAME: test
+    DB_PASSWORD: test
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git curl libpng-dev libonig-dev libxml2-dev zip unzip
+    - docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --prefer-dist --no-progress --no-interaction
+    - cp .env.example .env || true
+    - php artisan key:generate
+    - php artisan config:clear
+  script:
+    - php artisan test
+  only:
+    - merge_requests
+    - main
+    - master
+
+test:lint:
+  stage: test
+  image: php:${PHP_VERSION}-cli
+  tags:
+    - docker
+    - laravel
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git curl zip unzip
+    - curl -sS https://getcomposer.org/installer | php
+    - php composer.phar install --prefer-dist --no-progress --no-interaction
+  script:
+    - vendor/bin/pint --test || true
+  only:
+    - merge_requests
+    - main
+    - master
+
+# Build stage
+build:assets:
+  stage: build
+  image: node:${NODE_VERSION}
+  tags:
+    - docker
+    - laravel
+  cache:
+    paths:
+      - node_modules/
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - public/build/
+    expire_in: 1 week
+  only:
+    - main
+    - master
+    - tags
+
+# Deploy stage (tùy chỉnh theo môi trường của bạn)
+deploy:staging:
+  stage: deploy
+  image: alpine:latest
+  tags:
+    - docker
+    - laravel
+  script:
+    - echo "Deploy to staging server"
+    # Thêm lệnh deploy của bạn ở đây
+    # Ví dụ: rsync, scp, hoặc gọi API deployment
+  only:
+    - main
+    - master
+  when: manual
+
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  tags:
+    - docker
+    - laravel
+  script:
+    - echo "Deploy to production server"
+    # Thêm lệnh deploy của bạn ở đây
+  only:
+    - tags
+  when: manual
