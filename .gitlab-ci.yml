@@ -1,116 +1,49 @@
-stages:
-  - test
+# This file is a template, and might need editing before it works on your project.
+# This is a sample GitLab CI/CD configuration file that should run without any modifications.
+# It demonstrates a basic 3 stage CI/CD pipeline. Instead of real tests or scripts,
+# it uses echo commands to simulate the pipeline execution.
+#
+# A pipeline is composed of independent jobs that run scripts, grouped into stages.
+# Stages run in sequential order, but jobs within stages run in parallel.
+#
+# For more information, see: https://docs.gitlab.com/ee/ci/yaml/#stages
+#
+# You can copy and paste this template into a new `.gitlab-ci.yml` file.
+# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
+#
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/development/cicd/templates/
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
+
+stages:          # List of stages for jobs, and their order of execution
   - build
+  - test
   - deploy
 
-variables:
-  PHP_VERSION: "8.4"
-  NODE_VERSION: "22"
-
-# Cache để tăng tốc độ build
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - vendor/
-    - node_modules/
-
-# Test stage
-test:php:
-  stage: test
-  image: php:${PHP_VERSION}-cli
-  tags:
-    - docker
-    - laravel
-  services:
-    - mysql:8.0
-  variables:
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: testing
-    MYSQL_USER: test
-    MYSQL_PASSWORD: test
-    DB_HOST: mysql
-    DB_DATABASE: testing
-    DB_USERNAME: test
-    DB_PASSWORD: test
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq git curl libpng-dev libonig-dev libxml2-dev zip unzip
-    - docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-    - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install --prefer-dist --no-progress --no-interaction
-    - cp .env.example .env || true
-    - php artisan key:generate
-    - php artisan config:clear
-  script:
-    - php artisan test
-  only:
-    - merge_requests
-    - main
-    - master
-
-test:lint:
-  stage: test
-  image: php:${PHP_VERSION}-cli
-  tags:
-    - docker
-    - laravel
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq git curl zip unzip
-    - curl -sS https://getcomposer.org/installer | php
-    - php composer.phar install --prefer-dist --no-progress --no-interaction
-  script:
-    - vendor/bin/pint --test || true
-  only:
-    - merge_requests
-    - main
-    - master
-
-# Build stage
-build:assets:
+build-job:       # This job runs in the build stage, which runs first.
   stage: build
-  image: node:${NODE_VERSION}
-  tags:
-    - docker
-    - laravel
-  cache:
-    paths:
-      - node_modules/
   script:
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - public/build/
-    expire_in: 1 week
-  only:
-    - main
-    - master
-    - tags
+    - echo "Compiling the code..."
+    - echo "Compile complete."
 
-# Deploy stage (tùy chỉnh theo môi trường của bạn)
-deploy:staging:
-  stage: deploy
-  image: alpine:latest
-  tags:
-    - docker
-    - laravel
+unit-test-job:   # This job runs in the test stage.
+  stage: test    # It only starts when the job in the build stage completes successfully.
   script:
-    - echo "Deploy to staging server"
-    # Thêm lệnh deploy của bạn ở đây
-    # Ví dụ: rsync, scp, hoặc gọi API deployment
-  only:
-    - main
-    - master
-  when: manual
+    - echo "Running unit tests... This will take about 60 seconds."
+    - sleep 60
+    - echo "Code coverage is 90%"
 
-deploy:production:
-  stage: deploy
-  image: alpine:latest
-  tags:
-    - docker
-    - laravel
+lint-test-job:   # This job also runs in the test stage.
+  stage: test    # It can run at the same time as unit-test-job (in parallel).
   script:
-    - echo "Deploy to production server"
-    # Thêm lệnh deploy của bạn ở đây
-  only:
-    - tags
-  when: manual
+    - echo "Linting code... This will take about 10 seconds."
+    - sleep 10
+    - echo "No lint issues found."
+
+deploy-job:      # This job runs in the deploy stage.
+  stage: deploy  # It only runs when *both* jobs in the test stage complete successfully.
+  environment: production
+  script:
+    - echo "Deploying application..."
+    - echo "Application successfully deployed."
