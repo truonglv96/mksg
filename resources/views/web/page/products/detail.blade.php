@@ -2,6 +2,111 @@
 
 @section('title', $title ?? 'Chi Tiết Sản Phẩm - Mắt Kính Sài Gòn')
 
+@section('meta')
+    @php
+        use Illuminate\Support\Str;
+
+        $productName = $product->name ?? 'Sản phẩm';
+        $brandName = $brand->name
+            ?? ($product->brand->name ?? null)
+            ?? null;
+
+        $seoTitle = $title
+            ?? ($productName . ($brandName ? ' - ' . $brandName : '') . ' | Mắt Kính Sài Gòn');
+
+        $seoDescription = $product->meta_description
+            ?? $product->description
+            ?? Str::limit(strip_tags($content->text ?? ''), 160)
+            ?? Str::limit(strip_tags($tech->text ?? ''), 160);
+
+        $seoKeywords = $product->kw
+            ?? $product->keyword
+            ?? $product->meta_keyword
+            ?? ($brandName ? $productName . ', ' . $brandName : null);
+
+        $canonicalUrl = route('product.detail', [
+            'categoryPath' => isset($mainCategory) && $mainCategory ? $product->getCategoryPath() : '',
+            'productAlias' => $product->alias,
+        ]);
+
+        $imageUrl = isset($productImages) && $productImages && $productImages->first()
+            ? asset('img/product/' . $productImages->first()->image)
+            : asset('img/product/no-image.png');
+
+        $currentPrice = $product->price_sale ?? $product->price ?? 0;
+        $oldPrice = $product->price ?? 0;
+        $hasDiscount = $product->price_sale && $product->price && $product->price > $product->price_sale;
+
+        $schemaProduct = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $productName,
+            'description' => Str::limit(trim(strip_tags($seoDescription ?? '')), 200, ''),
+            'image' => [$imageUrl],
+            'sku' => $product->code ?? null,
+            'brand' => $brandName ? [
+                '@type' => 'Brand',
+                'name' => $brandName,
+            ] : null,
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => $canonicalUrl,
+                'priceCurrency' => 'VND',
+                'price' => $currentPrice > 0 ? $currentPrice : null,
+                'availability' => 'https://schema.org/InStock',
+            ],
+        ];
+
+        // Loại bỏ key null để JSON sạch hơn
+        $schemaProduct = array_filter($schemaProduct, function ($value) {
+            return !is_null($value);
+        });
+        if (isset($schemaProduct['brand'])) {
+            $schemaProduct['brand'] = array_filter($schemaProduct['brand'], function ($value) {
+                return !is_null($value);
+            });
+        }
+        if (isset($schemaProduct['offers'])) {
+            $schemaProduct['offers'] = array_filter($schemaProduct['offers'], function ($value) {
+                return !is_null($value);
+            });
+        }
+    @endphp
+
+    @if(!empty($seoDescription))
+        <meta name="description" content="{{ trim(strip_tags($seoDescription)) }}">
+    @endif
+    @if(!empty($seoKeywords))
+        <meta name="keywords" content="{{ $seoKeywords }}">
+    @endif
+
+    {{-- Canonical --}}
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    {{-- Open Graph --}}
+    <meta property="og:type" content="product">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    @if(!empty($seoDescription))
+        <meta property="og:description" content="{{ trim(strip_tags($seoDescription)) }}">
+    @endif
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:site_name" content="Mắt Kính Sài Gòn">
+    <meta property="og:image" content="{{ $imageUrl }}">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    @if(!empty($seoDescription))
+        <meta name="twitter:description" content="{{ trim(strip_tags($seoDescription)) }}">
+    @endif
+    <meta name="twitter:image" content="{{ $imageUrl }}">
+
+    {{-- Product structured data --}}
+    <script type="application/ld+json">
+        {!! json_encode($schemaProduct, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+    </script>
+@endsection
+
 @section('content')
     <main class="container mx-auto px-4 py-8">
 

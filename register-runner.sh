@@ -47,3 +47,8 @@ else
     echo ""
     echo "❌ Đăng ký thất bại. Vui lòng kiểm tra lại URL và token."
 fi
+
+
+
+
+

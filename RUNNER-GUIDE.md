@@ -108,3 +108,8 @@ Nếu gặp lỗi về Docker, đảm bảo runner có quyền truy cập Docker
 
 - [GitLab Runner Documentation](https://docs.gitlab.com/runner/)
 - [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/)
+
+
+
+
+

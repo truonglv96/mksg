@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\IndexController;
 use App\Http\Controllers\Web\ProductController;
-use App\Http\Controllers\Web\NewController;
+use App\Http\Controllers\Web\NewsController;
 
 // Trang chủ
 Route::get('/', [IndexController::class, 'index'])->name('home');
@@ -23,8 +23,16 @@ Route::prefix('san-pham')->name('product.')->group(function () {
 
 // Tin tức
 Route::prefix('tin-tuc')->name('new.')->group(function () {
-    Route::get('/', [NewController::class, 'category'])->name('category');
-    Route::get('/{alias}', [NewController::class, 'detail'])->name('detail');
+    // Trang chi tiết bài viết: /tin-tuc/bai-viet/{alias}
+    Route::get('/bai-viet/{alias}', [NewsController::class, 'detail'])->name('detail');
+
+    // Trang danh mục tổng: /tin-tuc
+    Route::get('/', [NewsController::class, 'category'])->name('category');
+
+    // Trang danh mục theo path (khớp với menu: /tin-tuc/{category}/{child?...})
+    Route::get('/{categoryPath}', [NewsController::class, 'category'])
+        ->where('categoryPath', '[^/]+(/[^/]+)*')
+        ->name('category.path');
 });
 
 // Giỏ hàng

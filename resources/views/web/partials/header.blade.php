@@ -67,9 +67,15 @@
                                 $colClass = 'col-span-2';
                             elseif ($childCount >= 6)
                                 $colClass = 'col-span-2';
+
+                            // Xác định base path theo type của category
+                            $basePath = '/san-pham/';
+                            if (isset($category->type) && $category->type === 'new') {
+                                $basePath = '/tin-tuc/';
+                            }
                         @endphp
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
-                            <a href="{{ $category->alias ? url('/san-pham/' . $category->alias) : '#' }}"
+                            <a href="{{ $category->alias ? url($basePath . $category->alias) : '#' }}"
                                 class="{{ $hasChildren ? 'text-red-600 font-bold' : 'text-gray-600 font-bold category-link' }}">
                                 {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                             </a>
@@ -78,7 +84,7 @@
                                     <div class="container mx-auto grid grid-cols-12 gap-8 text-gray-700">
                                         @foreach($category->chillParent as $child)
                                             <div class="{{ $colClass }}">
-                                                <a href="{{ $child->alias ? url('/san-pham/' . $category->alias . '/' . $child->alias) : '#' }}"
+                                                <a href="{{ $child->alias ? url($basePath . $category->alias . '/' . $child->alias) : '#' }}"
                                                     class="font-bold mb-3 text-red-600 hover:text-red-700 transition-colors block">
                                                     {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
                                                 </a>
@@ -100,7 +106,7 @@
                                                                 @endphp
                                                                 <button type="button"
                                                                     aria-label="{{ $grandChild->name ?? $grandChild->title ?? 'Icon' }}"
-                                                                    onclick="window.location.href='{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}'"
+                                                                    onclick="window.location.href='{{ $grandChild->alias ? url($basePath . $fullPath) : '#' }}'"
                                                                     class="w-10 h-10 rounded-md border border-gray-200 shadow-sm bg-cover bg-center transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-1 hover:-translate-y-0.5 hover:shadow-md flex-shrink-0"
                                                                     style="background-image: url('{{ $grandChild->getIconImages() }}'); background-size: cover; background-position: center; background-repeat: no-repeat; max-width: 40px; max-height: 40px;">
                                                                 </button>
@@ -115,7 +121,7 @@
                                                                     $fullPath = $category->alias . '/' . $child->alias . '/' . $grandChild->alias;
                                                                 @endphp
                                                                 <li>
-                                                                    <a href="{{ $grandChild->alias ? url('/san-pham/' . $fullPath) : '#' }}"
+                                                                    <a href="{{ $grandChild->alias ? url($basePath . $fullPath) : '#' }}"
                                                                         class="hover:text-red-600">
                                                                         {{ $grandChild->name ?? $grandChild->title ?? 'Item' }}
                                                                     </a>
@@ -129,7 +135,7 @@
                                                             @php
                                                                 $childPath = $category->alias . '/' . $child->alias;
                                                             @endphp
-                                                            <a href="{{ $child->alias ? url('/san-pham/' . $childPath) : '#' }}"
+                                                            <a href="{{ $child->alias ? url($basePath . $childPath) : '#' }}"
                                                                 class="hover:text-red-600">
                                                                 Xem tất cả
                                                             </a>
