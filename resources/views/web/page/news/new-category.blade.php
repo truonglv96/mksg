@@ -4,6 +4,9 @@
 
 @section('content')
 <main class="container mx-auto px-4 py-8">
+    {{-- Breadcrumb Component --}}
+    @include('web.partials.breadcrumb')
+    
     {{-- Hero giống bản HTML gốc --}}
     <section class="news-hero">
         <span

@@ -5,19 +5,11 @@
 @section('content')
 <main class="container mx-auto px-4 py-8">
 
-    <!-- Breadcrumb -->
-    <nav class="text-sm text-gray-500 flex items-center gap-1 mb-6 overflow-x-auto whitespace-nowrap"
-        aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="hover:text-red-600 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5.5a0.5 0.5 0 01-0.5-0.5V15a1 1 0 00-1-1h-4a1 1 0 00-1 1v5.5a0.5 0.5 0 01-0.5 0.5H4a1 1 0 01-1-1V9.75z" />
-            </svg>
-            Trang chủ
-        </a>
-        <span>/</span>
-        <span class="text-gray-700 font-medium">Giỏ hàng</span>
-    </nav>
+    {{-- Breadcrumb Component --}}
+    @php
+        $pageTitle = 'Giỏ hàng';
+    @endphp
+    @include('web.partials.breadcrumb')
 
     <!-- Success Message -->
     <div id="order-success-message" class="order-success-message hidden">

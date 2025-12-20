@@ -72,9 +72,23 @@ class ProductController extends Controller
         $pathArray = explode('/', trim($segments, '/'));
         $categories = [];
         foreach ($pathArray as $alias) {
+            // Tìm category theo alias, type = product, và hidden = 1
             $cat = Category::where('alias', $alias)->where('type', 'product')->where('hidden', 1)->first();
-            if ($cat) $categories[] = $cat;
+            if ($cat) {
+                $categories[] = $cat;
+            } else {
+                // Debug: Log nếu không tìm thấy category
+                \Log::warning("Category not found: alias={$alias}, path={$segments}");
+            }
         }
+        
+        // Debug: Log số lượng categories tìm được
+        \Log::info("CategoryPath Debug", [
+            'segments' => $segments,
+            'pathArray' => $pathArray,
+            'categories_count' => count($categories),
+            'category_aliases' => array_map(fn($c) => $c->alias, $categories)
+        ]);
         
         if (empty($categories)) {
             $product = Products::where('alias', end($pathArray))->where('hidden', 1)->first();
@@ -132,6 +146,8 @@ class ProductController extends Controller
         return view('web.page.products.product-category', [
             'title' => $lastCategory->name . ' - Mắt Kính Sài Gòn',
             'category' => $lastCategory,
+            'categories' => $categories, // Truyền mảng categories để breadcrumb hiển thị đầy đủ path
+            'categoryPathArray' => $pathArray, // Truyền path array để breadcrumb có thể hiển thị đầy đủ ngay cả khi một số category không tìm thấy
             'products' => $products,
             'totalProducts' => $products->total(),
             'colors' => $colors,

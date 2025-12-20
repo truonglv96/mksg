@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\IndexController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\NewsController;
+use App\Http\Controllers\Web\SearchController;
 
 // Trang chủ
 Route::get('/', [IndexController::class, 'index'])->name('home');
@@ -34,6 +35,9 @@ Route::prefix('tin-tuc')->name('new.')->group(function () {
         ->where('categoryPath', '[^/]+(/[^/]+)*')
         ->name('category.path');
 });
+
+// Tìm kiếm
+Route::post('/search', [SearchController::class, 'search'])->name('search');
 
 // Giỏ hàng
 Route::get('/gio-hang', [ProductController::class, 'shoppingCart'])->name('cart');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\News;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class NewsController extends Controller
@@ -25,8 +26,10 @@ class NewsController extends Controller
         $newsQuery = News::where('hidden', 1);
 
         // Nếu có path category: /tin-tuc/kien-thuc/khuc-xa-mat-kinh
+        $categoryPathArray = [];
         if (!empty($categoryPath)) {
             $aliases = array_filter(explode('/', trim($categoryPath, '/')));
+            $categoryPathArray = $aliases; // Lưu path array để truyền vào breadcrumb
             $categories = [];
 
             foreach ($aliases as $alias) {
@@ -122,6 +125,8 @@ class NewsController extends Controller
             'trendingNews'  => $trendingNews,
             'currentCategory' => $currentCategory,
             'typesBaseCategory' => $typesBaseCategory,
+            'categories' => $categories ?? [], // Truyền mảng categories để breadcrumb hiển thị đầy đủ path
+            'categoryPathArray' => $categoryPathArray, // Truyền path array để breadcrumb có thể hiển thị đầy đủ ngay cả khi một số category không tìm thấy
         ]);
     }
 
@@ -134,29 +139,168 @@ class NewsController extends Controller
             abort(404);
         }
 
-        $news = News::getDetailNews($alias);
+        // Cache news detail query - sử dụng file cache nếu database cache không available
+        $cacheKey = "news_detail_{$alias}";
+        try {
+            $news = Cache::remember($cacheKey, 3600, function () use ($alias) {
+                return News::getDetailNews($alias);
+            });
+        } catch (\Exception $e) {
+            // Fallback nếu cache không hoạt động
+            $news = News::getDetailNews($alias);
+        }
 
         if (!$news) {
             abort(404);
         }
 
-        // Lấy category chính của bài viết (nếu có) để hiển thị
-        $relatedCategory = News::getRelatedCategories($news->id);
+        // Lấy category chính của bài viết (nếu có) để hiển thị - cache
+        $categoryCacheKey = "news_category_{$news->id}";
+        try {
+            $relatedCategory = Cache::remember($categoryCacheKey, 3600, function () use ($news) {
+                return News::getRelatedCategories($news->id);
+            });
+        } catch (\Exception $e) {
+            // Fallback nếu cache không hoạt động
+            $relatedCategory = News::getRelatedCategories($news->id);
+        }
 
-        // Lấy danh sách tin liên quan theo category
+        // Lấy danh sách tin liên quan theo category - cache và limit
         $relatedNews = collect();
         if ($relatedCategory) {
-            $relatedNews = News::getRetedNewsByCate($relatedCategory->id)
-                ->where('id', '!=', $news->id);
+            $relatedNewsCacheKey = "related_news_{$relatedCategory->id}_{$news->id}";
+            try {
+                $relatedNews = Cache::remember($relatedNewsCacheKey, 1800, function () use ($relatedCategory, $news) {
+                    return News::getRetedNewsByCate($relatedCategory->id)
+                        ->where('id', '!=', $news->id)
+                        ->take(5); // Đảm bảo chỉ lấy 5 tin
+                });
+            } catch (\Exception $e) {
+                // Fallback nếu cache không hoạt động
+                $relatedNews = News::getRetedNewsByCate($relatedCategory->id)
+                    ->where('id', '!=', $news->id)
+                    ->take(5);
+            }
+        }
+
+        // Pre-process data để giảm logic trong view
+        $seoData = $this->prepareSeoData($news);
+        $relatedNewsData = $this->prepareRelatedNewsData($relatedNews, $relatedCategory);
+
+        // Xây dựng categories và categoryPathArray cho breadcrumb
+        $categories = [];
+        $categoryPathArray = [];
+        if ($relatedCategory) {
+            // Lấy full path từ category
+            $categoryPath = method_exists($relatedCategory, 'getFullPath') ? $relatedCategory->getFullPath() : $relatedCategory->alias;
+            $categoryPathArray = explode('/', trim($categoryPath, '/'));
+            
+            // Lấy tất cả categories trong path
+            foreach ($categoryPathArray as $alias) {
+                $cat = Category::where('alias', $alias)->where('type', 'new')->first();
+                if ($cat) {
+                    $categories[] = $cat;
+                }
+            }
         }
 
         return view('web.page.news.detail', [
-            'title'           => ($news->title ?? 'Chi Tiết Tin Tức') . ' - Mắt Kính Sài Gòn',
+            'title'           => ($news->title ?? $news->name ?? 'Chi Tiết Tin Tức') . ' - Mắt Kính Sài Gòn',
             'type'            => 'detail',
             'news'            => $news,
             'relatedNews'     => $relatedNews,
             'relatedCategory' => $relatedCategory,
+            'seoData'         => $seoData,
+            'relatedNewsData' => $relatedNewsData,
+            'canonicalUrl'    => route('new.detail', [$news->alias]),
+            'categories' => $categories, // Truyền mảng categories để breadcrumb hiển thị đầy đủ path
+            'categoryPathArray' => $categoryPathArray, // Truyền path array để breadcrumb có thể hiển thị đầy đủ ngay cả khi một số category không tìm thấy
         ]);
+    }
+
+    /**
+     * Chuẩn bị dữ liệu SEO để giảm logic trong view
+     */
+    private function prepareSeoData($news)
+    {
+        $seoDescription = $news->meta_description
+            ?? $news->description
+            ?? \Illuminate\Support\Str::limit(strip_tags($news->content ?? ''), 160);
+
+        $seoKeywords = $news->kw
+            ?? $news->keyword
+            ?? $news->meta_keyword
+            ?? null;
+
+        $seoTitle = $news->title ?? $news->name ?? 'Tin Tức - Mắt Kính Sài Gòn';
+        $canonicalUrl = route('new.detail', [$news->alias]);
+        $imageUrl = method_exists($news, 'getImage') ? $news->getImage() : '';
+
+        $schemaData = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Article',
+            'headline' => \Illuminate\Support\Str::limit(trim(strip_tags($seoTitle)), 110, ''),
+            'description' => \Illuminate\Support\Str::limit(trim(strip_tags($seoDescription ?? '')), 160, ''),
+            'datePublished' => optional($news->created_at)->toIso8601String(),
+            'dateModified' => optional($news->updated_at ?? $news->created_at)->toIso8601String(),
+            'author' => [
+                '@type' => 'Person',
+                'name' => $news->author ?? 'Mắt Kính Sài Gòn',
+            ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => $canonicalUrl,
+            ],
+            'publisher' => [
+                '@type' => 'Organization',
+                'name' => 'Mắt Kính Sài Gòn',
+                'logo' => [
+                    '@type' => 'ImageObject',
+                    'url' => asset('img/setting/logo_mksg_2025.png'),
+                ],
+            ],
+        ];
+
+        if (!empty($imageUrl)) {
+            $schemaData['image'] = $imageUrl;
+        }
+
+        return [
+            'description' => $seoDescription,
+            'keywords' => $seoKeywords,
+            'title' => $seoTitle,
+            'imageUrl' => $imageUrl,
+            'canonicalUrl' => $canonicalUrl,
+            'schemaData' => $schemaData,
+        ];
+    }
+
+    /**
+     * Chuẩn bị dữ liệu tin liên quan để giảm logic trong view
+     */
+    private function prepareRelatedNewsData($relatedNews, $relatedCategory)
+    {
+        $categoryName = $relatedCategory ? ($relatedCategory->name ?? $relatedCategory->title ?? 'Tin tức') : 'Tin tức';
+
+        return $relatedNews->map(function ($item) use ($categoryName) {
+            $createdAt = optional($item->created_at);
+            $itemDate = $createdAt->isValid() ? $createdAt->format('d/m/Y') : null;
+            $excerptSource = $item->description ?? $item->content ?? '';
+            $excerpt = \Illuminate\Support\Str::limit(strip_tags($excerptSource), 90);
+            $imageUrl = method_exists($item, 'getImage') ? $item->getImage() : null;
+            $detailUrl = route('new.detail', $item->alias);
+
+            return [
+                'id' => $item->id,
+                'title' => $item->title ?? $item->name,
+                'alias' => $item->alias,
+                'date' => $itemDate,
+                'excerpt' => $excerpt,
+                'imageUrl' => $imageUrl,
+                'detailUrl' => $detailUrl,
+                'categoryName' => $categoryName,
+            ];
+        });
     }
 }
 

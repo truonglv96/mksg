@@ -4,47 +4,13 @@
 
 @section('meta')
     @php
-        use Illuminate\Support\Str;
-
-        $seoDescription = $news->meta_description
-            ?? $news->description
-            ?? Str::limit(strip_tags($news->content ?? ''), 160);
-
-        $seoKeywords = $news->kw
-            ?? $news->keyword
-            ?? $news->meta_keyword
-            ?? null;
-
-        $seoTitle = $news->title ?? $news->name ?? ($title ?? 'Tin Tức - Mắt Kính Sài Gòn');
-        $canonicalUrl = route('new.detail', [$news->alias]);
-        $imageUrl = method_exists($news, 'getImage') ? $news->getImage() : '';
-        $schemaData = [
-            '@context' => 'https://schema.org',
-            '@type' => 'Article',
-            'headline' => Str::limit(trim(strip_tags($seoTitle)), 110, ''),
-            'description' => Str::limit(trim(strip_tags($seoDescription ?? '')), 160, ''),
-            'datePublished' => optional($news->created_at)->toIso8601String(),
-            'dateModified' => optional($news->updated_at ?? $news->created_at)->toIso8601String(),
-            'author' => [
-                '@type' => 'Person',
-                'name' => $news->author ?? 'Mắt Kính Sài Gòn',
-            ],
-            'mainEntityOfPage' => [
-                '@type' => 'WebPage',
-                '@id' => $canonicalUrl,
-            ],
-            'publisher' => [
-                '@type' => 'Organization',
-                'name' => 'Mắt Kính Sài Gòn',
-                'logo' => [
-                    '@type' => 'ImageObject',
-                    'url' => asset('img/setting/logo_mksg_2025.png'),
-                ],
-            ],
-        ];
-        if (!empty($imageUrl)) {
-            $schemaData['image'] = $imageUrl;
-        }
+        $seo = $seoData ?? [];
+        $seoDescription = $seo['description'] ?? '';
+        $seoKeywords = $seo['keywords'] ?? null;
+        $seoTitle = $seo['title'] ?? ($title ?? 'Tin Tức - Mắt Kính Sài Gòn');
+        $canonicalUrl = $seo['canonicalUrl'] ?? route('new.detail', [$news->alias]);
+        $imageUrl = $seo['imageUrl'] ?? '';
+        $schemaData = $seo['schemaData'] ?? [];
     @endphp
     @if(!empty($seoDescription))
         <meta name="description" content="{{ trim(strip_tags($seoDescription)) }}">
@@ -79,14 +45,19 @@
     @endif
 
     {{-- Structured data Article --}}
+    @if(!empty($schemaData))
     <script type="application/ld+json">
         {!! json_encode($schemaData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
     </script>
+    @endif
 @endsection
 
 @section('content')
 
 <main class="container mx-auto px-4 py-8">
+    {{-- Breadcrumb Component --}}
+    @include('web.partials.breadcrumb')
+    
     {{-- Hero chi tiết bài viết: dùng lại style news-hero --}}
     <section class="news-hero mb-8">
         <span
@@ -98,8 +69,9 @@
         </h1>
 
         @php
-            $created = optional($news->created_at);
-            $dateText = $created->isValid() ? $created->format('d/m/Y') : null;
+            $dateText = $news->created_at && $news->created_at->isValid() 
+                ? $news->created_at->format('d/m/Y') 
+                : null;
         @endphp
 
         <div class="mt-4 flex flex-wrap gap-3 items-center text-sm text-slate-600">
@@ -145,21 +117,22 @@
                 {!! $news->content !!}
             </div>
 
-            {{-- Box “Từ khóa / chia sẻ” đơn giản --}}
+            {{-- Box "Từ khóa / chia sẻ" đơn giản --}}
             <div class="px-5 sm:px-8 md:px-10 pb-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
                 <div class="flex flex-wrap gap-2 items-center text-sm text-slate-600">
                     <span class="font-semibold text-slate-800">Chia sẻ:</span>
                     <ul class="flex items-center">
-                        <div id="fb-root"></div>
-                        <script async defer crossorigin="anonymous"
-                            src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v15.0"></script>
-                        <div class="fb-share-button"
-                            data-href="{{ route('new.detail', [$news->alias]) }}"
-                            data-layout="button_count" data-size="large">
-                            <a target="_blank"
-                               href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('new.detail', [$news->alias])) }}"
-                               class="fb-xfbml-parse-ignore">Chia sẻ</a>
-                        </div>
+                        @php
+                            $shareUrl = $canonicalUrl ?? route('new.detail', [$news->alias]);
+                        @endphp
+                        <a target="_blank" rel="noopener noreferrer"
+                           href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}"
+                           class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            Chia sẻ
+                        </a>
                     </ul>
                 </div>
 
@@ -174,26 +147,24 @@
             </div>
 
             {{-- Tin liên quan --}}
-            @if(isset($relatedNews) && $relatedNews->count())
+            @if(isset($relatedNewsData) && $relatedNewsData->count())
                 <div class="border-t border-slate-100 px-5 sm:px-8 md:px-10 pt-7 pb-8">
                     <h2 class="text-lg md:text-xl font-bold text-slate-900 mb-4">
                         Tin liên quan
                     </h2>
                     <div class="swiper-container news-slider">
                         <div class="swiper-wrapper">
-                            @foreach($relatedNews as $item)
-                            @php
-                                $createdAt = optional($item->created_at);
-                                $itemDate = $createdAt->isValid() ? $createdAt->format('d/m/Y') : null;
-                                $excerptSource = $item->description ?? $item->content ?? '';
-                                $excerpt = \Illuminate\Support\Str::limit(strip_tags($excerptSource), 90);
-                            @endphp
+                            @foreach($relatedNewsData as $item)
                             <div class="swiper-slide">
                                 <article
                                     class="border rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white flex flex-col group">
-                                    @if(method_exists($item, 'getImage') && $item->getImage())
-                                        <a href="{{ route('new.detail', $item->alias) }}" class="block">
-                                            <img src="{{ $item->getImage() }}" alt="{{ $item->title ?? $item->name }}"
+                                    @if(!empty($item['imageUrl']))
+                                        <a href="{{ $item['detailUrl'] }}" class="block">
+                                            <img src="{{ $item['imageUrl'] }}" 
+                                                 alt="{{ $item['title'] }}"
+                                                 loading="lazy"
+                                                 width="400"
+                                                 height="208"
                                                  class="w-full h-52 object-cover">
                                         </a>
                                     @endif
@@ -202,29 +173,26 @@
                                             <span
                                                 class="inline-block text-xs font-semibold px-4 py-1 rounded-full mb-3"
                                                 style="background-color: #fee2e2; color: #ed1c24;">
-                                                {{ $relatedCategory->name ?? 'Tin tức' }}
+                                                {{ $item['categoryName'] }}
                                             </span>
-                                            <a href="{{ route('new.detail', $item->alias) }}">
-                                                <h3 class="font-bold text-lg leading-snug mb-2 text-slate-900 line-clamp-2"
-                                                    style="transition: color 0.3s;"
-                                                    onmouseover="this.style.color='#ed1c24'"
-                                                    onmouseout="this.style.color='#111827'">
-                                                    {{ $item->title ?? $item->name }}
+                                            <a href="{{ $item['detailUrl'] }}">
+                                                <h3 class="font-bold text-lg leading-snug mb-2 text-slate-900 line-clamp-2 hover:text-red-600 transition-colors">
+                                                    {{ $item['title'] }}
                                                 </h3>
                                             </a>
-                                            @if($excerpt)
+                                            @if(!empty($item['excerpt']))
                                                 <p class="text-sm text-slate-500 leading-relaxed line-clamp-2">
-                                                    {!! $excerpt !!}
+                                                    {{ $item['excerpt'] }}
                                                 </p>
                                             @endif
                                         </div>
-                                        @if($itemDate)
+                                        @if(!empty($item['date']))
                                             <div
                                                 class="mt-auto pt-2 text-xs md:text-sm text-slate-500 flex items-center flex-wrap gap-2">
-                                                <span>{{ $itemDate }}</span>
+                                                <span>{{ $item['date'] }}</span>
                                                 <span>• 5 phút đọc</span>
-                                                <a href="{{ route('new.detail', $item->alias) }}"
-                                                   class="font-semibold text-red-500 ml-auto">
+                                                <a href="{{ $item['detailUrl'] }}"
+                                                   class="font-semibold text-red-500 ml-auto hover:underline">
                                                     Đọc tiếp →
                                                 </a>
                                             </div>
@@ -242,5 +210,51 @@
     </section>
     
 </main>
+
+@push('scripts')
+<script>
+    // Khởi tạo Swiper cho tin liên quan khi DOM ready - chỉ khi có slides
+    (function() {
+        function initNewsSlider() {
+            const newsSliderEl = document.querySelector('.news-slider');
+            if (!newsSliderEl) return;
+            
+            const slides = newsSliderEl.querySelectorAll('.swiper-slide');
+            if (slides.length === 0) return;
+            
+            if (typeof Swiper !== 'undefined') {
+                new Swiper(newsSliderEl, {
+                    slidesPerView: 1,
+                    spaceBetween: 20,
+                    loop: false,
+                    autoplay: slides.length > 1 ? {
+                        delay: 4000,
+                        disableOnInteraction: false,
+                    } : false,
+                    breakpoints: {
+                        640: {
+                            slidesPerView: 2,
+                            spaceBetween: 20,
+                        },
+                        1024: {
+                            slidesPerView: 3,
+                            spaceBetween: 24,
+                        },
+                    },
+                });
+            } else {
+                // Retry nếu Swiper chưa load
+                setTimeout(initNewsSlider, 100);
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNewsSlider);
+        } else {
+            initNewsSlider();
+        }
+    })();
+</script>
+@endpush
 
 @endsection

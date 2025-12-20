@@ -11,7 +11,11 @@
          @foreach($banners as $banner)
         <div class="swiper-slide">
             <img src="{{ $banner->getImage() }}"
-                alt="{{ $banner->title }}">
+                alt="{{ $banner->title }}"
+                loading="eager"
+                width="1920"
+                height="600"
+                class="w-full h-auto">
         </div>
         @endforeach
         @endif
@@ -62,7 +66,7 @@
                         class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">👓</div>
                         <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
+                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
@@ -70,7 +74,7 @@
                         class="bg-amber-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🔵</div>
                         <h3 class="font-bold text-lg mb-2">{{ config('texts.category_lenses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
+                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
@@ -78,7 +82,7 @@
                         class="bg-pink-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🕶️</div>
                         <h3 class="font-bold text-lg mb-2">{{ config('texts.category_sunglasses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
+                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
                 <div class="swiper-slide">
@@ -86,7 +90,7 @@
                         class="bg-cyan-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
                         <div class="text-5xl mb-3">🎁</div>
                         <h3 class="font-bold text-lg mb-2">{{ config('texts.category_promotion') }}</h3>
-                        <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
+                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
                     </div>
                 </div>
             </div>
@@ -103,10 +107,7 @@
                 @if(isset($categoriesProduct) && $categoriesProduct->count() > 0)
                 @foreach($categoriesProduct as $index => $category)
                 <a data-category="{{ $category->alias }}"
-                    class="product-tab text-sm font-medium transition-colors relative pb-1 border-b-2 {{ $index === 0 ? 'active' : 'border-transparent' }}" 
-                    style="{{ $index === 0 ? 'border-color: #ed1c24; color: #ed1c24;' : 'color: #1f2937;' }}"
-                    onmouseover="this.style.color='#ed1c24'" 
-                    onmouseout="if(!this.classList.contains('active')) this.style.color='#1f2937'; else this.style.color='#ed1c24'">{{ $category->name }}</a>
+                    class="product-tab text-sm font-medium transition-colors relative pb-1 border-b-2 hover:text-red-600 {{ $index === 0 ? 'active border-red-600 text-red-600' : 'border-transparent text-gray-800' }}">{{ $category->name }}</a>
                 @endforeach
                 @endif
             </div>
@@ -117,20 +118,22 @@
             @if(isset($categoriesProduct) && $categoriesProduct->count() > 0)
             @foreach($categoriesProduct as $index => $category)
             @php
-                $categoryProducts = isset($productsByCategory[$category->alias]) ? $productsByCategory[$category->alias] : collect([]);
+                $processedProducts = isset($processedProductsByCategory[$category->alias]) 
+                    ? $processedProductsByCategory[$category->alias] 
+                    : collect([]);
             @endphp
             <div class="product-group {{ $index === 0 ? '' : 'hidden' }}" data-category="{{ $category->alias }}">
                 <div class="swiper-container category-swiper">
                     <div class="swiper-wrapper">
-                        @if($categoryProducts->count() > 0)
-                        @foreach($categoryProducts as $product)
+                        @if($processedProducts->count() > 0)
+                        @foreach($processedProducts as $item)
                         @php
-                            $productImages = \App\Models\ProductImage::getTwoImageCategoryProduct($product->id);
-                            $mainImage = $productImages->count() > 0 ? asset('img/product/' . $productImages->first()->image) : asset('img/product/no-image.jpg');
-                            $hoverImage = $productImages->count() > 1 ? asset('img/product/' . $productImages->get(1)->image) : $mainImage;
-                            $priceSale = $product->price_sale ?? $product->price ?? 0;
-                            $price = $product->price ?? 0;
-                            $discount = $price > 0 && $priceSale < $price ? round((($price - $priceSale) / $price) * 100) : 0;
+                            $product = $item['product'];
+                            $mainImage = $item['mainImage'];
+                            $hoverImage = $item['hoverImage'];
+                            $priceSale = $item['priceSale'];
+                            $price = $item['price'];
+                            $discount = $item['discount'];
                         @endphp
                         <div class="swiper-slide group">
                             <div
@@ -138,9 +141,15 @@
                                 <div class="relative overflow-hidden">
                                     <img src="{{ $mainImage }}"
                                         alt="{{ $product->name }}"
+                                        loading="lazy"
+                                        width="400"
+                                        height="192"
                                         class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
                                     <img src="{{ $hoverImage }}"
                                         alt="{{ $product->name }} - Hình 2"
+                                        loading="lazy"
+                                        width="400"
+                                        height="192"
                                         class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
                                     @if($discount > 0)
                                     <!-- Badge giảm giá góc phải trên -->
@@ -150,7 +159,7 @@
                                 </div>
                                 <div class="p-4">
                                     <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
-                                        <h3 class="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.5rem] product-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $product->name }}</h3>
+                                        <h3 class="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.5rem] product-title hover:text-red-600 transition-colors">{{ $product->name }}</h3>
                                     </a>
                                     <div class="mb-3 text-right">
                                         <p class="font-bold text-lg leading-tight" style="color: #ed1c24;">{{ number_format($priceSale, 0, ',', '.') }} {{ config('texts.currency') }}</p>
@@ -160,10 +169,8 @@
                                     </div>
                                     <div class="flex gap-2">
                                         <button
-                                            class="flex-1 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors duration-200 min-h-[2.5rem] add-to-cart-btn" 
+                                            class="flex-1 text-white py-1.5 px-3 rounded text-xs font-medium transition-colors duration-200 min-h-[2.5rem] add-to-cart-btn hover:bg-red-700" 
                                             style="background-color: #ed1c24;" 
-                                            onmouseover="this.style.backgroundColor='#d0171f'" 
-                                            onmouseout="this.style.backgroundColor='#ed1c24'"
                                             data-product-name="{{ $product->name }}"
                                             data-product-price="{{ $priceSale }}"
                                             data-product-image="{{ $mainImage }}"
@@ -213,24 +220,40 @@
 
         <div class="swiper-container news-slider">
             <div class="swiper-wrapper">
-                @if(isset($news) && $news->count() > 0)
-                @foreach($news as $newsItem)
+                @if(isset($processedNews) && $processedNews->count() > 0)
+                @foreach($processedNews as $item)
+                @php
+                    $newsItem = $item['news'];
+                    $imageUrl = $item['imageUrl'];
+                    $date = $item['date'];
+                    $detailUrl = $item['detailUrl'];
+                @endphp
                 <div class="swiper-slide">
                     <div
                         class="border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white">
                         <div class="relative">
-                            <img src="{{ $newsItem->getImage() }}"
-                                alt="{{ $newsItem->title }}" class="w-full h-48 object-cover">
+                            @if(!empty($imageUrl))
+                            <img src="{{ $imageUrl }}"
+                                alt="{{ $newsItem->title ?? $newsItem->name }}" 
+                                loading="lazy"
+                                width="400"
+                                height="192"
+                                class="w-full h-48 object-cover">
+                            @endif
                         </div>
                         <div class="p-4">
+                            @if(!empty($date))
                             <div
                                 class="inline-block text-xs font-medium px-3 py-1 rounded mb-2" style="background-color: #fee2e2; color: #ed1c24;">
-                                {{ $newsItem->created_at->format('d/m/Y') }}
+                                {{ $date }}
                             </div>
-                            <a href="{{ $newsItem->alias ? route('new.detail', ['alias' => $newsItem->alias]) : '#' }}">
-                                <h3 class="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] news-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $newsItem->title }}</h3>
+                            @endif
+                            <a href="{{ $detailUrl }}">
+                                <h3 class="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] news-title hover:text-red-600 transition-colors">{{ $newsItem->title ?? $newsItem->name }}</h3>
                             </a>
-                            <p class="text-sm text-gray-600 line-clamp-2">{!! $newsItem->description !!}</p>
+                            @if(!empty($newsItem->description))
+                            <p class="text-sm text-gray-600 line-clamp-2">{{ strip_tags($newsItem->description) }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -248,7 +271,12 @@
                 @if(isset($brands) && $brands->count() > 0)
                 @foreach($brands as $brand)
                 <div class="swiper-slide flex justify-center">
-                    <img src="{{ $brand->getLogoBrand() }}" alt="{{ $brand->name }}" class="h-10 md:h-12  hover:opacity-100 transition">
+                    <img src="{{ $brand->getLogoBrand() }}" 
+                         alt="{{ $brand->name }}" 
+                         loading="lazy"
+                         width="120"
+                         height="48"
+                         class="h-10 md:h-12 hover:opacity-100 transition">
                 </div>
                 @endforeach
                 @endif

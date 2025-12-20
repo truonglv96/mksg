@@ -5,6 +5,9 @@
 @section('content')
 <main class="container mx-auto px-4 py-8">
 
+    {{-- Breadcrumb Component --}}
+    @include('web.partials.breadcrumb')
+
     <!-- Frame Styles Filter Section -->
     <section class="mb-6">
         <h2 class="text-xl font-bold mb-4 text-gray-800">{{ config('texts.frame_style_title') }}</h2>
