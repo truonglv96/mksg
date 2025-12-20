@@ -11,7 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Đăng ký alias cho middleware
+        $middleware->alias([
+            'admin.auth' => \App\Http\Middleware\AuthenticateAdmin::class,
+            'admin.guest' => \App\Http\Middleware\RedirectIfAdminAuthenticated::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

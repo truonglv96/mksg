@@ -15,6 +15,10 @@ class BreadcrumbHelper
             $type = 'new';
         } elseif (str_starts_with($currentPath, 'san-pham')) {
             $type = 'product';
+        } elseif (str_starts_with($currentPath, 'thuong-hieu')) {
+            $type = 'brand';
+        } elseif (str_starts_with($currentPath, 'doi-tac')) {
+            $type = 'partner';
         } elseif (!empty($data['categories'])) {
             // Fallback: dùng type từ category nếu không xác định được từ URL
             $categories = $data['categories'];
@@ -81,8 +85,26 @@ class BreadcrumbHelper
             }
         }
         
+        // Handle brand breadcrumb
+        if ($type === 'brand' && isset($data['brand'])) {
+            $brand = $data['brand'];
+            $items[] = ['label' => 'Thương hiệu', 'url' => route('brand.index')];
+            $items[] = ['label' => $brand->name ?? 'Thương hiệu', 'url' => null];
+        } elseif ($type === 'brand' && !isset($data['brand'])) {
+            $items[] = ['label' => 'Thương hiệu', 'url' => null];
+        }
+        
+        // Handle partner breadcrumb
+        if ($type === 'partner' && isset($data['partner'])) {
+            $partner = $data['partner'];
+            $items[] = ['label' => 'Đối tác', 'url' => route('partner.index')];
+            $items[] = ['label' => $partner->name ?? 'Đối tác', 'url' => null];
+        } elseif ($type === 'partner' && !isset($data['partner'])) {
+            $items[] = ['label' => 'Đối tác', 'url' => null];
+        }
+        
         // Chỉ thêm current page item nếu chưa có item nào là current page và không phải là category page
-        if (!collect($items)->contains(fn($item) => !($item['url'] ?? null)) && !$hasCategories && !isset($data['category'])) {
+        if (!collect($items)->contains(fn($item) => !($item['url'] ?? null)) && !$hasCategories && !isset($data['category']) && $type !== 'brand' && $type !== 'partner') {
             if (isset($data['product'])) {
                 $items[] = ['label' => $data['product']->name ?? 'Sản phẩm', 'url' => null];
             } elseif (isset($data['news'])) {

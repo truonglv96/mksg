@@ -1,12 +1,12 @@
 @extends('web.master')
 
-@section('title', $title ?? 'Chi Tiết Sản Phẩm - Mắt Kính Sài Gòn')
+@section('title', $title ?? config('texts.product_detail_title'))
 
 @section('meta')
     @php
         use Illuminate\Support\Str;
 
-        $productName = $product->name ?? 'Sản phẩm';
+        $productName = $product->name ?? config('texts.product_fallback');
         $brandName = $brand->name
             ?? ($product->brand->name ?? null)
             ?? null;
@@ -124,7 +124,7 @@
                     @endphp
                     <button type="button" id="lightbox-trigger"
                         class="relative w-full h-[420px] lg:h-[520px] flex items-center justify-center bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-                        aria-label="Phóng to hình sản phẩm">
+                        aria-label="{{ config('texts.product_lightbox_zoom') }}">
                         <img id="main-product-image"
                             src="{{ $mainImageUrl }}"
                             alt="{{ $product->name }}"
@@ -157,8 +157,8 @@
                                 🚚
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Miễn phí vận chuyển</p>
-                                <p class="text-xs text-gray-500">Giao nhanh 24-72h toàn quốc</p>
+                                <p class="font-semibold text-gray-800">{{ config('texts.product_free_shipping') }}</p>
+                                <p class="text-xs text-gray-500">{{ config('texts.product_shipping_time') }}</p>
                             </div>
                         </div>
                         <div
@@ -167,8 +167,8 @@
                                 🔁
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Đổi trả trong 7 ngày</p>
-                                <p class="text-xs text-gray-500">Miễn phí nếu lỗi từ nhà sản xuất</p>
+                                <p class="font-semibold text-gray-800">{{ config('texts.product_return_policy') }}</p>
+                                <p class="text-xs text-gray-500">{{ config('texts.product_return_free') }}</p>
                             </div>
                         </div>
                         <div
@@ -177,8 +177,8 @@
                                 🛡️
                             </span>
                             <div>
-                                <p class="font-semibold text-gray-800">Bảo hành 12 tháng</p>
-                                <p class="text-xs text-gray-500">Chính hãng Helen Keller toàn hệ thống</p>
+                                <p class="font-semibold text-gray-800">{{ config('texts.product_warranty') }}</p>
+                                <p class="text-xs text-gray-500">{{ config('texts.product_warranty_info') }}</p>
                             </div>
                         </div>
                     </div>
@@ -203,10 +203,10 @@
                             </div> -->
                             @if($product->code)
                             <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
-                            <p>Mã SP: <span class="font-medium text-gray-700">{{ $product->code }}</span></p>
+                            <p>{{ config('texts.product_code') }} <span class="font-medium text-gray-700">{{ $product->code }}</span></p>
                             @endif
                             <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-gray-300"></span>
-                            <p>Thương Hiệu: <span class="font-medium text-green-600">
+                            <p>{{ config('texts.product_brand') }} <span class="font-medium text-green-600">
                                 @if($brand && $brand->name)
                                     {{ $brand->name }}
                                 @elseif($product->brand && $product->brand->name)
@@ -223,7 +223,7 @@
                                     data-layout="button_count" data-size="large">
                                     <a target="_blank"
                                         href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
-                                        class="fb-xfbml-parse-ignore">Chia sẻ</a>
+                                        class="fb-xfbml-parse-ignore">{{ config('texts.product_share') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -242,7 +242,7 @@
                             @php
                                 $savingPercent = round((($oldPrice - $currentPrice) / $oldPrice) * 100);
                             @endphp
-                            <span class="price-saving text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full">Tiết kiệm {{ $savingPercent }}%</span>
+                            <span class="price-saving text-xs font-semibold text-white bg-red-500 px-2 py-1 rounded-full">{{ config('texts.product_save') }} {{ $savingPercent }}%</span>
                             @endif
                         </div>
                     </div>
@@ -250,7 +250,7 @@
                     <div class="space-y-4">
                         @if(isset($productColors) && $productColors && $productColors->count() > 0)
                         <div>
-                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Màu gọng</p>
+                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">{{ config('texts.product_frame_color') }}</p>
                             <div class="flex flex-wrap gap-3">
                                 @foreach($productColors as $index => $color)
                                 <button type="button" class="color-chip border border-gray-200 shadow-sm bg-cover bg-center transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 {{ $index === 0 ? 'active' : '' }}"
@@ -264,13 +264,13 @@
                                 </button>
                                 @endforeach
                             </div>
-                            <p id="selected-color" class="mt-2 text-xs text-gray-500">Đã chọn: <span class="font-medium text-gray-700">{{ $productColors->first()->name ?? '' }}</span></p>
+                            <p id="selected-color" class="mt-2 text-xs text-gray-500">{{ config('texts.product_selected') }} <span class="font-medium text-gray-700">{{ $productColors->first()->name ?? '' }}</span></p>
                         </div>
                         @endif
 
                         @if(isset($discountedCombos) && $discountedCombos && $discountedCombos->count() > 0)
                         <div>
-                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">Chọn gói tròng kính</p>
+                            <p class="text-sm font-semibold text-gray-700 mb-2 uppercase">{{ config('texts.product_lens_package') }}</p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($discountedCombos as $index => $combo)
                                 <button type="button" 
@@ -290,7 +290,7 @@
                                 @endforeach
                             </div>
                             <p id="selected-option" class="mt-2 text-xs text-gray-500">
-                                Đã chọn: <span class="font-medium text-gray-700" id="selected-options-list">{{ $discountedCombos->first()->name ?? '' }}</span>
+                                {{ config('texts.product_selected') }} <span class="font-medium text-gray-700" id="selected-options-list">{{ $discountedCombos->first()->name ?? '' }}</span>
                             </p>
                         </div>
                         @endif
@@ -299,36 +299,36 @@
                     <div class="cta-buttons flex flex-col sm:flex-row gap-3">
                         <button
                             class="flex-1 bg-red-600 text-white py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-700 transition shadow-lg shadow-red-200 add-to-cart-btn">
-                            Thêm vào giỏ hàng
+                            {{ config('texts.product_add_to_cart') }}
                         </button>
                         <button
                             class="flex-1 border border-red-600 text-red-600 py-3 sm:py-4 rounded-xl font-semibold hover:bg-red-50 transition buy-now-btn">
-                            Mua ngay
+                            {{ config('texts.product_buy_now') }}
                         </button>
                     </div>
 
                     <div class="support-chips flex flex-wrap items-center gap-3 text-sm">
                         <span class="px-3 py-2 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-2">
-                            🛠️ Lắp kính trong 30 phút tại cửa hàng
+                            🛠️ {{ config('texts.product_install_time') }}
                         </span>
                         <a href="tel:0888368889"
                             class="px-4 py-2 rounded-full bg-yellow-50 text-yellow-700 font-semibold flex items-center gap-2 hover:bg-yellow-100 transition">
-                            ☎ Hotline tư vấn: 0888 368 889
+                            ☎ {{ config('texts.product_hotline') }} 0888 368 889
                         </a>
                     </div>
 
                     <div class="info-badges bg-gray-50 border border-gray-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm text-gray-600">
                         <div class="flex items-start gap-2">
                             <span class="text-red-500 mt-0.5">🏬</span>
-                            <p><strong>Nhận tại showroom</strong><br>301B Điện Biên Phủ, Q.3 - hoặc hệ thống 3 chi nhánh Mắt Kính Sài Gòn.</p>
+                            <p><strong>{{ config('texts.product_pickup_showroom') }}</strong><br>{{ config('texts.product_pickup_address') }}</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="text-red-500 mt-0.5">🎁</span>
-                            <p><strong>Quà tặng kèm</strong><br>Khăn lau & dung dịch vệ sinh kính cao cấp.</p>
+                            <p><strong>{{ config('texts.product_gift') }}</strong><br>{{ config('texts.product_gift_info') }}</p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="text-red-500 mt-0.5">💳</span>
-                            <p><strong>Thanh toán linh hoạt</strong><br>Tiền mặt, chuyển khoản, quẹt thẻ, trả góp.</p>
+                            <p><strong>{{ config('texts.product_payment') }}</strong><br>{{ config('texts.product_payment_info') }}</p>
                         </div>
                     </div>
                 </div>
@@ -339,7 +339,7 @@
             aria-label="Xem hình sản phẩm phóng to">
             <div class="image-lightbox__content">
                 <button type="button" id="lightbox-close" class="image-lightbox__close"
-                    aria-label="Đóng phóng to hình ảnh">
+                    aria-label="{{ config('texts.product_lightbox_close') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12"></path>
@@ -347,10 +347,10 @@
                 </button>
                 <div class="image-lightbox__main">
                     <button type="button" id="lightbox-prev"
-                        class="image-lightbox__nav image-lightbox__nav--prev" aria-label="Hình trước">&lsaquo;</button>
+                        class="image-lightbox__nav image-lightbox__nav--prev" aria-label="{{ config('texts.product_lightbox_prev') }}">&lsaquo;</button>
                     <img id="lightbox-main-image" src="" alt="Hình sản phẩm phóng to">
                     <button type="button" id="lightbox-next"
-                        class="image-lightbox__nav image-lightbox__nav--next" aria-label="Hình tiếp theo">&rsaquo;</button>
+                        class="image-lightbox__nav image-lightbox__nav--next" aria-label="{{ config('texts.product_lightbox_next') }}">&rsaquo;</button>
                 </div>
                 <div id="lightbox-thumbnails" class="image-lightbox__thumbs"></div>
             </div>
@@ -359,17 +359,16 @@
         <!-- Highlights -->
         <section class="highlights-grid grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-10">
             <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Cam kết chính hãng 100%</h3>
-                <p class="text-sm text-gray-600">Sản phẩm Helen Keller nhập khẩu, có đầy đủ tem chống hàng giả, phiếu bảo hành,
-                    hóa đơn VAT theo yêu cầu.</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_guarantee_title') }}</h3>
+                <p class="text-sm text-gray-600">{{ config('texts.product_guarantee_desc') }}</p>
             </div>
             <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Đo thị lực chuẩn quốc tế</h3>
-                <p class="text-sm text-gray-600">Trang thiết bị Essilor &amp; ZEISS, bác sĩ nhãn khoa nhiều kinh nghiệm. Đặt lịch trước để được ưu tiên.</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_eye_test_title') }}</h3>
+                <p class="text-sm text-gray-600">{{ config('texts.product_eye_test_desc') }}</p>
             </div>
             <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Hậu mãi trọn đời</h3>
-                <p class="text-sm text-gray-600">Miễn phí vệ sinh, chỉnh sửa gọng, thay ốc, da mũi, căn chỉnh form trong suốt quá trình sử dụng.</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_after_sale_title') }}</h3>
+                <p class="text-sm text-gray-600">{{ config('texts.product_after_sale_desc') }}</p>
             </div>
         </section>
 
@@ -377,17 +376,17 @@
         <section class="product-tabs bg-white border border-gray-100 rounded-2xl shadow-sm mb-10">
             <div class="flex items-center gap-6 px-4 sm:px-6 border-b overflow-x-auto">
                 <button class="tab-button active py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-description">{{ $content->name ?? 'Mô tả sản phẩm' }}</button>
+                    data-tab-target="tab-description">{{ $content->name ?? config('texts.product_tab_description') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-specs">{{ $tech->name ?? 'Thông số kỹ thuật' }}</button>
+                    data-tab-target="tab-specs">{{ $tech->name ?? config('texts.product_tab_specs') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-services">{{ $service->name ?? 'Dịch vụ &amp; bảo hành' }}</button>
+                    data-tab-target="tab-services">{{ $service->name ?? config('texts.product_tab_services') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-faq">{{ $tutorial->name ?? 'Câu hỏi thường gặp' }}</button>
+                    data-tab-target="tab-faq">{{ $tutorial->name ?? config('texts.product_tab_faq') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-address">{{ $address_sale->name ?? 'Địa chỉ bán hàng' }}</button>
+                    data-tab-target="tab-address">{{ $address_sale->name ?? config('texts.product_tab_address') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
-                    data-tab-target="tab-time">{{ $open_time->name ?? 'Giờ làm việc' }}</button>
+                    data-tab-target="tab-time">{{ $open_time->name ?? config('texts.product_tab_time') }}</button>
             </div>
             <div class="p-6 space-y-6">
                 <div id="tab-description" class="tab-panel active space-y-4 text-sm leading-relaxed text-gray-700">
@@ -395,7 +394,7 @@
                         {!! $content->text !!}
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu mô tả sản phẩm.</p>
+                            <p>{{ config('texts.product_no_description') }}</p>
                         </div>
                     @endif
                 </div>
@@ -407,7 +406,7 @@
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu thông số kỹ thuật.</p>
+                            <p>{{ config('texts.product_no_specs') }}</p>
                         </div>
                     @endif
                 </div>
@@ -419,7 +418,7 @@
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu dịch vụ &amp; bảo hành.</p>
+                            <p>{{ config('texts.product_no_services') }}</p>
                         </div>
                     @endif
                 </div>
@@ -431,7 +430,7 @@
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu câu hỏi thường gặp.</p>
+                            <p>{{ config('texts.product_no_faq') }}</p>
                         </div>
                     @endif
                 </div>
@@ -443,7 +442,7 @@
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu địa chỉ bán hàng.</p>
+                            <p>{{ config('texts.product_no_address') }}</p>
                         </div>
                     @endif
                 </div>
@@ -455,7 +454,7 @@
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
-                            <p>Không có dữ liệu giờ làm việc.</p>
+                            <p>{{ config('texts.product_no_time') }}</p>
                         </div>
                     @endif
                 </div>
@@ -466,17 +465,17 @@
         <section class="showroom-section bg-gradient-to-br from-red-50 via-white to-white border border-red-100 rounded-2xl p-6 md:p-8 mb-10">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div class="max-w-xl">
-                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">Trải nghiệm trực tiếp tại showroom Mắt Kính Sài Gòn</h2>
-                    <p class="text-sm text-gray-600 mb-4">Hệ thống cửa hàng phủ khắp TP.HCM, phục vụ đo mắt chuẩn quốc tế, lắp kính lấy nhanh và chăm sóc sau bán tận tâm.</p>
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">{{ config('texts.product_showroom_title') }}</h2>
+                    <p class="text-sm text-gray-600 mb-4">{{ config('texts.product_showroom_desc') }}</p>
                     @if(isset($address_sale) && isset($address_sale->text) && $address_sale->text)
                         <div class="text-sm text-gray-700 mb-4">
                             {!! $address_sale->text !!}
                         </div>
                     @else
                     <ul class="space-y-3 text-sm text-gray-700 font-sans">
-                        <li><strong>Showroom 1:</strong> 301B Điện Biên Phủ, P. Xuân Hòa, TP.HCM</li>
-                        <li><strong>Showroom 2:</strong> 245C Xô Viết Nghệ Tĩnh, Phường Gia Định, TP.HCM</li>
-                        <li><strong>Showroom 3:</strong> 90 Nguyễn Hữu Thọ, Phường Bà Rịa, TP.HCM</li>
+                        <li><strong>{{ config('texts.product_showroom_1') }}</strong> {{ config('texts.product_showroom_1_address') }}</li>
+                        <li><strong>{{ config('texts.product_showroom_2') }}</strong> {{ config('texts.product_showroom_2_address') }}</li>
+                        <li><strong>{{ config('texts.product_showroom_3') }}</strong> {{ config('texts.product_showroom_3_address') }}</li>
                     </ul>
                     @endif
                     @if(isset($open_time) && isset($open_time->text) && $open_time->text)
@@ -484,7 +483,7 @@
                             {!! $open_time->text !!}
                         </div>
                     @else
-                        <p class="text-sm text-gray-700 mt-4"><strong>Giờ làm việc:</strong> Thứ 2 - Thứ 7: 08h00 - 20h30 | CN &amp; Lễ: 08h30 - 20h00</p>
+                        <p class="text-sm text-gray-700 mt-4"><strong>{{ config('texts.product_work_time') }}</strong> {{ config('texts.product_work_time_value') }}</p>
                     @endif
                 </div>
                 <div class="flex-1 w-full">
@@ -492,48 +491,48 @@
                         <div class="consult-form-header">
                             <span>📅</span>
                             <div>
-                                <h3 class="consult-form-title">Đặt lịch đo mắt &amp; tư vấn nhanh</h3>
-                                <p class="consult-form-subtitle">Điền thông tin dưới đây, chuyên viên sẽ gọi lại trong 10 phút.</p>
+                                <h3 class="consult-form-title">{{ config('texts.product_book_appointment_title') }}</h3>
+                                <p class="consult-form-subtitle">{{ config('texts.product_book_appointment_desc') }}</p>
                             </div>
                         </div>
                         <form class="consult-form" autocomplete="on">
                             <div class="consult-form-grid">
                                 <div class="form-field">
-                                    <label for="consult-name">Họ và tên</label>
-                                    <input id="consult-name" type="text" name="name" placeholder="Nguyễn Thị Minh Anh" autocomplete="name"
+                                    <label for="consult-name">{{ config('texts.product_form_name') }}</label>
+                                    <input id="consult-name" type="text" name="name" placeholder="{{ config('texts.product_form_name_placeholder') }}" autocomplete="name"
                                         required>
                                 </div>
                                 <div class="form-field">
-                                    <label for="consult-phone">Số điện thoại</label>
-                                    <input id="consult-phone" type="tel" name="phone" placeholder="0966 666 301" autocomplete="tel"
+                                    <label for="consult-phone">{{ config('texts.product_form_phone') }}</label>
+                                    <input id="consult-phone" type="tel" name="phone" placeholder="{{ config('texts.product_form_phone_placeholder') }}" autocomplete="tel"
                                         required>
                                 </div>
                             </div>
                             <div class="consult-form-grid">
                                 <div class="form-field form-field--select">
-                                    <label for="consult-showroom">Showroom gần bạn</label>
+                                    <label for="consult-showroom">{{ config('texts.product_form_showroom') }}</label>
                                     <select id="consult-showroom" name="showroom" required>
-                                        <option value="" disabled selected>Chọn chi nhánh</option>
-                                        <option>301B Điện Biên Phủ, Q.3</option>
-                                        <option>245C Xô Viết Nghệ Tĩnh, Bình Thạnh</option>
-                                        <option>90 Nguyễn Hữu Thọ, Bà Rịa</option>
+                                        <option value="" disabled selected>{{ config('texts.product_form_showroom_placeholder') }}</option>
+                                        <option>{{ config('texts.product_form_showroom_1') }}</option>
+                                        <option>{{ config('texts.product_form_showroom_2') }}</option>
+                                        <option>{{ config('texts.product_form_showroom_3') }}</option>
                                     </select>
                                 </div>
                                 <div class="form-field form-field--datetime">
-                                    <label for="consult-datetime">Thời gian mong muốn</label>
+                                    <label for="consult-datetime">{{ config('texts.product_form_datetime') }}</label>
                                     <input id="consult-datetime" type="datetime-local" name="datetime" required>
                                 </div>
                             </div>
                             <div class="form-field">
-                                <label for="consult-message">Nhu cầu hoặc độ kính hiện tại</label>
+                                <label for="consult-message">{{ config('texts.product_form_message') }}</label>
                                 <textarea id="consult-message" name="message" rows="3"
-                                    placeholder="Ví dụ: cần đo lại độ, muốn tư vấn tròng chống ánh sáng xanh..."></textarea>
+                                    placeholder="{{ config('texts.product_form_message_placeholder') }}"></textarea>
                             </div>
                             <button type="submit">
-                                <span>📨</span> Gửi yêu cầu tư vấn
+                                <span>📨</span> {{ config('texts.product_form_submit') }}
                             </button>
                         </form>
-                        <p class="consult-form-help">Hoặc liên hệ nhanh: <a href="tel:0966666301">0966 666 301</a> • <a
+                        <p class="consult-form-help">{{ config('texts.product_form_help') }} <a href="tel:0966666301">0966 666 301</a> • <a
                                 href="mailto:mksgvn@gmail.com">mksgvn@gmail.com</a></p>
                     </div>
                 </div>
@@ -544,7 +543,7 @@
         @if(isset($relatedProducts) && $relatedProducts && $relatedProducts->count() > 0)
         <section class="mb-12">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl md:text-2xl font-bold text-gray-900">Sản phẩm liên quan</h2>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-900">{{ config('texts.product_related_title') }}</h2>
                 <div class="h-1 bg-red-600 w-16 md:w-24 rounded-full"></div>
             </div>
             <div class="swiper-container related-swiper">
@@ -601,7 +600,7 @@
                                             class="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-700 transition add-to-cart-btn"
                                             data-product-id="{{ $relatedProduct->id }}"
                                             data-product-name="{{ $relatedProduct->name }}"
-                                            data-product-price="{{ $relatedPrice }}">Thêm vào giỏ</button>
+                                            data-product-price="{{ $relatedPrice }}">{{ config('texts.product_related_add_to_cart') }}</button>
                                         <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}"
                                             class="px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                                             <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

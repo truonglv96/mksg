@@ -1,13 +1,13 @@
 @extends('web.master')
 
-@section('title', $title ?? 'Tin Tức - Mắt Kính Sài Gòn')
+@section('title', $title ?? config('texts.news_detail_title'))
 
 @section('meta')
     @php
         $seo = $seoData ?? [];
         $seoDescription = $seo['description'] ?? '';
         $seoKeywords = $seo['keywords'] ?? null;
-        $seoTitle = $seo['title'] ?? ($title ?? 'Tin Tức - Mắt Kính Sài Gòn');
+        $seoTitle = $seo['title'] ?? ($title ?? config('texts.news_detail_title'));
         $canonicalUrl = $seo['canonicalUrl'] ?? route('new.detail', [$news->alias]);
         $imageUrl = $seo['imageUrl'] ?? '';
         $schemaData = $seo['schemaData'] ?? [];
@@ -29,7 +29,7 @@
         <meta property="og:description" content="{{ trim(strip_tags($seoDescription)) }}">
     @endif
     <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:site_name" content="Mắt Kính Sài Gòn">
+    <meta property="og:site_name" content="{{ config('texts.page_title') }}">
     @if(!empty($imageUrl))
         <meta property="og:image" content="{{ $imageUrl }}">
     @endif
@@ -62,7 +62,7 @@
     <section class="news-hero mb-8">
         <span
             class="inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold text-red-600 bg-white/70 border border-red-200 rounded-full mb-4 shadow-sm w-fit">
-            📰 {{ $relatedCategory->name ?? 'Tin tức' }}
+            📰 {{ $relatedCategory->name ?? config('texts.news_detail_category') }}
         </span>
         <h1 class="text-3xl md:text-4xl font-extrabold leading-snug text-slate-900">
             {{ $news->title ?? $news->name }}
@@ -102,7 +102,7 @@
                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         <circle cx="12" cy="12" r="3" />
                     </svg>
-                    {{ number_format($news->view) }} lượt xem
+                    {{ number_format($news->view) }} {{ config('texts.news_detail_views') }}
                 </span>
             @endif
         </div>
@@ -120,7 +120,7 @@
             {{-- Box "Từ khóa / chia sẻ" đơn giản --}}
             <div class="px-5 sm:px-8 md:px-10 pb-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100">
                 <div class="flex flex-wrap gap-2 items-center text-sm text-slate-600">
-                    <span class="font-semibold text-slate-800">Chia sẻ:</span>
+                    <span class="font-semibold text-slate-800">{{ config('texts.news_detail_share') }}:</span>
                     <ul class="flex items-center">
                         @php
                             $shareUrl = $canonicalUrl ?? route('new.detail', [$news->alias]);
@@ -131,14 +131,14 @@
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                             </svg>
-                            Chia sẻ
+                            {{ config('texts.news_detail_share') }}
                         </a>
                     </ul>
                 </div>
 
                 @if($relatedCategory)
                     <div class="text-xs sm:text-sm text-slate-500">
-                        Thuộc chuyên mục:
+                        {{ config('texts.news_detail_category_label') }}
                         <span class="font-semibold text-red-600">
                             {{ $relatedCategory->name ?? $relatedCategory->title }}
                         </span>
@@ -150,7 +150,7 @@
             @if(isset($relatedNewsData) && $relatedNewsData->count())
                 <div class="border-t border-slate-100 px-5 sm:px-8 md:px-10 pt-7 pb-8">
                     <h2 class="text-lg md:text-xl font-bold text-slate-900 mb-4">
-                        Tin liên quan
+                        {{ config('texts.news_detail_related_title') }}
                     </h2>
                     <div class="swiper-container news-slider">
                         <div class="swiper-wrapper">
@@ -190,10 +190,10 @@
                                             <div
                                                 class="mt-auto pt-2 text-xs md:text-sm text-slate-500 flex items-center flex-wrap gap-2">
                                                 <span>{{ $item['date'] }}</span>
-                                                <span>• 5 phút đọc</span>
+                                                <span>• {{ config('texts.news_detail_read_time') }}</span>
                                                 <a href="{{ $item['detailUrl'] }}"
                                                    class="font-semibold text-red-500 ml-auto hover:underline">
-                                                    Đọc tiếp →
+                                                    {{ config('texts.news_detail_read_more') }}
                                                 </a>
                                             </div>
                                         @endif

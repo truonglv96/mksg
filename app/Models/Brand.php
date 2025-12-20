@@ -35,6 +35,18 @@ class Brand extends Model
         return '';
     }
 
+    public function getAllImages() {
+        $images = json_decode($this->url_imgs, true);
+        if($images && is_array($images)) {
+            return array_map(function($image) {
+                return asset("img/brand/".$image);
+            }, $images);
+        } elseif($this->url_imgs) {
+            return [asset('img/brand/'. $this->url_imgs)];
+        }
+        return [];
+    }
+
 
     public static function getAllBrandAdmin() {
         return Brand::orderBy('weight', 'asc')->get();

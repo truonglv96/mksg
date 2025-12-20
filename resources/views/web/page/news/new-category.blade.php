@@ -1,6 +1,6 @@
 @extends('web.master')
 
-@section('title', $title ?? 'Tin Tức - Mắt Kính Sài Gòn')
+@section('title', $title ?? config('texts.news_category_title'))
 
 @section('content')
 <main class="container mx-auto px-4 py-8">
@@ -11,18 +11,16 @@
     <section class="news-hero">
         <span
             class="inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold text-red-600 bg-white/70 border border-red-200 rounded-full mb-4 shadow-sm w-fit">
-            📰 Trang tin Mắt Kính Sài Gòn
+            📰 {{ config('texts.news_category_badge') }}
         </span>
-        <h1>Kho kiến thức &amp; bản tin cập nhật cho người yêu đôi mắt</h1>
+        <h1>{{ config('texts.news_category_hero_title') }}</h1>
         <p class="text-gray-600 text-lg max-w-3xl">
-            Cùng khám phá xu hướng kính mới, mẹo chăm sóc mắt và câu chuyện tại hệ thống showroom của Mắt Kính Sài
-            Gòn.
-            Chúng tôi cập nhật mỗi tuần để bạn luôn dẫn đầu phong cách và bảo vệ thị lực tốt nhất.
+            {{ config('texts.news_category_hero_desc') }}
         </p>
         <div class="news-hero__meta">
-            <span>📍 3 showroom tại TP.HCM</span>
-            <span>🕒 Thứ 2 - Thứ 7: 08h00 - 20h30</span>
-            <span>📞 Hotline: 0888 368 888</span>
+            <span>📍 {{ config('texts.news_category_location') }}</span>
+            <span>🕒 {{ config('texts.news_category_work_time') }}</span>
+            <span>📞 {{ config('texts.news_category_hotline') }}</span>
         </div>
     </section>
 
@@ -34,7 +32,7 @@
                 id="news-search"
                 name="keyword"
                 value="{{ request('keyword') }}"
-                placeholder="Tìm kiếm bài viết, chủ đề hoặc thương hiệu...">
+                placeholder="{{ config('texts.news_category_search_placeholder') }}">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                     d="M21 21l-5.2-5.2m1.45-4.55A6.25 6.25 0 1110 4.25a6.25 6.25 0 017.25 6.25z" />
@@ -51,7 +49,7 @@
 
         <a href="{{ $baseNewsUrl }}"
            class="news-chip {{ !isset($currentCategory) || !$currentCategory || ($baseCategory && $currentCategory && $currentCategory->id === $baseCategory->id) ? 'active' : '' }}">
-            Tất cả
+            {{ config('texts.news_category_all') }}
         </a>
 
         @if(isset($newsTypes) && $newsTypes->count())
@@ -66,14 +64,14 @@
                 @endphp
                 <a href="{{ url('/tin-tuc/' . $path) }}"
                    class="news-chip {{ $isActive ? 'active' : '' }}">
-                    {{ $type->name ?? $type->title ?? 'Danh mục' }}
+                    {{ $type->name ?? $type->title ?? config('texts.news_category_fallback') }}
                 </a>
             @endforeach
         @else
-            <button type="button" class="news-chip" data-filter="kien-thuc">Kiến thức mắt</button>
-            <button type="button" class="news-chip" data-filter="xu-huong">Xu hướng kính</button>
-            <button type="button" class="news-chip" data-filter="cham-soc">Chăm sóc mắt</button>
-            <button type="button" class="news-chip" data-filter="su-kien">Sự kiện nổi bật</button>
+            <button type="button" class="news-chip" data-filter="kien-thuc">{{ config('texts.news_category_filter_knowledge') }}</button>
+            <button type="button" class="news-chip" data-filter="xu-huong">{{ config('texts.news_category_filter_trend') }}</button>
+            <button type="button" class="news-chip" data-filter="cham-soc">{{ config('texts.news_category_filter_care') }}</button>
+            <button type="button" class="news-chip" data-filter="su-kien">{{ config('texts.news_category_filter_event') }}</button>
         @endif
     </section>
 
@@ -100,7 +98,7 @@
                             </div>
                             <div class="news-card__content">
                                 <span class="news-badge text-red-600 bg-red-50 uppercase">
-                                    {{ $itemCategory->name ?? 'Tin tức' }}
+                                    {{ $itemCategory->name ?? config('texts.news_detail_category') }}
                                 </span>
                                 <h3 class="news-title">
                                     <a href="{{ route('new.detail', $item->alias) }}" class="hover:text-red-600">
@@ -120,24 +118,24 @@
                                     <span>
                                         {{ $dateText }}
                                         @if($dateText)
-                                            • 5 phút đọc
+                                            • {{ config('texts.news_detail_read_time') }}
                                         @endif
                                     </span>
-                                    <a href="{{ route('new.detail', $item->alias) }}">Đọc tiếp →</a>
+                                    <a href="{{ route('new.detail', $item->alias) }}">{{ config('texts.news_detail_read_more') }}</a>
                                 </div>
                             </div>
                         </article>
                     @endforeach
                 @else
                     <p class="text-center text-sm text-slate-500 py-6 col-span-full">
-                        Hiện chưa có bài viết nào.
+                        {{ config('texts.news_category_no_posts') }}
                     </p>
                 @endif
             </div>
 
             {{-- Pagination: dynamic nhưng style bám theo .news-pagination trong CSS (giống HTML gốc: các nút tròn) --}}
             @if(isset($news) && $news->hasPages())
-                <nav class="news-pagination" aria-label="Phân trang bài viết">
+                <nav class="news-pagination" aria-label="{{ config('texts.news_category_pagination_label') }}">
                     @php
                         $news->appends(request()->query());
                         $currentPage = $news->currentPage();
@@ -148,9 +146,9 @@
 
                     {{-- Prev --}}
                     @if($news->onFirstPage())
-                        <button type="button" aria-label="Trang trước" disabled>←</button>
+                        <button type="button" aria-label="{{ config('texts.news_category_pagination_prev') }}" disabled>←</button>
                     @else
-                        <button type="button" aria-label="Trang trước"
+                        <button type="button" aria-label="{{ config('texts.news_category_pagination_prev') }}"
                             onclick="window.location='{{ $news->previousPageUrl() }}'">←</button>
                     @endif
 
@@ -185,10 +183,10 @@
 
                     {{-- Next --}}
                     @if($news->hasMorePages())
-                        <button type="button" aria-label="Trang tiếp theo"
+                        <button type="button" aria-label="{{ config('texts.news_category_pagination_next') }}"
                             onclick="window.location='{{ $news->nextPageUrl() }}'">→</button>
                     @else
-                        <button type="button" aria-label="Trang tiếp theo" disabled>→</button>
+                        <button type="button" aria-label="{{ config('texts.news_category_pagination_next') }}" disabled>→</button>
                     @endif
                 </nav>
             @endif

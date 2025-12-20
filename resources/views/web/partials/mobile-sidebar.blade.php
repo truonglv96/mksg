@@ -5,14 +5,14 @@
     </div>
     <div class="overflow-y-auto h-full pb-20">
         <div class="bg-red-600 text-white text-center py-2 font-bold text-sm">
-            <span class="inline-block mr-2 text-lg">🏷️</span> ĐANG GIẢM GIÁ
+            <span class="inline-block mr-2 text-lg">🏷️</span> {{ config('texts.mobile_sidebar_sale') }}
         </div>
         <ul class="text-gray-700">
             <li class="p-3 border-b hover:bg-gray-100">
-                <a href="{{ route('home') }}">TRANG CHỦ</a>
+                <a href="{{ route('home') }}">{{ config('texts.nav_home') }}</a>
             </li>
             <li class="p-3 border-b hover:bg-gray-100">
-                <a href="#">GIỚI THIỆU</a>
+                <a href="#">{{ config('texts.nav_about') }}</a>
             </li>
             
             @if(isset($categories) && $categories->count() > 0)

@@ -30,4 +30,8 @@ class Page extends Model
     public static function getDetailPage($link) {
         return Page::where('link', $link)->first();
     }
+
+    public static function getDetailPageByAlias($alias) {
+        return Page::where('link', $alias)->first();
+    }
 }

@@ -5,6 +5,9 @@ use App\Http\Controllers\Web\IndexController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\NewsController;
 use App\Http\Controllers\Web\SearchController;
+use App\Http\Controllers\Web\BrandController;
+use App\Http\Controllers\Web\PartnerController;
+use App\Http\Controllers\Web\PageController;
 
 // Trang chủ
 Route::get('/', [IndexController::class, 'index'])->name('home');
@@ -36,9 +39,34 @@ Route::prefix('tin-tuc')->name('new.')->group(function () {
         ->name('category.path');
 });
 
+// Thương hiệu
+Route::prefix('thuong-hieu')->name('brand.')->group(function () {
+    Route::get('/', [BrandController::class, 'index'])->name('index');
+    Route::get('/{alias}', [BrandController::class, 'detail'])->name('detail');
+});
+
+// Đối tác
+Route::prefix('doi-tac')->name('partner.')->group(function () {
+    Route::get('/', [PartnerController::class, 'index'])->name('index');
+    Route::get('/{alias}', [PartnerController::class, 'detail'])->name('detail');
+});
+
+// Page detail
+Route::prefix('trang')->name('page.')->group(function () {
+    Route::get('/{alias}', [PageController::class, 'detail'])->name('detail');
+});
+
 // Tìm kiếm
 Route::post('/search', [SearchController::class, 'search'])->name('search');
 
 // Giỏ hàng
 Route::get('/gio-hang', [ProductController::class, 'shoppingCart'])->name('cart');
 Route::post('/checkout', [ProductController::class, 'checkout'])->name('checkout');
+
+// Admin Routes
+require __DIR__.'/admin.php';
+
+// Route alias for login (for Laravel's auth middleware)
+Route::get('/login', function () {
+    return redirect()->route('admin.login');
+})->name('login');

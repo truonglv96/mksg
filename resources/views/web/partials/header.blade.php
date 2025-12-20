@@ -11,11 +11,10 @@
     <div class="container mx-auto px-4 py-3 flex justify-between items-center lg:hidden">
     
         <button id="mobile-menu-btn" class="text-3xl text-gray-700">☰</button>
-        <div class="flex flex-col items-center flex-shrink-0">
-            <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="Mắt Kính Hàng Hiệu"
-                class="h-6">
-            <span class="text-xs font-serif font-medium mt-0.5 text-gray-600">Mắt Kính Sài Gòn</span>
-        </div>
+        <a href="{{ route('home') }}" class="flex flex-col items-center flex-shrink-0">
+            <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="{{ config('texts.alt_logo_premium') }}"
+                class="h-12 md:h-14">
+        </a>
         <div class="flex items-center space-x-4">
             <button id="search-btn-mobile" class="text-gray-700 hover:text-red-600 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,14 +37,14 @@
 
     <nav class="hidden lg:block bg-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center py-3">
-            <div class="flex items-center">
-                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="Mắt Kính Sài Gòn"
+            <a href="{{ route('home') }}" class="flex items-center">
+                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="{{ config('texts.alt_logo') }}"
                     class="h-8 mr-3">
-            </div>
+            </a>
             <ul class="flex space-x-6 text-sm font-medium">
-                <li><a href="{{ route('home') }}" class="text-red-600 font-bold hover:text-red-600">TRANG CHỦ</a></li>
+                <li><a href="{{ route('home') }}" class="text-red-600 font-bold hover:text-red-600">{{ config('texts.nav_home') }}</a></li>
                 @if(isset($brands) && $brands->count() > 0)
-                    <li><a href="#" class="text-red-600 font-bold hover:text-red-600">THƯƠNG HIỆU</a></li>
+                    <li><a href="#" class="text-red-600 font-bold hover:text-red-600">{{ config('texts.nav_brand') }}</a></li>
                 @endif
 
                 @if(isset($categories) && $categories->count() > 0)
@@ -137,7 +136,7 @@
                                                             @endphp
                                                             <a href="{{ $child->alias ? url($basePath . $childPath) : '#' }}"
                                                                 class="hover:text-red-600">
-                                                                Xem tất cả
+                                                                {{ config('texts.view_all') }}
                                                             </a>
                                                         </li>
                                                     </ul>
@@ -179,7 +178,7 @@
         {{-- Search Header --}}
         <div class="p-4 border-b border-gray-200">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Tìm kiếm</h2>
+                <h2 class="text-xl font-bold text-gray-800">{{ config('texts.search_title') }}</h2>
                 <button id="search-close-btn" class="text-gray-500 hover:text-gray-700 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -191,29 +190,29 @@
             <div class="relative">
                 <input type="text" 
                        id="search-input" 
-                       placeholder="Nhập từ khóa tìm kiếm sản phẩm, tin tức hoặc thương hiệu..." 
+                       placeholder="{{ config('texts.search_placeholder') }}" 
                        class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
                 <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 <button id="search-submit-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
-                    Tìm
+                    {{ config('texts.search_button') }}
                 </button>
             </div>
             
             {{-- Search Tabs --}}
             <div class="flex space-x-2 mt-4 flex-wrap">
                 <button data-search-type="all" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-red-600 text-white">
-                    Tất cả
+                    {{ config('texts.search_all') }}
                 </button>
                 <button data-search-type="product" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
-                    Sản phẩm
+                    {{ config('texts.search_product') }}
                 </button>
                 <button data-search-type="news" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
-                    Tin tức
+                    {{ config('texts.search_news') }}
                 </button>
                 <button data-search-type="brand" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
-                    Thương hiệu
+                    {{ config('texts.search_brand') }}
                 </button>
             </div>
         </div>
@@ -224,7 +223,7 @@
                 <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
-                <p class="text-sm">Nhập từ khóa để tìm kiếm</p>
+                <p class="text-sm">{{ config('texts.search_enter_keyword') }}</p>
             </div>
         </div>
         
@@ -235,7 +234,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="text-sm">Đang tìm kiếm...</span>
+                <span class="text-sm">{{ config('texts.search_loading') }}</span>
             </div>
         </div>
     </div>
@@ -269,7 +268,7 @@
         searchModal.classList.remove('flex');
         document.body.style.overflow = '';
         searchInput.value = '';
-        searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><p class="text-sm">Nhập từ khóa để tìm kiếm</p></div>';
+            searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><p class="text-sm">{{ config('texts.search_enter_keyword') }}</p></div>';
     }
     
     // Event listeners cho nút mở
@@ -315,7 +314,7 @@
     function performSearch() {
         const keyword = searchInput.value.trim();
         if (!keyword) {
-            searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><p class="text-sm">Vui lòng nhập từ khóa tìm kiếm</p></div>';
+            searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><p class="text-sm">{{ config('texts.search_please_enter') }}</p></div>';
             return;
         }
         
@@ -340,12 +339,12 @@
             if (data.success) {
                 displayResults(data.results, keyword);
             } else {
-                searchResults.innerHTML = `<div class="text-center text-red-500 py-8"><p class="text-sm">${data.message || 'Có lỗi xảy ra'}</p></div>`;
+                searchResults.innerHTML = `<div class="text-center text-red-500 py-8"><p class="text-sm">${data.message || '{{ config('texts.search_error') }}'}</p></div>`;
             }
         })
         .catch(error => {
             searchLoading.classList.add('hidden');
-            searchResults.innerHTML = '<div class="text-center text-red-500 py-8"><p class="text-sm">Có lỗi xảy ra khi tìm kiếm</p></div>';
+            searchResults.innerHTML = '<div class="text-center text-red-500 py-8"><p class="text-sm">{{ config('texts.search_error_message') }}</p></div>';
             console.error('Search error:', error);
         });
     }
@@ -363,14 +362,14 @@
                     <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <p class="text-sm font-medium mb-1">Không tìm thấy kết quả</p>
-                    <p class="text-xs text-gray-400">Thử với từ khóa khác</p>
+                    <p class="text-sm font-medium mb-1">{{ config('texts.search_no_results') }}</p>
+                    <p class="text-xs text-gray-400">{{ config('texts.search_try_other') }}</p>
                 </div>
             `;
         } else {
             // Sản phẩm
             if (hasProducts && (currentSearchType === 'all' || currentSearchType === 'product')) {
-                html += '<div class="mb-6"><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>Sản phẩm (' + results.products.length + ')</h3><div class="space-y-3">';
+                html += '<div class="mb-6"><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>{{ config('texts.search_product') }} (' + results.products.length + ')</h3><div class="space-y-3">';
                 results.products.forEach(product => {
                     html += `
                         <a href="${product.url}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
@@ -387,7 +386,7 @@
             
             // Tin tức
             if (hasNews && (currentSearchType === 'all' || currentSearchType === 'news')) {
-                html += '<div><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>Tin tức (' + results.news.length + ')</h3><div class="space-y-3">';
+                html += '<div><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>{{ config('texts.search_news') }} (' + results.news.length + ')</h3><div class="space-y-3">';
                 results.news.forEach(news => {
                     html += `
                         <a href="${news.url}" class="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
@@ -405,7 +404,7 @@
             
             // Thương hiệu
             if (hasBrands && (currentSearchType === 'all' || currentSearchType === 'brand')) {
-                html += '<div class="mb-6"><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>Thương hiệu (' + results.brands.length + ')</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+                html += '<div class="mb-6"><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>{{ config('texts.search_brand') }} (' + results.brands.length + ')</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
                 results.brands.forEach(brand => {
                     html += `
                         <a href="${brand.url}" class="flex flex-col items-center justify-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 group">
@@ -442,7 +441,7 @@
         if (keyword.length >= 2) {
             searchTimeout = setTimeout(performSearch, 500);
         } else if (keyword.length === 0) {
-            searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><p class="text-sm">Nhập từ khóa để tìm kiếm</p></div>';
+            searchResults.innerHTML = '<div class="text-center text-gray-500 py-8"><svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><p class="text-sm">{{ config('texts.search_enter_keyword') }}</p></div>';
         }
     });
 })();
