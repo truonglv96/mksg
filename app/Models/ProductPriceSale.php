@@ -10,6 +10,21 @@ class ProductPriceSale extends Model
 {
     use HasFactory;
     protected $table = 'product_price_sales';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'id_category',
+        'parent_category',
+        'id_Product',
+        'order',
+        'discount',
+        'price',
+        'status',
+    ];
 
     public static function getPriceSaleByIDProduct($idProduct) {
         return ProductPriceSale::where('id_Product', $idProduct)->get();

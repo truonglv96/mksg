@@ -11,6 +11,16 @@ class Material extends Model
     use HasFactory;
 
     protected $table = 'material';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'weight',
+    ];
 
     public static function getMaterialAdmin() {
         return Material::orderBy('weight', 'asc')->get();

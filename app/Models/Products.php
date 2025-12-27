@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Color;
+use App\Models\ProductImage;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -15,6 +16,39 @@ class Products extends Model
     use HasFactory;
     protected $table = 'products';
     const IMAGE = 'img/product/';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'alias',
+        'sku',
+        'code_sp',
+        'description',
+        'content',
+        'tech',
+        'service',
+        'tutorial',
+        'address_sale',
+        'open_time',
+        'price',
+        'price_sale',
+        'url_img',
+        'url_imgs',
+        'brand_id',
+        'material_id',
+        'hidden',
+        'weight',
+        'unit',
+        'type_color',
+        'type_sale',
+        'gender',
+        'kw',
+        'meta_des',
+    ];
 
     /**
      * Lấy category path từ product (lấy category cuối cùng - deepest và build full path)
@@ -296,6 +330,11 @@ class Products extends Model
     public function colors()
     {
         return $this->belongsToMany(Color::class, 'product_color', 'productID', 'colorID');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, 'product_id', 'id')->orderBy('weight', 'ASC');
     }
 
     public static function getPriceRangesByCategoryId($categoryId) {

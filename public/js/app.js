@@ -1,5 +1,17 @@
         // 9. LOGIC JAVASCRIPT
-        document.addEventListener('DOMContentLoaded', function () {
+        // Đợi Swiper load xong trước khi chạy
+        function waitForSwiper(callback) {
+            if (typeof Swiper !== 'undefined') {
+                callback();
+            } else {
+                setTimeout(function() {
+                    waitForSwiper(callback);
+                }, 100);
+            }
+        }
+
+        waitForSwiper(function() {
+            document.addEventListener('DOMContentLoaded', function () {
 
             // --- TÍNH TOÁN VỊ TRÍ TOP CHO MEGA MENU ---
             function updateMegaMenuPosition() {
@@ -1152,3 +1164,4 @@
                 });
             });
         });
+        }); // Đóng waitForSwiper callback

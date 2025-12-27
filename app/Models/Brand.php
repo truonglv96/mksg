@@ -11,6 +11,29 @@ class Brand extends Model
     const IS_ACTIVE = 1;
     const IMAGE = 'img/brand/';
     protected $table = 'brand';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'alias',
+        'content',
+        'url_imgs',
+        'weight',
+        'hidden',
+        'logo',
+    ];
+
+    /**
+     * Get brand images
+     */
+    public function images()
+    {
+        return $this->hasMany(BrandImage::class, 'brand_id');
+    }
 
     public function getLogoBrand() {
         return asset('img/brand/'. $this->logo);

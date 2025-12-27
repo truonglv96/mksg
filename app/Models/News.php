@@ -10,6 +10,25 @@ class News extends Model
     use HasFactory;
     protected $table = 'news';
     const IMAGE = 'img/news/';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'alias',
+        'description',
+        'content',
+        'url_img',
+        'views',
+        'weight',
+        'hidden',
+        'kw',
+        'meta_description',
+        'cat_id',
+    ];
 
     public function getImage() {
         return asset('img/news/'. $this->url_img);

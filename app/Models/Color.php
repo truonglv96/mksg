@@ -11,6 +11,17 @@ class Color extends Model
 
     protected $table = 'color';
     const IMAGE = 'img/color/';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'url_img',
+        'weight',
+    ];
 
     public static function getAllColorAdmin() {
         return Color::orderBy('weight', 'asc')->get();

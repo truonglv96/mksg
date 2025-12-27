@@ -16,9 +16,15 @@ $breadcrumbs = [
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Tổng đơn hàng</p>
-                <p class="text-3xl font-bold text-gray-900">1,234</p>
-                <p class="text-xs text-green-600 mt-2">
-                    <i class="fas fa-arrow-up"></i> 12% so với tháng trước
+                <p class="text-3xl font-bold text-gray-900">{{ number_format($totalOrders) }}</p>
+                <p class="text-xs {{ $orderGrowth >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2">
+                    @if($orderGrowth > 0)
+                        <i class="fas fa-arrow-up"></i> {{ $orderGrowth }}% so với tháng trước
+                    @elseif($orderGrowth < 0)
+                        <i class="fas fa-arrow-down"></i> {{ abs($orderGrowth) }}% so với tháng trước
+                    @else
+                        <i class="fas fa-minus"></i> Không đổi
+                    @endif
                 </p>
             </div>
             <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -32,9 +38,25 @@ $breadcrumbs = [
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Doanh thu</p>
-                <p class="text-3xl font-bold text-gray-900">₫250M</p>
-                <p class="text-xs text-green-600 mt-2">
-                    <i class="fas fa-arrow-up"></i> 8% so với tháng trước
+                <p class="text-3xl font-bold text-gray-900">
+                    @if($totalRevenue >= 1000000000)
+                        ₫{{ number_format($totalRevenue / 1000000000, 1) }}B
+                    @elseif($totalRevenue >= 1000000)
+                        ₫{{ number_format($totalRevenue / 1000000, 1) }}M
+                    @elseif($totalRevenue >= 1000)
+                        ₫{{ number_format($totalRevenue / 1000, 1) }}K
+                    @else
+                        ₫{{ number_format($totalRevenue) }}
+                    @endif
+                </p>
+                <p class="text-xs {{ $revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2">
+                    @if($revenueGrowth > 0)
+                        <i class="fas fa-arrow-up"></i> {{ $revenueGrowth }}% so với tháng trước
+                    @elseif($revenueGrowth < 0)
+                        <i class="fas fa-arrow-down"></i> {{ abs($revenueGrowth) }}% so với tháng trước
+                    @else
+                        <i class="fas fa-minus"></i> Không đổi
+                    @endif
                 </p>
             </div>
             <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
@@ -48,9 +70,9 @@ $breadcrumbs = [
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Sản phẩm</p>
-                <p class="text-3xl font-bold text-gray-900">5,678</p>
+                <p class="text-3xl font-bold text-gray-900">{{ number_format($totalProducts) }}</p>
                 <p class="text-xs text-gray-500 mt-2">
-                    <i class="fas fa-minus"></i> Không đổi
+                    <i class="fas fa-minus"></i> Tổng số sản phẩm
                 </p>
             </div>
             <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -64,9 +86,15 @@ $breadcrumbs = [
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-600 mb-1">Khách hàng</p>
-                <p class="text-3xl font-bold text-gray-900">9,876</p>
-                <p class="text-xs text-green-600 mt-2">
-                    <i class="fas fa-arrow-up"></i> 15% so với tháng trước
+                <p class="text-3xl font-bold text-gray-900">{{ number_format($totalCustomers) }}</p>
+                <p class="text-xs {{ $customerGrowth >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2">
+                    @if($customerGrowth > 0)
+                        <i class="fas fa-arrow-up"></i> {{ $customerGrowth }}% so với tháng trước
+                    @elseif($customerGrowth < 0)
+                        <i class="fas fa-arrow-down"></i> {{ abs($customerGrowth) }}% so với tháng trước
+                    @else
+                        <i class="fas fa-minus"></i> Không đổi
+                    @endif
                 </p>
             </div>
             <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
@@ -82,14 +110,14 @@ $breadcrumbs = [
     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-lg font-semibold text-gray-900">Doanh thu theo tháng</h2>
-            <select class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
-                <option>12 tháng</option>
-                <option>6 tháng</option>
-                <option>3 tháng</option>
+            <select id="revenuePeriod" class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none">
+                <option value="12">12 tháng</option>
+                <option value="6">6 tháng</option>
+                <option value="3">3 tháng</option>
             </select>
         </div>
-        <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p class="text-gray-400">Biểu đồ doanh thu sẽ được hiển thị ở đây</p>
+        <div class="h-64 bg-gray-50 rounded-lg p-4">
+            <canvas id="revenueChart"></canvas>
         </div>
     </div>
     
@@ -97,36 +125,38 @@ $breadcrumbs = [
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-6">Hoạt động gần đây</h2>
         <div class="space-y-4">
-            <div class="flex items-start space-x-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-shopping-cart text-blue-600"></i>
+            @forelse($recentActivities as $activity)
+                @php
+                    $bgColorClass = match($activity['color']) {
+                        'blue' => 'bg-blue-100',
+                        'green' => 'bg-green-100',
+                        'purple' => 'bg-purple-100',
+                        'orange' => 'bg-orange-100',
+                        'red' => 'bg-red-100',
+                        default => 'bg-gray-100'
+                    };
+                    $textColorClass = match($activity['color']) {
+                        'blue' => 'text-blue-600',
+                        'green' => 'text-green-600',
+                        'purple' => 'text-purple-600',
+                        'orange' => 'text-orange-600',
+                        'red' => 'text-red-600',
+                        default => 'text-gray-600'
+                    };
+                @endphp
+                <div class="flex items-start space-x-3">
+                    <div class="w-10 h-10 {{ $bgColorClass }} rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-{{ $activity['icon'] }} {{ $textColorClass }}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900">{{ $activity['message'] }}</p>
+                        <p class="text-xs text-gray-500">{{ $activity['detail'] }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ $activity['time'] }}</p>
+                    </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900">Đơn hàng mới</p>
-                    <p class="text-xs text-gray-500">#12345 vừa được đặt</p>
-                    <p class="text-xs text-gray-400 mt-1">5 phút trước</p>
-                </div>
-            </div>
-            <div class="flex items-start space-x-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-user text-green-600"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900">Khách hàng mới</p>
-                    <p class="text-xs text-gray-500">Nguyễn Văn A đã đăng ký</p>
-                    <p class="text-xs text-gray-400 mt-1">15 phút trước</p>
-                </div>
-            </div>
-            <div class="flex items-start space-x-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-box text-purple-600"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900">Sản phẩm mới</p>
-                    <p class="text-xs text-gray-500">Sản phẩm đã được thêm</p>
-                    <p class="text-xs text-gray-400 mt-1">1 giờ trước</p>
-                </div>
-            </div>
+            @empty
+                <p class="text-sm text-gray-500 text-center py-4">Chưa có hoạt động nào</p>
+            @endforelse
         </div>
     </div>
 </div>
@@ -153,45 +183,153 @@ $breadcrumbs = [
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12345</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Nguyễn Văn A</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₫1,250,000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Đang xử lý</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">25/12/2024</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" class="text-primary-600 hover:text-primary-900">Xem</a>
-                    </td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12344</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Trần Thị B</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₫850,000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Hoàn thành</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">24/12/2024</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" class="text-primary-600 hover:text-primary-900">Xem</a>
-                    </td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#12343</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Lê Văn C</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₫2,100,000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Đang giao</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">24/12/2024</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" class="text-primary-600 hover:text-primary-900">Xem</a>
-                    </td>
-                </tr>
+                @forelse($recentOrders as $order)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $order['id'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order['customer_name'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₫{{ number_format($order['total']) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
+                                $statusClass = match($order['status']) {
+                                    'completed', 'hoàn thành' => 'bg-green-100 text-green-800',
+                                    'processing', 'đang xử lý' => 'bg-yellow-100 text-yellow-800',
+                                    'shipping', 'đang giao' => 'bg-blue-100 text-blue-800',
+                                    'cancelled', 'đã hủy' => 'bg-red-100 text-red-800',
+                                    default => 'bg-gray-100 text-gray-800'
+                                };
+                                $statusText = match($order['status']) {
+                                    'completed', 'hoàn thành' => 'Hoàn thành',
+                                    'processing', 'đang xử lý' => 'Đang xử lý',
+                                    'shipping', 'đang giao' => 'Đang giao',
+                                    'cancelled', 'đã hủy' => 'Đã hủy',
+                                    default => 'Chờ xử lý'
+                                };
+                            @endphp
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $statusClass }}">{{ $statusText }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order['date'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{{ route('admin.orders.show', $order['id']) }}" class="text-primary-600 hover:text-primary-900">Xem</a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                            Chưa có đơn hàng nào
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
 </div>
+
+@push('scripts')
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Revenue Chart Data
+    const revenueData12 = @json($revenueByMonth);
+    const months12 = @json($months);
+    const revenueData6 = @json($revenueByMonth6);
+    const months6 = @json($months6);
+    const revenueData3 = @json($revenueByMonth3);
+    const months3 = @json($months3);
+    
+    // Format currency
+    function formatCurrency(value) {
+        if (value >= 1000000000) {
+            return (value / 1000000000).toFixed(1) + 'B';
+        } else if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + 'M';
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(1) + 'K';
+        }
+        return value.toFixed(0);
+    }
+    
+    // Chart configuration
+    const chartConfig = {
+        type: 'line',
+        data: {
+            labels: months12,
+            datasets: [{
+                label: 'Doanh thu (₫)',
+                data: revenueData12,
+                borderColor: 'rgb(14, 165, 233)',
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: 'rgb(14, 165, 233)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Doanh thu: ₫' + formatCurrency(context.parsed.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₫' + formatCurrency(value);
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                    }
+                }
+            }
+        }
+    };
+    
+    // Initialize chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    let revenueChart = new Chart(ctx, chartConfig);
+    
+    // Update chart when period changes
+    document.getElementById('revenuePeriod').addEventListener('change', function(e) {
+        const period = parseInt(e.target.value);
+        let labels, data;
+        
+        if (period === 12) {
+            labels = months12;
+            data = revenueData12;
+        } else if (period === 6) {
+            labels = months6;
+            data = revenueData6;
+        } else {
+            labels = months3;
+            data = revenueData3;
+        }
+        
+        revenueChart.data.labels = labels;
+        revenueChart.data.datasets[0].data = data;
+        revenueChart.update();
+    });
+</script>
+@endpush
 @endsection
 

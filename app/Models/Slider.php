@@ -9,6 +9,20 @@ class Slider extends Model
 {
     use HasFactory;
     protected $table = 'slider';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'alias',
+        'content',
+        'url_img',
+        'weight',
+        'hidden',
+    ];
 
 
     // Admin

@@ -9,6 +9,21 @@ class Contact extends Model
 {
     use HasFactory;
     protected $table = 'contacts';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'phone',
+        'address',
+        'strart_time',
+        'end_time',
+        'status',
+        'weight',
+    ];
 
 
     public static function getListContactAdmin() {

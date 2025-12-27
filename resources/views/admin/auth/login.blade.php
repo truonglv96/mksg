@@ -41,6 +41,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chinese Calligraphy Font for Dragon & Phoenix effect -->
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+QingKe+HuangYou&family=Long+Cang&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -329,21 +331,398 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+        /* Balloon Container */
+        .balloon-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Beautiful Balloon Design */
+        .balloon {
+            position: fixed;
+            width: var(--size, 70px);
+            height: var(--size, 90px);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            bottom: -150px;
+            left: var(--start-x, 50%);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            will-change: transform, opacity;
+        }
+        
+        /* Balloon highlight for 3D effect */
+        .balloon::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 30%;
+            width: 25%;
+            height: 25%;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            filter: blur(8px);
+        }
+        
+        /* Balloon string */
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 120px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+            border-radius: 1px;
+        }
+        
+        /* Balloon Colors with beautiful gradients */
+        .balloon.red {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ee5a6f, #dc3545);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .balloon.blue {
+            background: radial-gradient(circle at 30% 30%, #4ecdc4, #44a08d, #2d8659);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(78, 205, 196, 0.3);
+        }
+        
+        .balloon.yellow {
+            background: radial-gradient(circle at 30% 30%, #ffe66d, #ffd93d, #ffc107);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(255, 230, 109, 0.3);
+        }
+        
+        .balloon.green {
+            background: radial-gradient(circle at 30% 30%, #95e1d3, #6bcf7f, #28a745);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(149, 225, 211, 0.3);
+        }
+        
+        .balloon.purple {
+            background: radial-gradient(circle at 30% 30%, #a8e6cf, #dcedc1, #9c88ff);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(168, 230, 207, 0.3);
+        }
+        
+        .balloon.pink {
+            background: radial-gradient(circle at 30% 30%, #ff9ff3, #f368e0, #e91e63);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(255, 159, 243, 0.3);
+        }
+        
+        .balloon.orange {
+            background: radial-gradient(circle at 30% 30%, #ffa07a, #ff7f50, #ff5722);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(255, 160, 122, 0.3);
+        }
+        
+        .balloon.cyan {
+            background: radial-gradient(circle at 30% 30%, #00d4ff, #00a8cc, #0097a7);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        .balloon.lavender {
+            background: radial-gradient(circle at 30% 30%, #e6e6fa, #d8bfd8, #ba55d3);
+            box-shadow: 
+                inset -15px -15px 0 rgba(0, 0, 0, 0.15),
+                inset 10px 10px 0 rgba(255, 255, 255, 0.2),
+                0 6px 20px rgba(230, 230, 250, 0.3);
+        }
+        
+        /* Floating Animation - from bottom to top */
+        @keyframes floatUp {
+            0% {
+                bottom: -150px;
+                transform: translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateX(var(--drift-x, 0px)) rotate(var(--rotate, 5deg));
+                opacity: 0.9;
+            }
+            95% {
+                opacity: 0.9;
+            }
+            100% {
+                bottom: 100vh;
+                transform: translateX(var(--drift-x, 0px)) rotate(var(--rotate, 10deg));
+                opacity: 0;
+            }
+        }
+        
+        /* Sway animation for natural movement */
+        @keyframes sway {
+            0%, 100% {
+                transform: translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateX(8px) rotate(3deg);
+            }
+            75% {
+                transform: translateX(-8px) rotate(-3deg);
+            }
+        }
+        
+        .balloon.floating {
+            animation: 
+                floatUp var(--duration, 8s) linear forwards,
+                sway 4s ease-in-out infinite;
+        }
+        
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        .balloon.popping {
+            animation: pop 0.4s ease-out forwards;
+        }
+        
+        .balloon.popping::before,
+        .balloon.popping::after {
+            animation: pop 0.4s ease-out forwards;
+        }
+        
+        /* Particle effect when balloon pops */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFall 1s ease-out forwards;
+        }
+        
+        @keyframes particleFall {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Calligraphy Text - Dragon & Phoenix Effect */
+        .calligraphy-title {
+            font-family: 'Ma Shan Zheng', 'Long Cang', cursive;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #b8860b, #ffd700, #ff4500, #ff6347, #ffd700, #b8860b);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: 
+                dragonFly 4s ease-in-out infinite,
+                gradientShift 5s ease infinite;
+            position: relative;
+            display: inline-block;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 40px rgba(255, 215, 0, 0.4);
+            letter-spacing: 0.1em;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+            -webkit-text-stroke: 0.5px rgba(184, 134, 11, 0.3);
+        }
+        
+        .calligraphy-subtitle {
+            font-family: 'Ma Shan Zheng', 'Long Cang', cursive;
+            font-size: 1.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #dc143c, #ff6347, #00ced1, #ffd700, #dc143c);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: 
+                phoenixDance 3s ease-in-out infinite,
+                gradientShift 4s ease infinite;
+            position: relative;
+            display: inline-block;
+            letter-spacing: 0.05em;
+            text-shadow: 
+                1px 1px 3px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(220, 20, 60, 0.5),
+                0 0 30px rgba(220, 20, 60, 0.3);
+            filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.4));
+            -webkit-text-stroke: 0.3px rgba(220, 20, 60, 0.3);
+        }
+        
+        /* Dragon Flying Animation */
+        @keyframes dragonFly {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% {
+                transform: translateY(-8px) rotate(-2deg) scale(1.02);
+            }
+            50% {
+                transform: translateY(-12px) rotate(0deg) scale(1.05);
+            }
+            75% {
+                transform: translateY(-8px) rotate(2deg) scale(1.02);
+            }
+        }
+        
+        /* Phoenix Dancing Animation */
+        @keyframes phoenixDance {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            33% {
+                transform: translateY(-5px) rotate(-1deg) scale(1.03);
+            }
+            66% {
+                transform: translateY(-8px) rotate(1deg) scale(1.05);
+            }
+        }
+        
+        /* Gradient Shift Animation */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Individual Character Animation for Dragon Effect */
+        .calligraphy-title span,
+        .calligraphy-subtitle span {
+            display: inline-block;
+            animation: characterFloat 2s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.1s);
+        }
+        
+        @keyframes characterFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-6px) rotate(1deg);
+            }
+        }
+        
+        /* Glow Effect - Enhanced */
+        .calligraphy-title::before,
+        .calligraphy-subtitle::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, #b8860b, #ffd700, #ff4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(6px);
+            opacity: 0.8;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.03);
+            }
+        }
+        
+        /* Additional shadow layer for depth */
+        .calligraphy-title::after,
+        .calligraphy-subtitle::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            z-index: -2;
+            color: rgba(0, 0, 0, 0.3);
+            -webkit-text-stroke: 0;
+            filter: blur(3px);
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <!-- Balloon Container -->
+    <div class="balloon-container" id="balloonContainer"></div>
+    
     <!-- Animated Background Shapes -->
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
     
     <!-- Login Card -->
-    <div class="glass-card rounded-2xl p-8 w-full max-w-md fade-in relative z-10">
+    <div class="glass-card rounded-2xl p-8 w-full max-w-md fade-in relative" style="z-index: 10;">
         <!-- Logo -->
         <div class="text-center mb-8 logo-container">
             <img src="{{ asset('img/logo/logo_mksg.png') }}" alt="Logo" class="h-16 mx-auto mb-4">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Chào mừng trở lại</h1>
-            <p class="text-gray-600">Đăng nhập vào hệ thống quản trị</p>
+            <h1 class="calligraphy-title mb-2" data-text="Chào mừng trở lại">
+                <span style="--i: 0">Ch</span><span style="--i: 1">ào</span> 
+                <span style="--i: 2">m</span><span style="--i: 3">ừng</span> 
+                <span style="--i: 4">tr</span><span style="--i: 5">ở</span> 
+                <span style="--i: 6">l</span><span style="--i: 7">ại</span>
+            </h1>
+            <p class="calligraphy-subtitle" data-text="Đăng nhập vào hệ thống quản trị">
+                <span style="--i: 0">Đ</span><span style="--i: 1">ăng</span> 
+                <span style="--i: 2">n</span><span style="--i: 3">hập</span> 
+                <span style="--i: 4">v</span><span style="--i: 5">ào</span> 
+                <span style="--i: 6">h</span><span style="--i: 7">ệ</span> 
+                <span style="--i: 8">t</span><span style="--i: 9">hống</span> 
+                <span style="--i: 10">q</span><span style="--i: 11">uản</span> 
+                <span style="--i: 12">t</span><span style="--i: 13">rị</span>
+            </p>
         </div>
         
         <!-- Error Messages -->
@@ -434,6 +813,148 @@
     </div>
     
     <script>
+        // Balloon System
+        const balloonContainer = document.getElementById('balloonContainer');
+        const balloonColors = ['red', 'blue', 'yellow', 'green', 'purple', 'pink', 'orange', 'cyan', 'lavender'];
+        let balloons = [];
+        let balloonIdCounter = 0;
+        
+        // Create a beautiful balloon
+        function createBalloon() {
+            const balloon = document.createElement('div');
+            const color = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+            balloon.className = `balloon ${color} floating`;
+            balloon.id = `balloon-${balloonIdCounter++}`;
+            
+            // Random starting position from bottom (0-100% of screen width)
+            const startX = Math.random() * 100;
+            // Random drift left/right during flight
+            const driftX = (Math.random() - 0.5) * 80; 
+            // Random rotation for natural movement
+            const rotate = (Math.random() - 0.5) * 15; 
+            // Random size for variety (60-90px)
+            const size = 60 + Math.random() * 30;
+            // Random duration 6-10 seconds (faster!)
+            const duration = 6 + Math.random() * 4;
+            
+            balloon.style.setProperty('--start-x', `${startX}%`);
+            balloon.style.setProperty('--size', `${size}px`);
+            balloon.style.setProperty('--drift-x', `${driftX}px`);
+            balloon.style.setProperty('--rotate', `${rotate}deg`);
+            balloon.style.setProperty('--duration', `${duration}s`);
+            balloon.style.left = `${startX}%`;
+            balloon.style.bottom = '-150px';
+            
+            balloonContainer.appendChild(balloon);
+            balloons.push(balloon);
+            
+            // Force reflow to ensure animation starts
+            balloon.offsetHeight;
+            
+            // Remove balloon after animation completes
+            setTimeout(() => {
+                if (balloon.parentNode) {
+                    balloon.remove();
+                    balloons = balloons.filter(b => b !== balloon);
+                }
+            }, duration * 1000);
+        }
+        
+        // Pop a balloon with particle effect
+        function popBalloon(balloon) {
+            if (!balloon || balloon.classList.contains('popping')) return;
+            
+            const rect = balloon.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            
+            // Add pop animation
+            balloon.classList.add('popping');
+            
+            // Create particles
+            const particleCount = 12;
+            const balloonColor = getComputedStyle(balloon).background;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+                particle.style.background = balloonColor;
+                
+                const angle = (Math.PI * 2 * i) / particleCount;
+                const velocity = 50 + Math.random() * 50;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+            
+            // Remove balloon after animation
+            setTimeout(() => {
+                if (balloon.parentNode) {
+                    balloon.remove();
+                    balloons = balloons.filter(b => b !== balloon);
+                }
+            }, 400);
+        }
+        
+        // Pop random balloon
+        function popRandomBalloon() {
+            if (balloons.length === 0) return;
+            
+            const randomIndex = Math.floor(Math.random() * balloons.length);
+            const balloon = balloons[randomIndex];
+            popBalloon(balloon);
+        }
+        
+        // Initialize balloons
+        function initBalloons() {
+            // Create many initial balloons (50 balloons) - faster creation
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => createBalloon(), i * 80);
+            }
+            
+            // Continuously create new balloons to maintain many balloons on screen
+            setInterval(() => {
+                // Keep 40-50 balloons on screen for continuous effect
+                if (balloons.length < 40) {
+                    createBalloon();
+                }
+            }, 400);
+        }
+        
+        // Input typing handlers
+        let lastInputLength = {
+            login: 0,
+            password: 0
+        };
+        
+        function handleInputTyping(inputId) {
+            const input = document.getElementById(inputId);
+            const currentLength = input.value.length;
+            const lastLength = lastInputLength[inputId];
+            
+            // If user is typing (length increased)
+            if (currentLength > lastLength) {
+                const charsTyped = currentLength - lastLength;
+                
+                // Pop balloons based on characters typed
+                for (let i = 0; i < charsTyped && balloons.length > 0; i++) {
+                    setTimeout(() => {
+                        popRandomBalloon();
+                    }, i * 100);
+                }
+            }
+            
+            lastInputLength[inputId] = currentLength;
+        }
+        
         // Password Toggle
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -470,6 +991,19 @@
             input.addEventListener('blur', function() {
                 this.parentElement.classList.remove('input-focused');
             });
+            
+            // Handle typing events
+            input.addEventListener('input', function() {
+                handleInputTyping(this.id);
+            });
+            
+            // Handle keypress for better responsiveness
+            input.addEventListener('keydown', function(e) {
+                // Pop a balloon on keydown for immediate feedback
+                if (e.key.length === 1 && balloons.length > 0) {
+                    setTimeout(() => popRandomBalloon(), 50);
+                }
+            });
         });
         
         // Auto-hide alerts after 5 seconds
@@ -481,6 +1015,23 @@
                 setTimeout(() => alert.remove(), 300);
             });
         }, 5000);
+        
+        // Initialize balloons immediately when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initBalloons();
+            });
+        } else {
+            // DOM is already ready
+            initBalloons();
+        }
+        
+        // Also initialize on window load as backup
+        window.addEventListener('load', () => {
+            if (balloons.length === 0) {
+                initBalloons();
+            }
+        });
     </script>
 </body>
 </html>

@@ -10,6 +10,18 @@ class ProductImage extends Model
 {
     use HasFactory;
     protected $table = 'product_images';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'product_id',
+        'image',
+        'weight',
+        'color_id',
+    ];
 
 
     public function getAllImage() {

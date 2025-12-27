@@ -18,6 +18,7 @@ class IndexController extends Controller
      */
     public function index()
     {
+        // dd(bcrypt('NewP@ssw0rd'));
         // Cache banners - 1 giờ
         try {
             $banners = Cache::remember('home_banners', 3600, function () {

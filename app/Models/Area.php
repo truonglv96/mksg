@@ -9,6 +9,17 @@ class Area extends Model
 {
     use HasFactory;
     protected $table = 'area';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'parent_id',
+        'weight',
+    ];
 
     /**
      * Lấy tất cả quận/huyện thuộc thành phố (theo CityID), kèm theo danh sách phường/xã nếu có.

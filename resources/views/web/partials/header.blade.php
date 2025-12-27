@@ -43,9 +43,6 @@
             </a>
             <ul class="flex space-x-6 text-sm font-medium">
                 <li><a href="{{ route('home') }}" class="text-red-600 font-bold hover:text-red-600">{{ config('texts.nav_home') }}</a></li>
-                @if(isset($brands) && $brands->count() > 0)
-                    <li><a href="#" class="text-red-600 font-bold hover:text-red-600">{{ config('texts.nav_brand') }}</a></li>
-                @endif
 
                 @if(isset($categories) && $categories->count() > 0)
                     @foreach($categories as $category)
@@ -71,6 +68,9 @@
                             $basePath = '/san-pham/';
                             if (isset($category->type) && $category->type === 'new') {
                                 $basePath = '/tin-tuc/';
+                            }
+                            if (isset($category->type) && $category->type === 'brand') {
+                                $basePath = '/';
                             }
                         @endphp
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">

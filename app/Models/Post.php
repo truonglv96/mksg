@@ -9,12 +9,18 @@ class Post extends Model
 {
     use HasFactory;
 
-    protected $table = 'posts';
+    protected $table = 'post';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'user_id',
-        'title',
-        'description',
-        'body'
+        'name',
+        'alias',
+        'content',
+        'kw',
+        'des',
     ];
 }

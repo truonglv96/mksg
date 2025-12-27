@@ -1,0 +1,573 @@
+/* ============================================
+   Admin Products Page Styles
+   ============================================ */
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Table row animation */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.table-row {
+    animation: slideIn 0.3s ease-out;
+    animation-fill-mode: both;
+}
+
+/* Table row hover effect */
+.table-row:hover {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.03), rgba(14, 165, 233, 0.01)) !important;
+    transform: scale(1.001);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Table header styling */
+.table-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-header th {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* Product image styling */
+.product-image {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-row:hover .product-image {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Status badge styling */
+.status-badge {
+    position: relative;
+    overflow: hidden;
+}
+
+.status-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.table-row:hover .status-badge::before {
+    left: 100%;
+}
+
+/* Action buttons */
+.action-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.action-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.action-btn:hover::after {
+    width: 40px;
+    height: 40px;
+}
+
+/* Checkbox styling */
+.table-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.table-checkbox:checked {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+/* Price styling */
+.price-original {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.price-sale {
+    font-weight: 700;
+    color: #0ea5e9;
+}
+
+/* Search input focus effect */
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Table container */
+.table-container {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Empty state */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Table row selected state */
+.table-row.selected {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.02)) !important;
+}
+
+/* Progress bar */
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Category Select Styling - Enhanced for better option display */
+.category-select {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-select:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.05);
+}
+
+/* Base option styling - Improved padding and spacing */
+.category-select option {
+    padding: 12px 16px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 44px;
+}
+
+/* Level 0 - Parent categories (Main categories) - Bold and prominent */
+.category-select option[data-level="0"] {
+    font-weight: 700;
+    font-size: 13px;
+    color: #0c4a6e;
+    background: #f1f5f9 !important;
+    padding: 16px 16px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #cbd5e1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Add separator line before parent categories (except first) */
+.category-select option[data-level="0"]:not(:first-of-type) {
+    border-top: 3px solid #e2e8f0;
+    margin-top: 4px;
+    padding-top: 18px;
+}
+
+/* Level 1 - First level children (Subcategories) - Clear hierarchy */
+.category-select option[data-level="1"] {
+    font-weight: 600;
+    color: #334155;
+    background: #ffffff !important;
+    padding: 12px 16px 12px 36px;
+    font-size: 14px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+}
+
+/* Level 2 - Second level children (Sub-subcategories) - Subtle styling */
+.category-select option[data-level="2"] {
+    font-weight: 400;
+    color: #64748b;
+    background: #fafbfc !important;
+    padding: 11px 16px 11px 52px;
+    font-size: 13.5px;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+}
+
+/* Selected option styling - Beautiful gradient */
+.category-select option:checked {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effect for options */
+.category-select option:hover {
+    background: #e0f2fe !important;
+    color: #0c4a6e;
+}
+
+/* Custom dropdown arrow with better styling */
+.category-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25em 1.25em;
+    padding-right: 2.75rem;
+}
+
+.category-select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%230ea5e9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+/* Enhanced visual hierarchy for better readability */
+.category-select option[data-level="0"] {
+    font-size: 12px;
+    letter-spacing: 0.6px;
+}
+
+/* Better spacing between options */
+.category-select option {
+    margin: 1px 0;
+}
+
+/* Improve prefix arrows visibility with monospace font */
+.category-select option[data-level="1"],
+.category-select option[data-level="2"] {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+}
+
+/* Color coding for different levels */
+.category-select option[data-level="1"] {
+    color: #475569;
+}
+
+.category-select option[data-level="2"] {
+    color: #64748b;
+}
+
+/* Selected state for all levels */
+.category-select option[data-level="0"]:checked {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    color: #ffffff !important;
+}
+
+.category-select option[data-level="1"]:checked,
+.category-select option[data-level="2"]:checked {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* ============================================
+   Admin Layout Styles
+   ============================================ */
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Sidebar transitions */
+.sidebar-transition {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Sidebar collapsed state - Option 1: Collapsed to icon-only */
+.sidebar-main.sidebar-collapsed {
+    width: 80px !important;
+}
+
+/* Sidebar collapsed state - Option 2: Completely hidden (uncomment to use) */
+/* .sidebar-main.sidebar-collapsed {
+    transform: translateX(-100%);
+} */
+
+.sidebar-main.sidebar-collapsed .sidebar-menu-text,
+.sidebar-main.sidebar-collapsed .sidebar-user-info {
+    display: none !important;
+}
+
+.sidebar-main.sidebar-collapsed .sidebar-logo-content {
+    justify-content: center;
+}
+
+.sidebar-main.sidebar-collapsed nav ul li a {
+    justify-content: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-left-width: 0 !important;
+}
+
+.sidebar-main.sidebar-collapsed .sidebar-user-section {
+    padding: 1rem 0.5rem;
+}
+
+.sidebar-main.sidebar-collapsed .sidebar-user-section a,
+.sidebar-main.sidebar-collapsed .sidebar-user-section button {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.sidebar-main.sidebar-collapsed nav ul li a span.sidebar-menu-text,
+.sidebar-main.sidebar-collapsed .sidebar-user-section .sidebar-menu-text {
+    display: none !important;
+}
+
+/* Smooth transition for sidebar width */
+.sidebar-main {
+    transition: width 0.3s ease-in-out;
+}
+
+/* Logo styling */
+.sidebar-logo {
+    max-height: 40px;
+    object-fit: contain;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.sidebar-main.sidebar-collapsed .sidebar-logo {
+    max-height: 32px;
+}
+
+/* Ensure Font Awesome icons display correctly */
+.fas, .far, .fal, .fab, .fa {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", "Font Awesome 6 Pro" !important;
+    font-weight: 900;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+.far {
+    font-weight: 400;
+}
+
+.fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400;
+}
+
+/* Submenu Styles - Smooth Animation */
+#products-submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateY(-10px);
+}
+
+#products-submenu:not(.hidden) {
+    max-height: 500px;
+    opacity: 1;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    transform: translateY(0);
+}
+
+#products-submenu.hidden {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateY(-10px);
+}
+
+/* Hide submenu when sidebar is collapsed */
+.sidebar-main.sidebar-collapsed #products-submenu {
+    display: none !important;
+}
+
+/* Submenu item styles with smooth animations */
+#products-submenu li {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0s;
+}
+
+#products-submenu:not(.hidden) li {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#products-submenu:not(.hidden) li:nth-child(1) { transition-delay: 0.05s; }
+#products-submenu:not(.hidden) li:nth-child(2) { transition-delay: 0.1s; }
+#products-submenu:not(.hidden) li:nth-child(3) { transition-delay: 0.15s; }
+#products-submenu:not(.hidden) li:nth-child(4) { transition-delay: 0.2s; }
+#products-submenu:not(.hidden) li:nth-child(5) { transition-delay: 0.25s; }
+#products-submenu:not(.hidden) li:nth-child(6) { transition-delay: 0.3s; }
+
+#products-submenu li a {
+    position: relative;
+    padding-left: 2.75rem;
+    padding-right: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#products-submenu li a::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 0;
+    background: linear-gradient(to bottom, #0ea5e9, #0284c7);
+    border-radius: 0 2px 2px 0;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.3);
+}
+
+#products-submenu li a:hover {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.05));
+    transform: translateX(4px);
+    padding-left: 3rem;
+}
+
+#products-submenu li a:hover::before,
+#products-submenu li a.bg-primary-50::before {
+    height: 80%;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.4);
+}
+
+#products-submenu li a.bg-primary-50 {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.12), rgba(14, 165, 233, 0.08));
+    font-weight: 600;
+}
+
+/* Icon animation in submenu */
+#products-submenu li a i {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#products-submenu li a:hover i {
+    transform: scale(1.15);
+    color: #0ea5e9;
+}
+
+/* Rotate chevron icon with smooth transition */
+#products-menu-icon {
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#products-menu-icon.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Button hover effect */
+#products-menu-toggle:hover {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.05));
+}
+
+#products-menu-toggle.menu-item-active {
+    background: linear-gradient(to right, rgba(14, 165, 233, 0.12), rgba(14, 165, 233, 0.08));
+}
+
+.cke_notifications_area {
+    display: none !important;
+}

@@ -24,22 +24,63 @@
                 </a>
             </li>
             
-            <!-- Products -->
-            <li>
-                <a href="{{ route('admin.products.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.products.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
-                    <i class="fas fa-box w-5 flex-shrink-0"></i>
-                    <span class="ml-3 sidebar-menu-text font-medium">Sản phẩm</span>
-                </a>
-            </li>
-            
             <!-- Categories -->
             <li>
                 <a href="{{ route('admin.categories.index') }}" 
                    class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.categories.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
-                    <i class="fas fa-tags w-5 flex-shrink-0"></i>
+                    <i class="fas fa-folder-tree w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Danh mục</span>
                 </a>
+            </li>
+            
+            <!-- Products with Submenu -->
+            <li>
+                <button type="button" 
+                        id="products-menu-toggle"
+                        class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.brands.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                    <div class="flex items-center">
+                        <i class="fas fa-box w-5 flex-shrink-0"></i>
+                        <span class="ml-3 sidebar-menu-text font-medium">Sản phẩm</span>
+                    </div>
+                    <i class="fas fa-chevron-down sidebar-menu-text transition-transform duration-200" id="products-menu-icon"></i>
+                </button>
+                <ul id="products-submenu" class="hidden pl-2 mt-2 space-y-1.5">
+                    <li>
+                        <a href="{{ route('admin.products.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.products.*') ? 'bg-primary-50 text-primary-600' : '' }}">
+                            <i class="fas fa-box w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Sản phẩm</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.brands.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.brands.*') ? 'bg-primary-50 text-primary-600' : '' }}">
+                            <i class="fas fa-star w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Thương hiệu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
+                            <i class="fas fa-fabric w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Chất liệu</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
+                            <i class="fas fa-palette w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Màu sắc</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
+                            <i class="fas fa-star-of-life w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Danh mục nổi bật</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             
             <!-- Orders -->
@@ -70,14 +111,6 @@
                 </a>
             </li>
             
-            <!-- Brands -->
-            <li>
-                <a href="{{ route('admin.brands.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.brands.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
-                    <i class="fas fa-star w-5 flex-shrink-0"></i>
-                    <span class="ml-3 sidebar-menu-text font-medium">Thương hiệu</span>
-                </a>
-            </li>
             
             <!-- Sliders -->
             <li>
@@ -132,7 +165,7 @@
         overlay.classList.toggle('hidden');
     }
     
-    // Load saved sidebar state from localStorage
+    // Products Submenu Toggle
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         
@@ -140,6 +173,53 @@
         const savedState = localStorage.getItem('sidebarCollapsed');
         if (savedState === 'true') {
             sidebar.classList.add('sidebar-collapsed');
+        }
+        
+        // Products submenu toggle
+        const productsMenuToggle = document.getElementById('products-menu-toggle');
+        const productsSubmenu = document.getElementById('products-submenu');
+        const productsMenuIcon = document.getElementById('products-menu-icon');
+        
+        if (productsMenuToggle && productsSubmenu) {
+            // Check if any submenu item is active
+            const isSubmenuActive = productsSubmenu.querySelector('a.bg-primary-50');
+            if (isSubmenuActive) {
+                productsSubmenu.classList.remove('hidden');
+                if (productsMenuIcon) {
+                    productsMenuIcon.classList.add('rotate-180');
+                }
+            }
+            
+            productsMenuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Don't toggle if sidebar is collapsed
+                if (sidebar.classList.contains('sidebar-collapsed')) {
+                    return;
+                }
+                productsSubmenu.classList.toggle('hidden');
+                if (productsMenuIcon) {
+                    productsMenuIcon.classList.toggle('rotate-180');
+                }
+            });
+            
+            // Hide submenu when sidebar is collapsed
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        if (sidebar.classList.contains('sidebar-collapsed')) {
+                            productsSubmenu.classList.add('hidden');
+                            if (productsMenuIcon) {
+                                productsMenuIcon.classList.remove('rotate-180');
+                            }
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(sidebar, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
         }
     });
 </script>

@@ -13,6 +13,21 @@ class Page extends Model
     const IMAGE = 'img/page/';
 
     const IS_ACTIVE = 1;
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'content',
+        'link',
+        'image',
+        'weight',
+        'type',
+        'status',
+    ];
 
 
     public function getImage() {

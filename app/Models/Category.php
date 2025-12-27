@@ -9,6 +9,27 @@ class Category extends Model
 {
     use HasFactory;
     protected $table = 'category';
+    
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'alias',
+        'parent_id',
+        'total',
+        'type',
+        'kw',
+        'des',
+        'weight',
+        'hidden',
+        'index_hidden',
+        'content',
+        'icon',
+        'show_icon',
+    ];
 
     const IMAGE = 'img/color/';
 
