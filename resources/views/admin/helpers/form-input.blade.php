@@ -15,7 +15,7 @@
     $attributes = $attributes ?? [];
     
     $currentValue = $oldValue ?? old($name, $value ?? '');
-    $inputClass = 'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth ' . $class;
+    $inputClass = 'w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-smooth ' . $class;
 @endphp
 
 <div>

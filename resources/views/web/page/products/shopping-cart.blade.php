@@ -467,20 +467,71 @@
             return [item.name, item.color || '', optionsKey].join('||');
         };
 
+        // Hàm chuyển đổi giá trị sang string hợp lệ
+        const toSafeString = (value) => {
+            if (value == null) return '';
+            if (typeof value === 'object') return ''; // Không cho phép object
+            return String(value);
+        };
+
+        // Hàm làm sạch cart item - chỉ giữ lại các trường cần thiết
+        function cleanCartItem(item) {
+            if (!item || typeof item !== 'object') {
+                return null;
+            }
+            
+            return {
+                id: parseInt(item.id || item.productId || 0) || 0,
+                productId: parseInt(item.productId || item.id || 0) || 0,
+                name: toSafeString(item.name),
+                brand: toSafeString(item.brand),
+                price: parseInt(item.price) || 0,
+                image: toSafeString(item.image),
+                color: toSafeString(item.color),
+                lens: toSafeString(item.lens),
+                lensLabel: toSafeString(item.lensLabel),
+                selectedOptions: Array.isArray(item.selectedOptions) 
+                    ? item.selectedOptions.map(opt => toSafeString(opt)).filter(opt => opt !== '')
+                    : [],
+                quantity: parseInt(item.quantity) || 1
+            };
+        }
+
         // Load giỏ hàng từ localStorage
         function loadCart() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
-                cart = JSON.parse(savedCart);
-                renderOrderSection();
-                updateCartCount(); // Cập nhật count trên header khi load trang
-                
-                // Ẩn success message nếu có sản phẩm trong giỏ hàng
-                if (cart.length > 0 && orderSuccessMessage) {
-                    orderSuccessMessage.classList.add('hidden');
-                    if (orderSection) {
-                        orderSection.classList.remove('hidden');
+                try {
+                    const parsedCart = JSON.parse(savedCart);
+                    // Làm sạch tất cả items để loại bỏ các trường không mong muốn
+                    const cleanedCart = Array.isArray(parsedCart) 
+                        ? parsedCart.map(cleanCartItem).filter(item => item !== null && item.name) 
+                        : [];
+                    
+                    // Nếu có items bị loại bỏ, log để debug
+                    if (cleanedCart.length !== parsedCart.length) {
+                        console.log('Đã làm sạch cart: loại bỏ', parsedCart.length - cleanedCart.length, 'items không hợp lệ');
                     }
+                    
+                    cart = cleanedCart;
+                    
+                    // Lưu lại cart đã được làm sạch (ngay cả khi rỗng để xóa dữ liệu cũ)
+                    saveCart();
+                    renderOrderSection();
+                    updateCartCount(); // Cập nhật count trên header khi load trang
+                    
+                    // Ẩn success message nếu có sản phẩm trong giỏ hàng
+                    if (cart.length > 0 && orderSuccessMessage) {
+                        orderSuccessMessage.classList.add('hidden');
+                        if (orderSection) {
+                            orderSection.classList.remove('hidden');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading cart:', e);
+                    cart = [];
+                    localStorage.removeItem('cart');
+                    updateCartCount();
                 }
             } else {
                 updateCartCount(); // Cập nhật count ngay cả khi cart rỗng
@@ -583,22 +634,30 @@
                         });
                     }
 
+                    // Escape HTML để tránh hiển thị raw HTML/JSON
+                    const escapeHtml = (text) => {
+                        if (!text) return '';
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    };
+
                     const optionBadges = optionEntries.length
                         ? `<div class="order-card__options">
-                            ${optionEntries.map(opt => `<span class="order-card__option">${opt.label}: <span>${opt.value}</span></span>`).join('')}
+                            ${optionEntries.map(opt => `<span class="order-card__option">${escapeHtml(opt.label)}: <span>${escapeHtml(opt.value)}</span></span>`).join('')}
                            </div>`
                         : `<p class="order-card__options--empty">{{ config('texts.cart_no_options') }}</p>`;
 
-                    const brandLine = item.brand ? `<p class="order-card__brand">${item.brand}</p>` : '';
+                    const brandLine = item.brand ? `<p class="order-card__brand">${escapeHtml(item.brand)}</p>` : '';
                     const indexLabel = `#${String(index + 1).padStart(2, '0')}`;
 
                     return `
                         <article class="order-card" data-item-key="${itemKey}">
                             <div class="order-card__header">
-                                <img src="${item.image}" alt="${item.name}">
+                                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
                                 <div class="order-card__title">
                                     <span class="order-card__index">${indexLabel}</span>
-                                    <h3>${item.name}</h3>
+                                    <h3>${escapeHtml(item.name)}</h3>
                                     ${brandLine}
                                 </div>
                             </div>
@@ -659,17 +718,25 @@
                         });
                     }
 
+                    // Escape HTML để tránh hiển thị raw HTML/JSON
+                    const escapeHtml = (text) => {
+                        if (!text) return '';
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    };
+
                     const metaLines = [
-                        item.brand ? `<span><strong>{{ config('texts.cart_brand') }}</strong> ${item.brand}</span>` : null,
-                        ...optionEntries.map(opt => `<span><strong>${opt.label}:</strong> ${opt.value}</span>`)
+                        item.brand ? `<span><strong>{{ config('texts.cart_brand') }}</strong> ${escapeHtml(item.brand)}</span>` : null,
+                        ...optionEntries.map(opt => `<span><strong>${escapeHtml(opt.label)}:</strong> ${escapeHtml(opt.value)}</span>`)
                     ].filter(Boolean).join('');
 
                     return `
                         <div class="receipt-product">
                             <div class="receipt-product__info">
-                                <img src="${item.image}" alt="${item.name}">
+                                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">
                                 <div>
-                                    <h3>${item.name}</h3>
+                                    <h3>${escapeHtml(item.name)}</h3>
                                     <div class="receipt-product__meta">
                                         ${metaLines || '<span><strong>{{ config('texts.cart_option_label') }}</strong> {{ config('texts.cart_option_none') }}</span>'}
                                     </div>

@@ -20,6 +20,8 @@ use App\Models\ProductCategories;
 use App\Models\ProductColor;
 use App\Models\ProductPriceSale;
 use App\Models\DiscountedCombo;
+use App\Models\FeaturesProduct;
+use App\Models\ProductDegreeRange;
 use Exception;
 
 class ProductController extends Controller
@@ -145,8 +147,9 @@ class ProductController extends Controller
         $materials = Material::orderBy('weight', 'ASC')->get();
         $colors = Color::orderBy('weight', 'ASC')->get();
         $combos = \App\Models\DiscountedCombo::where('status', 1)->orderBy('weight', 'ASC')->orderBy('name', 'ASC')->get();
+        $featuresProducts = FeaturesProduct::orderBy('id', 'ASC')->get();
         
-        return view('admin.products.create', compact('categories', 'brands', 'materials', 'colors', 'combos'));
+        return view('admin.products.create', compact('categories', 'brands', 'materials', 'colors', 'combos', 'featuresProducts'));
     }
 
     /**
@@ -256,6 +259,30 @@ class ProductController extends Controller
                     ]);
                 }
             }
+
+            // Handle features products (many-to-many)
+            if ($request->has('features_products') && !empty($request->input('features_products'))) {
+                $featuresProductIds = $request->input('features_products');
+                // Store as array (Laravel will automatically encode to JSON via model cast)
+                $product->update(['id_features_product' => $featuresProductIds]);
+            } else {
+                $product->update(['id_features_product' => null]);
+            }
+
+            // Handle degree ranges
+            if (!empty($validated['degree_ranges'])) {
+                foreach ($validated['degree_ranges'] as $degreeRange) {
+                    if (!empty($degreeRange['name'])) {
+                        ProductDegreeRange::create([
+                            'product_id' => $product->id,
+                            'name' => $degreeRange['name'] ?? '',
+                            'price' => $degreeRange['price'] ?? 0,
+                            'price_sale' => $degreeRange['price_sale'] ?? 0,
+                            'weight' => $degreeRange['weight'] ?? 0,
+                        ]);
+                    }
+                }
+            }
             
             DB::commit();
             
@@ -312,12 +339,27 @@ class ProductController extends Controller
         // Get product combos
         $productCombos = DiscountedCombo::where('product_id', $product->id)->orderBy('weight', 'ASC')->get();
         
+        // Get product features (many-to-many relationship)
+        // With model cast, id_features_product is automatically decoded to array
+        $productFeaturesProductIds = [];
+        if ($product->id_features_product) {
+            $productFeaturesProductIds = is_array($product->id_features_product) 
+                ? $product->id_features_product 
+                : [$product->id_features_product];
+            // Filter out empty values
+            $productFeaturesProductIds = array_filter($productFeaturesProductIds);
+        }
+        
+        // Get product degree ranges
+        $productDegreeRanges = ProductDegreeRange::where('product_id', $product->id)->orderBy('weight', 'ASC')->get();
+        
         // Get dropdown data (same as create)
         $categories = $this->getHierarchicalCategories();
         $brands = Brand::orderBy('name', 'ASC')->get();
         $materials = Material::orderBy('weight', 'ASC')->get();
         $colors = Color::orderBy('weight', 'ASC')->get();
         $combos = DiscountedCombo::where('status', 1)->orderBy('weight', 'ASC')->orderBy('name', 'ASC')->get();
+        $featuresProducts = FeaturesProduct::orderBy('id', 'ASC')->get();
         
         return view('admin.products.edit', compact(
             'product',
@@ -325,11 +367,14 @@ class ProductController extends Controller
             'productColorIds',
             'productSalePrices',
             'productCombos',
+            'productFeaturesProductIds',
+            'productDegreeRanges',
             'categories',
             'brands',
             'materials',
             'colors',
-            'combos'
+            'combos',
+            'featuresProducts'
         ));
     }
 
@@ -534,6 +579,37 @@ class ProductController extends Controller
                     }
                 }
             }
+
+            // Handle features products (many-to-many)
+            if ($request->has('features_products') && !empty($request->input('features_products'))) {
+                $featuresProductIds = $request->input('features_products');
+                // Store as array (Laravel will automatically encode to JSON via model cast)
+                $product->update(['id_features_product' => $featuresProductIds]);
+            } else {
+                $product->update(['id_features_product' => null]);
+            }
+
+            // Handle degree ranges
+            if (isset($validated['degree_ranges'])) {
+                // Delete existing degree ranges
+                ProductDegreeRange::where('product_id', $product->id)->delete();
+                
+                // Create new degree ranges
+                foreach ($validated['degree_ranges'] as $degreeRange) {
+                    if (!empty($degreeRange['name'])) {
+                        ProductDegreeRange::create([
+                            'product_id' => $product->id,
+                            'name' => $degreeRange['name'] ?? '',
+                            'price' => $degreeRange['price'] ?? 0,
+                            'price_sale' => $degreeRange['price_sale'] ?? 0,
+                            'weight' => $degreeRange['weight'] ?? 0,
+                        ]);
+                    }
+                }
+            } else {
+                // If no degree ranges provided, delete all existing ones
+                ProductDegreeRange::where('product_id', $product->id)->delete();
+            }
             
             // Handle colors
             if (isset($validated['colors'])) {
@@ -609,6 +685,9 @@ class ProductController extends Controller
             
             // Delete discounted combos
             DiscountedCombo::where('product_id', $product->id)->delete();
+            
+            // Delete product degree ranges
+            ProductDegreeRange::where('product_id', $product->id)->delete();
             
             // Delete the product itself
             $product->delete();

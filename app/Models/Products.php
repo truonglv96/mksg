@@ -48,6 +48,16 @@ class Products extends Model
         'gender',
         'kw',
         'meta_des',
+        'id_features_product',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'id_features_product' => 'array',
     ];
 
     /**

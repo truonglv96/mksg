@@ -20,7 +20,7 @@ $breadcrumbs = [
             <p class="mt-1 text-sm text-gray-500">Chi tiết thương hiệu</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.brands.edit', $brand->id) }}" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
+            <a href="{{ route('admin.brands.edit', $brand->id) }}" class="px-4 py-2 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl font-semibold">
                 <i class="fas fa-edit mr-2"></i>Sửa
             </a>
             <a href="{{ route('admin.brands.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-smooth">

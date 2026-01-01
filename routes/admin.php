@@ -12,6 +12,11 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\MaterialController;
+use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\FeaturedCategoryController;
+use App\Http\Controllers\Admin\ContactController;
+use App\Http\Controllers\Admin\FeaturesProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,8 +74,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Orders
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
-            Route::get('/{id}', [OrderController::class, 'show'])->name('show');
             Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
+            Route::get('/{id}', [OrderController::class, 'show'])->name('show');
             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
         });
 
@@ -108,18 +113,61 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Sliders
         Route::prefix('sliders')->name('sliders.')->group(function () {
             Route::get('/', [SliderController::class, 'index'])->name('index');
-            Route::get('/create', [SliderController::class, 'create'])->name('create');
             Route::post('/', [SliderController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [SliderController::class, 'edit'])->name('edit');
+            Route::get('/{id}', [SliderController::class, 'getSlider'])->name('get');
             Route::put('/{id}', [SliderController::class, 'update'])->name('update');
             Route::delete('/{id}', [SliderController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [SliderController::class, 'toggleStatus'])->name('toggleStatus');
+        });
+
+        // Store Information (Contacts)
+        Route::prefix('store-information')->name('store-information.')->group(function () {
+            Route::get('/', [ContactController::class, 'index'])->name('index');
+            Route::post('/', [ContactController::class, 'store'])->name('store');
+            Route::get('/{id}', [ContactController::class, 'getContact'])->name('get');
+            Route::put('/{id}', [ContactController::class, 'update'])->name('update');
+            Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy');
         });
 
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SettingController::class, 'index'])->name('index');
             Route::put('/', [SettingController::class, 'update'])->name('update');
+        });
+
+        // Materials
+        Route::prefix('materials')->name('materials.')->group(function () {
+            Route::get('/', [MaterialController::class, 'index'])->name('index');
+            Route::post('/', [MaterialController::class, 'store'])->name('store');
+            Route::get('/{id}', [MaterialController::class, 'getMaterial'])->name('get');
+            Route::put('/{id}', [MaterialController::class, 'update'])->name('update');
+            Route::delete('/{id}', [MaterialController::class, 'destroy'])->name('destroy');
+        });
+
+        // Colors
+        Route::prefix('colors')->name('colors.')->group(function () {
+            Route::get('/', [ColorController::class, 'index'])->name('index');
+            Route::post('/', [ColorController::class, 'store'])->name('store');
+            Route::get('/{id}', [ColorController::class, 'getColor'])->name('get');
+            Route::put('/{id}', [ColorController::class, 'update'])->name('update');
+            Route::delete('/{id}', [ColorController::class, 'destroy'])->name('destroy');
+        });
+
+        // Featured Categories
+        Route::prefix('featured-categories')->name('featured-categories.')->group(function () {
+            Route::get('/', [FeaturedCategoryController::class, 'index'])->name('index');
+            Route::post('/', [FeaturedCategoryController::class, 'store'])->name('store');
+            Route::get('/{id}', [FeaturedCategoryController::class, 'getFeaturedCategory'])->name('get');
+            Route::put('/{id}', [FeaturedCategoryController::class, 'update'])->name('update');
+            Route::delete('/{id}', [FeaturedCategoryController::class, 'destroy'])->name('destroy');
+        });
+
+        // Features Product
+        Route::prefix('features-product')->name('features-product.')->group(function () {
+            Route::get('/', [FeaturesProductController::class, 'index'])->name('index');
+            Route::post('/', [FeaturesProductController::class, 'store'])->name('store');
+            Route::get('/{id}', [FeaturesProductController::class, 'getFeaturesProduct'])->name('get');
+            Route::put('/{id}', [FeaturesProductController::class, 'update'])->name('update');
+            Route::delete('/{id}', [FeaturesProductController::class, 'destroy'])->name('destroy');
         });
     });
 });

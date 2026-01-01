@@ -247,14 +247,96 @@
                 const optionsKey = item.selectedOptions && item.selectedOptions.length > 0 
                     ? item.selectedOptions.sort().join(',') 
                     : (item.lens || item.lensLabel || '');
-                return [item.name, item.color || '', optionsKey].join('||');
+                // Thêm chiết suất và độ khúc xạ vào key để phân biệt các sản phẩm
+                const priceSaleKey = item.selectedPriceSale || '';
+                const degreeRangeKey = item.selectedDegreeRange || '';
+                return [item.name, item.color || '', optionsKey, priceSaleKey, degreeRangeKey].join('||');
             };
+
+            // Hàm chuyển đổi giá trị sang string hợp lệ
+            const toSafeString = (value) => {
+                if (value == null) return '';
+                if (typeof value === 'object') return ''; // Không cho phép object
+                return String(value);
+            };
+
+            // Hàm làm sạch cart item - chỉ giữ lại các trường cần thiết
+            function cleanCartItem(item) {
+                if (!item || typeof item !== 'object') {
+                    return null;
+                }
+                
+                // Xử lý brand đặc biệt - nếu là object thì lấy name hoặc alias
+                let brandValue = item.brand;
+                if (brandValue && typeof brandValue === 'object') {
+                    brandValue = brandValue.name || brandValue.alias || '';
+                } else if (typeof brandValue === 'string') {
+                    // Nếu là JSON string, thử parse
+                    try {
+                        const parsed = JSON.parse(brandValue);
+                        if (parsed && typeof parsed === 'object') {
+                            brandValue = parsed.name || parsed.alias || '';
+                        }
+                    } catch (e) {
+                        // Không phải JSON, giữ nguyên
+                    }
+                }
+                
+                // Xử lý selectedOptions - đảm bảo là array
+                let selectedOptions = item.selectedOptions;
+                if (!Array.isArray(selectedOptions)) {
+                    selectedOptions = [];
+                }
+                
+                // Xử lý selectedPriceSale và selectedDegreeRange
+                const selectedPriceSale = toSafeString(item.selectedPriceSale || '');
+                const selectedDegreeRange = toSafeString(item.selectedDegreeRange || '');
+                
+                return {
+                    id: parseInt(item.id || item.productId || 0) || 0,
+                    productId: parseInt(item.productId || item.id || 0) || 0,
+                    name: toSafeString(item.name),
+                    brand: toSafeString(brandValue),
+                    price: parseInt(item.price) || 0,
+                    image: toSafeString(item.image),
+                    color: toSafeString(item.color),
+                    lens: toSafeString(item.lens),
+                    lensLabel: toSafeString(item.lensLabel),
+                    selectedOptions: selectedOptions.map(opt => toSafeString(opt)).filter(opt => opt !== ''),
+                    selectedPriceSale: selectedPriceSale,
+                    selectedDegreeRange: selectedDegreeRange,
+                    quantity: parseInt(item.quantity) || 1
+                };
+            }
 
             // Load giỏ hàng từ localStorage
             function loadCart() {
                 const savedCart = localStorage.getItem('cart');
                 if (savedCart) {
-                    cart = JSON.parse(savedCart);
+                    try {
+                        const parsedCart = JSON.parse(savedCart);
+                        // Làm sạch tất cả items để loại bỏ các trường không mong muốn
+                        const cleanedCart = Array.isArray(parsedCart) 
+                            ? parsedCart.map(cleanCartItem).filter(item => item !== null && item.name) 
+                            : [];
+                        
+                        // Nếu có items bị loại bỏ, log để debug
+                        if (cleanedCart.length !== parsedCart.length) {
+                            console.log('Đã làm sạch cart: loại bỏ', parsedCart.length - cleanedCart.length, 'items không hợp lệ');
+                        }
+                        
+                        cart = cleanedCart;
+                        
+                        // Lưu lại cart đã được làm sạch (ngay cả khi rỗng để xóa dữ liệu cũ)
+                        saveCart();
+                        updateCartUI();
+                    } catch (e) {
+                        console.error('Error loading cart:', e);
+                        cart = [];
+                        localStorage.removeItem('cart');
+                        updateCartUI();
+                    }
+                } else {
                     updateCartUI();
                 }
             }
@@ -266,16 +348,15 @@
 
             // Thêm sản phẩm vào giỏ hàng
             function addToCart(product) {
-                const productKey = buildCartItemKey(product);
+                // Làm sạch product data trước khi thêm vào cart
+                const cleanProduct = cleanCartItem(product);
+                const productKey = buildCartItemKey(cleanProduct);
                 const existingItem = cart.find(item => buildCartItemKey(item) === productKey);
 
                 if (existingItem) {
                     existingItem.quantity += 1;
                 } else {
-                    cart.push({
-                        ...product,
-                        quantity: 1
-                    });
+                    cart.push(cleanProduct);
                 }
 
                 saveCart();
@@ -351,30 +432,84 @@
                         cartItems.innerHTML = cart.map(item => {
                             const itemKey = encodeURIComponent(buildCartItemKey(item));
                             
+                            // Escape HTML và đảm bảo chỉ hiển thị string, không hiển thị object/JSON
+                            const escapeHtml = (text) => {
+                                if (!text) return '';
+                                // Nếu là object hoặc array, không hiển thị
+                                if (typeof text === 'object') {
+                                    return '';
+                                }
+                                // Chuyển đổi sang string và escape
+                                const str = String(text);
+                                const div = document.createElement('div');
+                                div.textContent = str;
+                                return div.innerHTML;
+                            };
+
                             // Xây dựng option details - ưu tiên selectedOptions (multi-select), sau đó fallback về lensLabel
                             const optionParts = [];
-                            if (item.color) {
-                                optionParts.push(`Màu: ${item.color}`);
+                            if (item.color && typeof item.color === 'string') {
+                                optionParts.push(`Màu: ${escapeHtml(item.color)}`);
+                            }
+                            
+                            // Thêm chiết suất đã chọn
+                            if (item.selectedPriceSale && typeof item.selectedPriceSale === 'string' && item.selectedPriceSale.trim() !== '') {
+                                optionParts.push(`Chiết Suất: ${escapeHtml(item.selectedPriceSale)}`);
+                            }
+                            
+                            // Thêm độ khúc xạ đã chọn
+                            if (item.selectedDegreeRange && typeof item.selectedDegreeRange === 'string' && item.selectedDegreeRange.trim() !== '') {
+                                optionParts.push(`Độ: ${escapeHtml(item.selectedDegreeRange)}`);
                             }
                             
                             // Sử dụng selectedOptions nếu có (multi-select), nếu không thì dùng lensLabel hoặc lens
-                            if (item.selectedOptions && item.selectedOptions.length > 0) {
-                                optionParts.push(`Gói tròng: ${item.selectedOptions.join(', ')}`);
-                            } else if (item.lensLabel) {
-                                optionParts.push(`Gói tròng: ${item.lensLabel}`);
-                            } else if (item.lens) {
-                                optionParts.push(`Gói tròng: ${item.lens}`);
+                            if (item.selectedOptions && Array.isArray(item.selectedOptions) && item.selectedOptions.length > 0) {
+                                const escapedOptions = item.selectedOptions
+                                    .filter(opt => opt != null && typeof opt !== 'object')
+                                    .map(opt => escapeHtml(String(opt)))
+                                    .join(', ');
+                                if (escapedOptions) {
+                                    optionParts.push(`Gói tròng: ${escapedOptions}`);
+                                }
+                            } else if (item.lensLabel && typeof item.lensLabel === 'string') {
+                                optionParts.push(`Gói tròng: ${escapeHtml(item.lensLabel)}`);
+                            } else if (item.lens && typeof item.lens === 'string') {
+                                optionParts.push(`Gói tròng: ${escapeHtml(item.lens)}`);
                             }
                             
                             const optionDetails = optionParts.join(' • ');
 
+                            // Đảm bảo brand là string hợp lệ - xử lý nhiều trường hợp
+                            let brandText = '';
+                            if (item.brand) {
+                                if (typeof item.brand === 'string') {
+                                    // Nếu là JSON string, thử parse
+                                    try {
+                                        const parsed = JSON.parse(item.brand);
+                                        if (parsed && typeof parsed === 'object') {
+                                            brandText = parsed.name || parsed.alias || '';
+                                        } else {
+                                            brandText = item.brand;
+                                        }
+                                    } catch (e) {
+                                        // Không phải JSON, dùng trực tiếp
+                                        brandText = item.brand;
+                                    }
+                                } else if (typeof item.brand === 'object') {
+                                    // Nếu là object, lấy name hoặc alias
+                                    brandText = item.brand.name || item.brand.alias || '';
+                                }
+                                brandText = escapeHtml(brandText);
+                            }
+                            const brandDisplay = brandText ? `<p class="text-xs text-gray-500">${brandText}</p>` : '';
+
                             return `
                                 <div class="cart-item flex gap-3 mb-4 pb-4 border-b" data-item-key="${itemKey}">
-                                <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
+                                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="w-20 h-20 object-cover rounded">
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-sm mb-1">${item.name}</h4>
-                                        <p class="text-xs text-gray-500">${item.brand || ''}</p>
-                                        ${optionDetails ? `<p class="text-xs text-gray-500 mt-1">${optionDetails}</p>` : ''}
+                                    <h4 class="font-semibold text-sm mb-1">${escapeHtml(item.name)}</h4>
+                                        ${brandDisplay}
+                                        ${optionDetails ? `<p class="text-xs text-gray-500 mt-1">${escapeHtml(optionDetails)}</p>` : ''}
                                         <div class="flex justify-between items-center mt-2">
                                         <div class="flex items-center gap-2">
                                             <button class="decrease-btn w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300">-</button>
@@ -532,6 +667,26 @@
                     
                     // Lấy product ID
                     const productId = productSummary.dataset.productId || productSummary.getAttribute('data-product-id') || '';
+                    
+                    // Lấy chiết suất đã chọn
+                    const priceSaleSelect = document.getElementById('price-sale-select');
+                    let selectedPriceSale = '';
+                    if (priceSaleSelect && priceSaleSelect.value) {
+                        const selectedOption = priceSaleSelect.options[priceSaleSelect.selectedIndex];
+                        if (selectedOption && selectedOption.value !== '') {
+                            selectedPriceSale = selectedOption.getAttribute('data-category') || '';
+                        }
+                    }
+                    
+                    // Lấy độ khúc xạ đã chọn
+                    const degreeRangeSelect = document.getElementById('degree-range-select');
+                    let selectedDegreeRange = '';
+                    if (degreeRangeSelect && degreeRangeSelect.value) {
+                        const selectedOption = degreeRangeSelect.options[degreeRangeSelect.selectedIndex];
+                        if (selectedOption && selectedOption.value !== '') {
+                            selectedDegreeRange = selectedOption.getAttribute('data-name') || '';
+                        }
+                    }
 
                     return {
                         id: parseInt(productId) || 0,
@@ -543,7 +698,9 @@
                         color,
                         lens,
                         lensLabel,
-                        selectedOptions: selectedOptions // Mảng tất cả các option đã chọn
+                        selectedOptions: selectedOptions, // Mảng tất cả các option đã chọn
+                        selectedPriceSale: selectedPriceSale, // Chiết suất đã chọn
+                        selectedDegreeRange: selectedDegreeRange // Độ khúc xạ đã chọn
                     };
                 }
 
@@ -845,25 +1002,109 @@
             if (productSummary) {
                 const colorChips = Array.from(productSummary.querySelectorAll('.color-chip'));
                 const optionPills = Array.from(productSummary.querySelectorAll('.option-pill'));
-                const selectedColorLabel = productSummary.querySelector('#selected-color span');
-                const selectedOptionLabel = productSummary.querySelector('#selected-option span');
+                const selectedSummaryLabel = document.getElementById('selected-summary');
 
+                const updateSelectedSummary = () => {
+                    if (!selectedSummaryLabel) return;
+                    
+                    const summaryParts = [];
+                    
+                    // Lấy màu đã chọn
+                    const activeColorChip = colorChips.find(chip => chip.classList.contains('active'));
+                    if (activeColorChip) {
+                        const color = activeColorChip.dataset.color || '';
+                        if (color) summaryParts.push(color);
+                    }
+                    
+                    // Lấy chiết suất đã chọn
+                    if (priceSaleSelect && priceSaleSelect.value) {
+                        const selectedPriceSaleOption = priceSaleSelect.options[priceSaleSelect.selectedIndex];
+                        if (selectedPriceSaleOption && selectedPriceSaleOption.value !== '') {
+                            const categoryName = selectedPriceSaleOption.getAttribute('data-category') || '';
+                            if (categoryName) summaryParts.push('Chiết Suất ' + categoryName);
+                        }
+                    }
+                    
+                    // Lấy độ khúc xạ đã chọn
+                    if (degreeRangeSelect && degreeRangeSelect.value) {
+                        const selectedDegreeOption = degreeRangeSelect.options[degreeRangeSelect.selectedIndex];
+                        if (selectedDegreeOption && selectedDegreeOption.value !== '') {
+                            const degreeName = selectedDegreeOption.getAttribute('data-name') || '';
+                            if (degreeName) summaryParts.push(degreeName);
+                        }
+                    }
+                    
+                    // Lấy combo/option đã chọn
+                    const { selectedOptions } = calculateTotalPrice();
+                    if (selectedOptions.length > 0) {
+                        summaryParts.push(...selectedOptions);
+                    }
+                    
+                    selectedSummaryLabel.textContent = summaryParts.length > 0 ? summaryParts.join(' - ') : 'Chưa chọn';
+                };
+                
                 const setSelectedColor = (chip) => {
                     colorChips.forEach(btn => {
                         btn.classList.toggle('active', btn === chip);
                         btn.setAttribute('aria-pressed', btn === chip ? 'true' : 'false');
                     });
-                    const color = chip?.dataset.color || '';
-                    if (selectedColorLabel) {
-                        selectedColorLabel.textContent = color;
-                    }
-                    productSummary.dataset.selectedColor = color;
+                    productSummary.dataset.selectedColor = chip?.dataset.color || '';
+                    updateSelectedSummary();
                 };
 
                 // Option pills - multi-select với tính giá tổng
                 const priceElement = productSummary.querySelector('[data-product-price]');
                 const selectedOptionsLabel = document.getElementById('selected-options-list');
-                const basePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
+                // Tìm các select elements - có thể nằm trong hoặc ngoài productSummary
+                const priceSaleSelect = document.getElementById('price-sale-select') || productSummary.querySelector('#price-sale-select');
+                const degreeRangeSelect = document.getElementById('degree-range-select') || productSummary.querySelector('#degree-range-select');
+                const originalBasePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
+                let selectedSalePrice = 0; // Giá chiết suất được cộng thêm
+                let selectedDegreeRangePrice = 0; // Giá độ khúc xạ được cộng thêm
+
+                // Xử lý chọn giá sale từ dropdown - CỘNG THÊM vào giá gốc
+                if (priceSaleSelect) {
+                    priceSaleSelect.addEventListener('change', function() {
+                        const selectedOption = this.options[this.selectedIndex];
+                        if (selectedOption) {
+                            if (selectedOption.value !== '' && selectedOption.dataset.price) {
+                                // Lấy giá chiết suất để cộng thêm
+                                const priceValue = selectedOption.getAttribute('data-price');
+                                selectedSalePrice = priceValue ? parseFloat(priceValue) : 0;
+                                if (isNaN(selectedSalePrice)) selectedSalePrice = 0;
+                            } else {
+                                // Nếu chọn "Chưa chọn" thì không cộng thêm
+                                selectedSalePrice = 0;
+                            }
+                            updatePriceAndLabel();
+                            updateSelectedSummary();
+                        }
+                    });
+                }
+
+                // Xử lý chọn độ khúc xạ từ dropdown - CỘNG THÊM vào giá gốc
+                if (degreeRangeSelect) {
+                    degreeRangeSelect.addEventListener('change', function(e) {
+                        const selectedOption = this.options[this.selectedIndex];
+                        if (selectedOption) {
+                            if (selectedOption.value && selectedOption.value !== '') {
+                                // Lấy giá độ khúc xạ để cộng thêm
+                                const priceAttr = selectedOption.getAttribute('data-price');
+                                if (priceAttr !== null && priceAttr !== undefined && priceAttr !== '') {
+                                    const parsedPrice = parseFloat(priceAttr);
+                                    selectedDegreeRangePrice = !isNaN(parsedPrice) && parsedPrice > 0 ? parsedPrice : 0;
+                                } else {
+                                    selectedDegreeRangePrice = 0;
+                                }
+                            } else {
+                                // Nếu chọn "Chưa chọn" thì không cộng thêm
+                                selectedDegreeRangePrice = 0;
+                            }
+                            updatePriceAndLabel();
+                            updateSelectedSummary();
+                        }
+                    });
+                }
 
                 // Tính tổng giá của tất cả các option đã chọn
                 const calculateTotalPrice = () => {
@@ -884,19 +1125,15 @@
 
                 const updatePriceAndLabel = () => {
                     const { totalOptionPrice, selectedOptions } = calculateTotalPrice();
-                    const totalPrice = basePrice + totalOptionPrice;
+                    // Tổng giá = giá gốc (mặc định) + giá chiết suất (nếu chọn) + giá độ khúc xạ (nếu chọn) + giá các option đã chọn
+                    // Khi không chọn chiết suất/độ khúc xạ: selectedSalePrice = 0, selectedDegreeRangePrice = 0
+                    const totalPrice = originalBasePrice + selectedSalePrice + selectedDegreeRangePrice + totalOptionPrice;
                     
                     if (priceElement) {
                         priceElement.textContent = new Intl.NumberFormat('vi-VN').format(totalPrice) + ' VNĐ';
                     }
                     
-                    if (selectedOptionsLabel) {
-                        if (selectedOptions.length > 0) {
-                            selectedOptionsLabel.textContent = selectedOptions.join(', ');
-                        } else {
-                            selectedOptionsLabel.textContent = 'Chưa chọn';
-                        }
-                    }
+                    updateSelectedSummary();
                 };
 
                 const toggleOption = (pill) => {
@@ -930,6 +1167,17 @@
                     }
                     updatePriceAndLabel();
                 }
+                
+                // Cập nhật tổng hợp lựa chọn khi khởi tạo
+                updateSelectedSummary();
+                
+                // Debug: Kiểm tra các select elements
+                console.log('Product Detail Initialized:', {
+                    priceSaleSelect: priceSaleSelect ? 'Found' : 'Not found',
+                    degreeRangeSelect: degreeRangeSelect ? 'Found' : 'Not found',
+                    priceElement: priceElement ? 'Found' : 'Not found',
+                    originalBasePrice: originalBasePrice
+                });
 
                 colorChips.forEach(chip => {
                     chip.addEventListener('click', (e) => {

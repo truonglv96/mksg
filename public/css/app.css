@@ -3360,11 +3360,12 @@ h1, h2, h3, h4, h5, h6,
 
 /* Category link hover color */
 .category-link {
+    color: #4b5563 !important; /* gray-600 */
     transition: color 0.3s ease;
 }
 
 .category-link:hover {
-    color: #11b3f1 !important;
+    color: #11b3f1 !important; /* blue */
 }
 
 /* Grid icon alignment trong mega menu - đảm bảo các icon thẳng hàng đều nhau như trong hình (7 hàng x 10 cột) */
@@ -3475,4 +3476,8 @@ button {
 
 .rounded-3xl {
     border-radius: 0.8rem !important;
+}
+
+header .py-3 {
+    padding-top: 0;
 }

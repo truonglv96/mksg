@@ -53,30 +53,6 @@
                 
                 <!-- Page Content -->
                 <div class="w-full">
-                    @if(session('success'))
-                        <div class="mb-4 p-4 bg-green-50 border border-green-200 text-green-800 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-check-circle mr-2"></i>
-                                <span>{{ session('success') }}</span>
-                            </div>
-                            <button onclick="this.parentElement.remove()" class="text-green-600 hover:text-green-800">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    @endif
-                    
-                    @if(session('error'))
-                        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas fa-exclamation-circle mr-2"></i>
-                                <span>{{ session('error') }}</span>
-                            </div>
-                            <button onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    @endif
-                    
                     @yield('content')
                 </div>
             </main>
@@ -88,6 +64,12 @@
     
     <!-- Mobile Sidebar Overlay -->
     <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+    
+    <!-- Toast Notification -->
+    @include('admin.partials.toast-notification')
+    
+    <!-- Confirm Modal -->
+    @include('admin.partials.confirm-modal')
     
     <!-- Sidebar Toggle Button (shown when sidebar is collapsed) -->
     <button id="sidebar-open-btn" class="hidden fixed left-4 top-4 z-50 w-10 h-10 bg-sidebar-bg text-white rounded-lg shadow-lg hover:bg-sidebar-hover transition-all duration-300 flex items-center justify-center" title="Mở sidebar">
@@ -244,6 +226,58 @@
         //         setTimeout(() => alert.remove(), 300);
         //     });
         // }, 5000);
+        
+        // Auto-show toast notifications from session flash messages
+        function showFlashMessages() {
+            // Wait a bit to ensure toast system is loaded
+            setTimeout(function() {
+                @if(session('success'))
+                    if (typeof showSuccess === 'function') {
+                        showSuccess('{{ addslashes(session('success')) }}', 4000);
+                    } else if (typeof showNotification === 'function') {
+                        showNotification('{{ addslashes(session('success')) }}', 'success', 4000);
+                    } else {
+                        // Fallback to alert if toast system not available
+                        alert('{{ addslashes(session('success')) }}');
+                    }
+                @endif
+                
+                @if(session('error'))
+                    if (typeof showError === 'function') {
+                        showError('{{ addslashes(session('error')) }}', 5000);
+                    } else if (typeof showNotification === 'function') {
+                        showNotification('{{ addslashes(session('error')) }}', 'error', 5000);
+                    } else {
+                        // Fallback to alert if toast system not available
+                        alert('{{ addslashes(session('error')) }}');
+                    }
+                @endif
+                
+                @if(session('warning'))
+                    if (typeof showWarning === 'function') {
+                        showWarning('{{ addslashes(session('warning')) }}', 4000);
+                    } else if (typeof showNotification === 'function') {
+                        showNotification('{{ addslashes(session('warning')) }}', 'warning', 4000);
+                    }
+                @endif
+                
+                @if(session('info'))
+                    if (typeof showInfo === 'function') {
+                        showInfo('{{ addslashes(session('info')) }}', 3000);
+                    } else if (typeof showNotification === 'function') {
+                        showNotification('{{ addslashes(session('info')) }}', 'info', 3000);
+                    }
+                @endif
+            }, 100);
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showFlashMessages);
+        } else {
+            // DOM is already ready
+            showFlashMessages();
+        }
     </script>
     
     
@@ -262,7 +296,14 @@
     
     <!-- Admin JS - Defer for better performance -->
     <script src="{{ asset('js/admin/app_admin.js') }}" defer></script>
+    
     @stack('scripts')
+    
+    <!-- API Handler Helper - Load sau để có thể dùng trong @stack('scripts') -->
+    <script>
+        // Load API handler inline hoặc từ CDN
+        // Tạm thời embed code trực tiếp
+    </script>
 </body>
 </html>
 

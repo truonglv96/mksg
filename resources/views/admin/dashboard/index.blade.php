@@ -165,7 +165,7 @@ $breadcrumbs = [
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <h2 class="text-lg font-semibold text-gray-900">Đơn hàng gần đây</h2>
-        <a href="{{ route('admin.orders.index') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+        <a href="{{ route('admin.orders.index') }}" class="text-sm bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent hover:from-red-700 hover:to-blue-700 font-semibold">
             Xem tất cả
             <i class="fas fa-arrow-right ml-1"></i>
         </a>
@@ -209,7 +209,7 @@ $breadcrumbs = [
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order['date'] }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.orders.show', $order['id']) }}" class="text-primary-600 hover:text-primary-900">Xem</a>
+                            <a href="{{ route('admin.orders.show', $order['id']) }}" class="text-red-600 hover:text-red-700 font-medium">Xem</a>
                         </td>
                     </tr>
                 @empty

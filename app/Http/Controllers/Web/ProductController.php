@@ -206,7 +206,34 @@ class ProductController extends Controller
             'discountedCombos' => DiscountedCombo::where('product_id', $product->id)
                 ->orderBy('weight', 'ASC')
                 ->get(),
+            'productPriceSales' => \App\Models\ProductPriceSale::where('id_Product', $product->id)
+                ->with(['category', 'mainCategory'])
+                ->orderBy('order', 'ASC')
+                ->get(),
+            'productDegreeRanges' => $productDegreeRanges = \App\Models\ProductDegreeRange::where('product_id', $product->id)
+                ->orderBy('weight', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->get(),
+            'productFeatures' => \App\Models\FeaturesProduct::whereIn('id', is_array($product->id_features_product) ? $product->id_features_product : [])
+                ->orderBy('id', 'ASC')
+                ->get(),
         ], $decodedData));
+        
+        // Debug: Log để kiểm tra data
+        \Log::info('Product Detail - Degree Ranges', [
+            'product_id' => $product->id,
+            'productDegreeRanges_count' => $productDegreeRanges->count(),
+            'productDegreeRanges' => $productDegreeRanges->map(function($item) {
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'name' => $item->name,
+                    'price' => $item->price,
+                    'price_sale' => $item->price_sale,
+                    'weight' => $item->weight,
+                ];
+            })->toArray()
+        ]);
     }
 
     public function shoppingCart()

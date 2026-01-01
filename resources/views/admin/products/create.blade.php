@@ -11,6 +11,77 @@ $breadcrumbs = [
 
 @push('styles')
 @include('admin.helpers.product-styles')
+<style>
+    .product-category-checkbox-item {
+        transition: all 0.2s ease;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .product-category-checkbox-item input[type="checkbox"]:checked + span {
+        color: #2563eb;
+        font-weight: 600;
+    }
+    
+    .product-category-checkbox-item.level-0 {
+        border-left: 3px solid transparent;
+        margin-bottom: 6px;
+    }
+    
+    .product-category-checkbox-item.level-0:hover {
+        border-left-color: #2563eb;
+    }
+    
+    .product-category-checkbox-item.level-0 label {
+        background: linear-gradient(to right, rgba(239, 68, 68, 0.03), rgba(37, 99, 235, 0.03));
+        border: 1px solid rgba(37, 99, 235, 0.1);
+    }
+    
+    .product-category-checkbox-item.level-0 input[type="checkbox"]:checked ~ span,
+    .product-category-checkbox-item.level-0:has(input[type="checkbox"]:checked) label {
+        background: linear-gradient(to right, rgba(239, 68, 68, 0.08), rgba(37, 99, 235, 0.08));
+        border-color: rgba(37, 99, 235, 0.3);
+    }
+    
+    .product-category-checkbox-item.level-1 {
+        margin-left: 8px;
+    }
+    
+    .product-category-checkbox-item.level-2 {
+        margin-left: 8px;
+        opacity: 0.9;
+    }
+    
+    .product-category-checkbox-item.hidden {
+        display: none;
+    }
+    
+    .product-category-checkbox:checked {
+        background: linear-gradient(135deg, #ef4444 0%, #2563eb 100%);
+        border-color: #2563eb;
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3.5-3.5a1 1 0 011.414-1.414L4.5 10.586l6.293-6.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    
+    #productCategoriesContainer::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    #productCategoriesContainer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    #productCategoriesContainer::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #ef4444 0%, #2563eb 100%);
+        border-radius: 3px;
+    }
+    
+    #productCategoriesContainer::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #1d4ed8 100%);
+    }
+</style>
 @endpush
 
 @section('content')
@@ -181,27 +252,90 @@ $breadcrumbs = [
             <div class="space-y-6">
                 <!-- Categories -->
                 <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                        <i class="fas fa-tags text-primary-600 mr-2"></i>
-                        Danh mục
-                    </h2>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-tags mr-2" style="color: #2563eb;"></i>
+                            Danh mục
+                        </h2>
+                        <span id="selectedCategoryCount" class="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-red-100 to-blue-100 text-blue-700 border border-blue-200">
+                            0 đã chọn
+                        </span>
+                    </div>
                     
-                    <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-white">
-                        @foreach($categories as $cat)
-                            <div class="category-checkbox-item level-{{ $cat['level'] }}">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" 
-                                           name="categories[]" 
-                                           value="{{ $cat['id'] }}"
-                                           {{ in_array($cat['id'], old('categories', [])) ? 'checked' : '' }}
-                                           class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                                    <span class="ml-2">{{ $cat['name'] }}</span>
-                                </label>
+                    <!-- Search Box -->
+                    <div class="mb-3">
+                        <div class="relative">
+                            <input type="text" 
+                                   id="productCategorySearch"
+                                   placeholder="Tìm kiếm danh mục..." 
+                                   class="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-smooth">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <button type="button" 
+                                    onclick="clearProductCategorySearch()"
+                                    id="clearProductCategorySearchBtn"
+                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 hidden">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2 mb-3">
+                        <button type="button" 
+                                onclick="selectAllProductCategories()"
+                                class="flex-1 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-200">
+                            <i class="fas fa-check-square mr-1"></i>Chọn tất cả
+                        </button>
+                        <button type="button" 
+                                onclick="deselectAllProductCategories()"
+                                class="flex-1 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300">
+                            <i class="fas fa-square mr-1"></i>Bỏ chọn
+                        </button>
+                    </div>
+                    
+                    <!-- Categories List -->
+                    <div class="max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-white custom-scrollbar shadow-inner" id="productCategoriesContainer">
+                        @if(isset($categories) && count($categories) > 0)
+                            @foreach($categories as $cat)
+                                <div class="product-category-checkbox-item level-{{ $cat['level'] }}" 
+                                     data-category-id="{{ $cat['id'] }}"
+                                     data-category-name="{{ strtolower($cat['name']) }}"
+                                     style="padding-left: {{ $cat['level'] * 16 }}px; margin-bottom: 4px;">
+                                    <label class="flex items-center cursor-pointer py-2 px-3 rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 group">
+                                        <div class="relative flex items-center flex-1">
+                                            <input type="checkbox" 
+                                                   name="categories[]" 
+                                                   value="{{ $cat['id'] }}"
+                                                   id="product_cat_{{ $cat['id'] }}"
+                                                   {{ in_array($cat['id'], old('categories', [])) ? 'checked' : '' }}
+                                                   class="product-category-checkbox w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all cursor-pointer"
+                                                   onchange="updateProductCategoryCount()">
+                                            <span class="ml-3 text-sm flex-1 {{ $cat['level'] == 0 ? 'font-semibold text-gray-900' : ($cat['level'] == 1 ? 'font-medium text-gray-700' : 'font-normal text-gray-600') }}">
+                                                @if($cat['level'] > 0)
+                                                    <i class="fas fa-chevron-right text-xs text-gray-400 mr-1"></i>
+                                                @endif
+                                                {{ $cat['name'] }}
+                                            </span>
+                                            @if($cat['level'] == 0)
+                                                <span class="ml-2 px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    Parent
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </label>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-8">
+                                <i class="fas fa-folder-open text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-sm text-gray-500">Chưa có danh mục nào</p>
                             </div>
-                        @endforeach
+                        @endif
                     </div>
                     @error('categories')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-sm text-red-600 flex items-center">
+                            <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                        </p>
                     @enderror
                 </div>
 
@@ -273,9 +407,9 @@ $breadcrumbs = [
                             </label>
                             <select name="type_sale" 
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth bg-white @error('type_sale') border-red-500 @enderror">
-                                <option value="0" {{ old('type_sale', 0) == 0 ? 'selected' : '' }}>Tại Shop & Online</option>
-                                <option value="1" {{ old('type_sale') == 1 ? 'selected' : '' }}>Tại Shop</option>
-                                <option value="2" {{ old('type_sale') == 2 ? 'selected' : '' }}>Online</option>
+                                <option value="-1" {{ old('type_sale', -1) == -1 ? 'selected' : '' }}>Tại Shop & Online</option>
+                                <option value="0" {{ old('type_sale') == 0 ? 'selected' : '' }}>Tại Shop</option>
+                                <option value="1" {{ old('type_sale') == 1 ? 'selected' : '' }}>Online</option>
                             </select>
                             @error('type_sale')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -460,8 +594,12 @@ $breadcrumbs = [
                                         class="category1-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth bg-white">
                                     <option value="">Tất cả</option>
                                     @foreach($categories as $cat)
-                                        @if($cat['level'] == 0)
-                                            <option value="{{ $cat['id'] }}">{{ $cat['name'] }}</option>
+                                        @if($cat['level'] == 0 || $cat['level'] == 1)
+                                            <option value="{{ $cat['id'] }}" 
+                                                    data-level="{{ $cat['level'] }}" 
+                                                    data-parent-id="{{ $cat['parent_id'] }}">
+                                                {{ $cat['formatted_name'] ?? $cat['name'] }}
+                                            </option>
                                         @endif
                                     @endforeach
                                 </select>
@@ -573,9 +711,145 @@ $breadcrumbs = [
                     
                     <button type="button" 
                             onclick="addComboRow()"
-                            class="mt-4 w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                            class="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                         <i class="fas fa-plus-circle"></i>
                         <span>Thêm Combo</span>
+                    </button>
+                </div>
+
+                <!-- Features Product Selection -->
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                            <i class="fas fa-star text-white text-lg"></i>
+                        </div>
+                        Chọn Tính Năng Sản Phẩm
+                    </h2>
+                    
+                    @if(isset($featuresProducts) && $featuresProducts->count() > 0)
+                        <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-white custom-scrollbar shadow-inner">
+                            <div class="grid grid-cols-2 gap-4">
+                            @foreach($featuresProducts as $feature)
+                                <label class="relative group cursor-pointer block">
+                                    <input type="checkbox" 
+                                           name="features_products[]" 
+                                           value="{{ $feature->id }}"
+                                           class="peer sr-only">
+                                    <div class="bg-white rounded-xl border-2 border-gray-200 p-4 transition-all duration-300 hover:border-red-500 hover:shadow-lg hover:-translate-y-1 peer-checked:border-red-600 peer-checked:bg-gradient-to-br peer-checked:from-red-50 peer-checked:to-blue-50 peer-checked:shadow-xl peer-checked:ring-2 peer-checked:ring-red-500 peer-checked:ring-opacity-50 h-full flex flex-col">
+                                        <!-- Checkbox indicator -->
+                                        <div class="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity duration-300 shadow-lg z-10 border-2 border-red-500">
+                                            <i class="fas fa-check text-red-600 text-xs font-bold"></i>
+                                        </div>
+                                        
+                                        <div class="flex flex-col items-center text-center space-y-3 flex-1">
+                                            @if($feature->image)
+                                                <div class="w-full aspect-square rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center mb-2 flex-shrink-0 border border-gray-200">
+                                                    <img src="{{ $feature->getImageUrl() }}" 
+                                                         alt="{{ $feature->name }}" 
+                                                         class="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-300">
+                                                </div>
+                                            @else
+                                                <div class="w-full aspect-square rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-2 flex-shrink-0 border border-gray-200 group-hover:from-red-50 group-hover:to-blue-50 transition-all duration-300">
+                                                    <i class="fas fa-image text-gray-400 text-3xl"></i>
+                                                </div>
+                                            @endif
+                                            
+                                            <span class="text-sm font-semibold text-gray-800 group-hover:text-red-600 peer-checked:text-red-700 transition-colors duration-300 leading-tight line-clamp-2 flex items-center justify-center min-h-[2.5rem]">
+                                                {{ $feature->name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-300">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-info-circle text-gray-400 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-600 font-medium">Chưa có tính năng nào. Vui lòng thêm tính năng trước.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Product Degree Range -->
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                            <i class="fas fa-sliders-h text-white text-lg"></i>
+                        </div>
+                        Dãy Độ
+                    </h2>
+                    
+                    <div id="degreeRangeContainer" class="space-y-4">
+                        <!-- Default row -->
+                        <div class="degree-range-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2.5 flex items-center">
+                                        <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                                        Tên Dãy Độ <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <div class="flex items-start gap-3">
+                                        <input type="text" 
+                                               name="degree_ranges[0][name]" 
+                                               value=""
+                                               placeholder="Nhập tên dãy độ"
+                                               class="flex-1 degree-range-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                        <button type="button" 
+                                                onclick="removeDegreeRangeRow(this)"
+                                                class="hidden remove-degree-range-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                                            Giá (VNĐ)
+                                        </label>
+                                        <input type="number" 
+                                               name="degree_ranges[0][price]" 
+                                               value=""
+                                               min="0"
+                                               step="1000"
+                                               placeholder="0"
+                                               class="degree-range-price w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                                            Giá Khuyến Mãi (VNĐ)
+                                        </label>
+                                        <input type="number" 
+                                               name="degree_ranges[0][price_sale]" 
+                                               value=""
+                                               min="0"
+                                               step="1000"
+                                               placeholder="0"
+                                               class="degree-range-price-sale w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                                            Thứ tự
+                                        </label>
+                                        <input type="number" 
+                                               name="degree_ranges[0][weight]" 
+                                               value="0"
+                                               min="0"
+                                               placeholder="0"
+                                               class="degree-range-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" 
+                            onclick="addDegreeRangeRow()"
+                            class="mt-6 w-full px-4 py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-plus-circle text-lg"></i>
+                        <span>Thêm Dãy Độ</span>
                     </button>
                 </div>
 
@@ -583,8 +857,7 @@ $breadcrumbs = [
                 <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
                     <div class="space-y-3">
                         <button type="submit" 
-                                class="w-full px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 font-medium"
-                                style="background: linear-gradient(to right, #0284c7, #0369a1); color: white; padding: 0.75rem 1rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.2s; font-weight: 500;">
+                                class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold">
                             <i class="fas fa-save mr-2"></i>Lưu sản phẩm
                         </button>
                         <a href="{{ route('admin.products.index') }}" 
@@ -628,14 +901,125 @@ $breadcrumbs = [
 </div>
 
 <script>
-// Categories data for filtering
-const allCategories = @json($categories);
-// Colors data from PHP
-const colorsData = @json($colors);
-const colorImageBasePath = '{{ asset("img/color") }}/';
+// Categories data for filtering - explicitly assign to window for global access
+window.allCategories = @json($categories ?? []);
+var allCategories = window.allCategories;
 
-// Store selected images
-let selectedImages = [];
+// Colors data from PHP - explicitly assign to window for global access
+window.colorsData = @json($colors ?? []);
+var colorsData = window.colorsData;
+
+// Color image base path
+window.colorImageBasePath = '{{ asset("img/color") }}/';
+var colorImageBasePath = window.colorImageBasePath;
+
+// Product Category Management Functions
+function updateProductCategoryCount() {
+    const checkboxes = document.querySelectorAll('.product-category-checkbox:checked');
+    const countElement = document.getElementById('selectedCategoryCount');
+    if (countElement) {
+        const count = checkboxes.length;
+        countElement.textContent = count + ' đã chọn';
+        if (count > 0) {
+            countElement.classList.remove('bg-gradient-to-r', 'from-red-100', 'to-blue-100', 'text-blue-700');
+            countElement.classList.add('bg-gradient-to-r', 'from-red-500', 'to-blue-500', 'text-white');
+        } else {
+            countElement.classList.remove('bg-gradient-to-r', 'from-red-500', 'to-blue-500', 'text-white');
+            countElement.classList.add('bg-gradient-to-r', 'from-red-100', 'to-blue-100', 'text-blue-700');
+        }
+    }
+}
+
+function selectAllProductCategories() {
+    const visibleCheckboxes = document.querySelectorAll('.product-category-checkbox-item:not(.hidden) .product-category-checkbox');
+    visibleCheckboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    updateProductCategoryCount();
+}
+
+function deselectAllProductCategories() {
+    const checkboxes = document.querySelectorAll('.product-category-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateProductCategoryCount();
+}
+
+function clearProductCategorySearch() {
+    const searchInput = document.getElementById('productCategorySearch');
+    const clearBtn = document.getElementById('clearProductCategorySearchBtn');
+    if (searchInput) {
+        searchInput.value = '';
+        filterProductCategories('');
+    }
+    if (clearBtn) {
+        clearBtn.classList.add('hidden');
+    }
+}
+
+function filterProductCategories(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const items = document.querySelectorAll('.product-category-checkbox-item');
+    const clearBtn = document.getElementById('clearProductCategorySearchBtn');
+    let visibleCount = 0;
+    
+    items.forEach(item => {
+        const categoryName = item.getAttribute('data-category-name') || '';
+        if (term === '' || categoryName.includes(term)) {
+            item.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+    
+    if (clearBtn) {
+        if (term !== '') {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
+        }
+    }
+    
+    // Show message if no results
+    const container = document.getElementById('productCategoriesContainer');
+    let noResultsMsg = container.querySelector('.no-results-message');
+    if (visibleCount === 0 && term !== '') {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'no-results-message text-center py-8';
+            noResultsMsg.innerHTML = '<i class="fas fa-search text-4xl text-gray-300 mb-3"></i><p class="text-sm text-gray-500">Không tìm thấy danh mục nào</p>';
+            container.appendChild(noResultsMsg);
+        }
+        noResultsMsg.classList.remove('hidden');
+    } else if (noResultsMsg) {
+        noResultsMsg.classList.add('hidden');
+    }
+}
+
+// Initialize product category search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('productCategorySearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            filterProductCategories(e.target.value);
+        });
+    }
+    
+    // Initialize selected count
+    updateProductCategoryCount();
+    
+    // Add change listeners to all checkboxes
+    const checkboxes = document.querySelectorAll('.product-category-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateProductCategoryCount);
+    });
+});
+
+// Store selected images - explicitly assign to window for global access
+window.selectedImages = window.selectedImages || [];
+var selectedImages = window.selectedImages;
 
 // Function to insert default tech content into CKEditor
 function insertDefaultTechContent() {
@@ -1152,7 +1536,7 @@ document.getElementById('productForm').addEventListener('submit', function(e) {
 });
 
 // Sale Prices Management
-let salePriceRowIndex = 1;
+var salePriceRowIndex = 1;
 
 function addSalePriceRow() {
     const container = document.getElementById('salePricesContainer');
@@ -1164,13 +1548,15 @@ function addSalePriceRow() {
     const newRow = document.createElement('div');
     newRow.className = 'sale-price-row grid grid-cols-1 gap-4 bg-white p-4 rounded-lg border border-gray-200 fade-in';
     
-    // Get categories HTML from first select
+    // Get categories HTML from first select (bao gồm cả level 0 và level 1)
     const firstSelect = container.querySelector('select[name*="[category1]"]');
     let categoriesOptions = '<option value="">Tất cả</option>';
     if (firstSelect) {
         firstSelect.querySelectorAll('option').forEach(option => {
             if (option.value !== '') {
-                categoriesOptions += `<option value="${option.value}">${option.textContent}</option>`;
+                const level = option.dataset.level || '';
+                const parentId = option.dataset.parentId || '';
+                categoriesOptions += `<option value="${option.value}" data-level="${level}" data-parent-id="${parentId}">${option.textContent}</option>`;
             }
         });
     }
@@ -1233,25 +1619,46 @@ function addSalePriceRow() {
 
 // Function to update category2 options based on category1 selection
 function updateCategory2Options(category1Select, category2Select) {
-    const parentId = category1Select.value;
+    const selectedOption = category1Select.options[category1Select.selectedIndex];
+    const selectedValue = category1Select.value;
+    const selectedLevel = selectedOption ? parseInt(selectedOption.dataset.level) : null;
+    const selectedParentId = selectedOption ? parseInt(selectedOption.dataset.parentId) : null;
     
     // Clear existing options except "Tất cả"
     category2Select.innerHTML = '<option value="">Tất cả</option>';
     
-    if (!parentId) {
+    if (!selectedValue) {
         return;
     }
     
-    // Filter categories by parent_id
-    const childCategories = allCategories.filter(cat => cat.parent_id == parentId);
-    
-    // Add child categories to select
-    childCategories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat.id;
-        option.textContent = cat.name;
-        category2Select.appendChild(option);
-    });
+    // Nếu chọn danh mục cấp 2 (level 1), tự động set parent (cấp 1) vào category2
+    // và hiển thị các danh mục con (level 2)
+    if (selectedLevel === 1 && selectedParentId) {
+        // Tự động chọn parent (cấp 1) vào category2
+        const parentOption = document.createElement('option');
+        parentOption.value = selectedParentId;
+        parentOption.textContent = allCategories.find(cat => cat.id == selectedParentId)?.name || '';
+        parentOption.selected = true;
+        category2Select.appendChild(parentOption);
+        
+        // Hiển thị các danh mục con (level 2) của danh mục cấp 2 đã chọn
+        const childCategories = allCategories.filter(cat => cat.parent_id == selectedValue && cat.level == 2);
+        childCategories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.formatted_name || cat.name;
+            category2Select.appendChild(option);
+        });
+    } else if (selectedLevel === 0) {
+        // Nếu chọn danh mục cấp 1 (level 0), hiển thị các danh mục con (level 1) trong category2
+        const childCategories = allCategories.filter(cat => cat.parent_id == selectedValue && cat.level == 1);
+        childCategories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.formatted_name || cat.name;
+            category2Select.appendChild(option);
+        });
+    }
 }
 
 function removeSalePriceRow(button) {
@@ -1299,7 +1706,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Combo Management
-let comboRowIndex = 1;
+var comboRowIndex = 1;
 
 function addComboRow() {
     const container = document.getElementById('comboContainer');
@@ -1405,11 +1812,120 @@ function updateComboRemoveButtons() {
 // Initialize combo remove buttons on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateComboRemoveButtons();
+    updateDegreeRangeRemoveButtons();
 });
 
+// Degree Range Management
+var degreeRangeRowIndex = 1;
+
+function addDegreeRangeRow() {
+    const container = document.getElementById('degreeRangeContainer');
+    if (!container) {
+        console.error('degreeRangeContainer not found');
+        return;
+    }
+    
+    const newRow = document.createElement('div');
+    newRow.className = 'degree-range-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300 fade-in';
+    
+    newRow.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2.5 flex items-center">
+                    <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                    Tên Dãy Độ <span class="text-red-500 ml-1">*</span>
+                </label>
+                <div class="flex items-start gap-3">
+                    <input type="text" 
+                           name="degree_ranges[${degreeRangeRowIndex}][name]" 
+                           value=""
+                           placeholder="Nhập tên dãy độ"
+                           class="flex-1 degree-range-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                    <button type="button" 
+                            onclick="removeDegreeRangeRow(this)"
+                            class="remove-degree-range-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                        Giá (VNĐ)
+                    </label>
+                    <input type="number" 
+                           name="degree_ranges[${degreeRangeRowIndex}][price]" 
+                           value=""
+                           min="0"
+                           step="1000"
+                           placeholder="0"
+                           class="degree-range-price w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                        Giá Khuyến Mãi (VNĐ)
+                    </label>
+                    <input type="number" 
+                           name="degree_ranges[${degreeRangeRowIndex}][price_sale]" 
+                           value=""
+                           min="0"
+                           step="1000"
+                           placeholder="0"
+                           class="degree-range-price-sale w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                        Thứ tự
+                    </label>
+                    <input type="number" 
+                           name="degree_ranges[${degreeRangeRowIndex}][weight]" 
+                           value="0"
+                           min="0"
+                           placeholder="0"
+                           class="degree-range-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(newRow);
+    degreeRangeRowIndex++;
+    
+    // Show remove buttons for all rows except the first one
+    updateDegreeRangeRemoveButtons();
+}
+
+function removeDegreeRangeRow(button) {
+    const row = button.closest('.degree-range-row');
+    if (!row) return;
+    
+    row.style.transition = 'opacity 0.3s, transform 0.3s';
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+    
+    setTimeout(() => {
+        row.remove();
+        updateDegreeRangeRemoveButtons();
+    }, 300);
+}
+
+function updateDegreeRangeRemoveButtons() {
+    const rows = document.querySelectorAll('.degree-range-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-degree-range-btn');
+        if (removeBtn) {
+            if (index === 0 && rows.length === 1) {
+                removeBtn.classList.add('hidden');
+            } else {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+    });
+}
+
 // Handle hidden checkbox
-const hiddenCheckbox = document.querySelector('input[name="hidden"][type="checkbox"]');
-const hiddenDefault = document.getElementById('hidden_default');
+var hiddenCheckbox = document.querySelector('input[name="hidden"][type="checkbox"]');
+var hiddenDefault = document.getElementById('hidden_default');
 if (hiddenCheckbox) {
     hiddenCheckbox.addEventListener('change', function() {
         if (this.checked) {
@@ -1694,7 +2210,9 @@ function reorderImagePreviews() {
             
             // Update color badge and label if color is selected
             if (img.color_id) {
-                const selectedColor = colorsData.find(c => c.id == img.color_id);
+                const colors = colorsData || window.colorsData || [];
+                const basePath = colorImageBasePath || window.colorImageBasePath || '';
+                const selectedColor = colors.find(c => c.id == img.color_id);
                 if (selectedColor) {
                     const colorBadge = document.getElementById(`color-badge-${img.id}`);
                     const colorPreview = document.getElementById(`color-preview-${img.id}`);
@@ -1705,7 +2223,7 @@ function reorderImagePreviews() {
                         // Use image if available, otherwise use background color
                         if (selectedColor.url_img) {
                             const img = document.createElement('img');
-                            img.src = colorImageBasePath + selectedColor.url_img;
+                            img.src = basePath + selectedColor.url_img;
                             img.alt = selectedColor.name || 'Color';
                             img.className = 'w-full h-full object-cover';
                             img.onerror = function() {
@@ -1755,7 +2273,7 @@ function reorderImagePreviews() {
 }
 
 // Drag and drop for reordering images
-let draggedImageElement = null;
+var draggedImageElement = null;
 
 function handleImageDragStart(e) {
     draggedImageElement = this;
@@ -1824,8 +2342,8 @@ function handleImageDragEnd(e) {
 }
 
 // Color selector functions
-let currentImageIdForColor = null;
-let selectedColorId = null;
+var currentImageIdForColor = null;
+var selectedColorId = null;
 
 function openColorSelector(imageId) {
     currentImageIdForColor = imageId;
@@ -1836,7 +2354,15 @@ function openColorSelector(imageId) {
     const colorGrid = document.getElementById('colorGrid');
     colorGrid.innerHTML = '';
     
-    colorsData.forEach(color => {
+    // Ensure colorsData is defined - use window.colorsData as fallback
+    const colors = colorsData || window.colorsData || [];
+    const basePath = colorImageBasePath || window.colorImageBasePath || '';
+    if (!colors || colors.length === 0) {
+        console.warn('No colors data available');
+        return;
+    }
+    
+    colors.forEach(color => {
         const colorOption = document.createElement('div');
         colorOption.className = `color-option ${selectedColorId == color.id ? 'selected' : ''}`;
         colorOption.dataset.colorId = color.id;
@@ -1846,7 +2372,7 @@ function openColorSelector(imageId) {
         // Use image if available, otherwise use background color
         if (color.url_img) {
             const img = document.createElement('img');
-            img.src = colorImageBasePath + color.url_img;
+            img.src = basePath + color.url_img;
             img.alt = color.name || 'Color';
             img.className = 'w-full h-full object-cover rounded';
             img.onerror = function() {
@@ -1914,13 +2440,15 @@ function confirmColorSelection() {
         const colorLabel = document.getElementById(`color-label-${currentImageIdForColor}`);
         
         if (selectedColorId) {
-            const selectedColor = colorsData.find(c => c.id == selectedColorId);
+            const colors = colorsData || window.colorsData || [];
+            const basePath = colorImageBasePath || window.colorImageBasePath || '';
+            const selectedColor = colors.find(c => c.id == selectedColorId);
             if (selectedColor) {
                 colorBadge.classList.remove('hidden');
                 // Use image if available, otherwise use background color
                 if (selectedColor.url_img) {
                     const img = document.createElement('img');
-                    img.src = colorImageBasePath + selectedColor.url_img;
+                    img.src = basePath + selectedColor.url_img;
                     img.alt = selectedColor.name || 'Color';
                     img.className = 'w-full h-full object-cover';
                     img.onerror = function() {

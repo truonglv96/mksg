@@ -190,9 +190,9 @@ $breadcrumbs = [
                 </button>
             </div>
             
-            <button onclick="openCreateModal()" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style="background: linear-gradient(to right, #0284c7, #0369a1); display: inline-flex; align-items: center; padding: 0.625rem 1.25rem; color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.2s;">
+            <button onclick="openCreateModal()" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold">
                 <i class="fas fa-plus mr-2"></i>
-                <span class="font-medium">Thêm danh mục</span>
+                <span>Thêm danh mục</span>
             </button>
         </div>
     </div>
@@ -332,8 +332,7 @@ $breadcrumbs = [
                     Hủy
                 </button>
                 <button type="submit" 
-                        class="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md"
-                        style="background: linear-gradient(to right, #0284c7, #0369a1); color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);">
+                        class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl font-semibold">
                     <span id="submitText">Lưu</span>
                 </button>
             </div>

@@ -66,7 +66,7 @@ $breadcrumbs = [
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 flex items-center">
-                <i class="fas fa-box text-primary-600 mr-3"></i>
+                <i class="fas fa-box text-red-600 mr-3"></i>
                 Quản lý sản phẩm
             </h1>
             <p class="mt-1 text-sm text-gray-500">Quản lý và theo dõi tất cả sản phẩm của bạn</p>
@@ -76,10 +76,10 @@ $breadcrumbs = [
                 <i class="fas fa-th view-icon" data-view="grid"></i>
                 <i class="fas fa-list view-icon hidden" data-view="list"></i>
             </button>
-            <a href="{{ route('admin.products.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style="background: linear-gradient(to right, #0284c7, #0369a1); display: inline-flex; align-items: center; padding: 0.625rem 1.25rem; color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: all 0.2s;">
-            <i class="fas fa-plus mr-2"></i>
-                <span class="font-medium">Thêm sản phẩm</span>
-        </a>
+            <a href="{{ route('admin.products.create') }}" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold">
+                <i class="fas fa-plus mr-2"></i>
+                <span>Thêm sản phẩm</span>
+            </a>
         </div>
     </div>
 </div>
@@ -98,7 +98,7 @@ $breadcrumbs = [
                        name="search"
                        value="{{ $search }}"
                        placeholder="Tìm theo tên, mã sản phẩm, mô tả..." 
-                       class="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth search-input">
+                       class="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-smooth search-input">
                 <i class="fas fa-search absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
         </div>
@@ -109,7 +109,7 @@ $breadcrumbs = [
                 <i class="fas fa-tags mr-2 text-gray-400"></i>Danh mục
             </label>
             <div class="relative category-dropdown-wrapper">
-                <select id="categoryFilter" name="category" class="category-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth bg-white appearance-none cursor-pointer">
+                <select id="categoryFilter" name="category" class="category-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-smooth bg-white appearance-none cursor-pointer">
                     <option value="">Tất cả danh mục</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat['id'] }}" 
@@ -130,7 +130,7 @@ $breadcrumbs = [
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-tag mr-2 text-gray-400"></i>Thương hiệu
             </label>
-            <select id="brandFilter" name="brand" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth bg-white">
+            <select id="brandFilter" name="brand" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-smooth bg-white">
                 <option value="">Tất cả thương hiệu</option>
                 @foreach($brands as $brandItem)
                     <option value="{{ $brandItem->id }}" {{ $brand == $brandItem->id ? 'selected' : '' }}>{{ $brandItem->name }}</option>
@@ -143,7 +143,7 @@ $breadcrumbs = [
             <label class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fas fa-sort mr-2 text-gray-400"></i>Sắp xếp
             </label>
-            <select id="sortFilter" name="sort" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth bg-white">
+            <select id="sortFilter" name="sort" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-smooth bg-white">
                 <option value="newest" {{ $sort == 'newest' ? 'selected' : '' }}>Mới nhất</option>
                 <option value="name_asc" {{ $sort == 'name_asc' ? 'selected' : '' }}>Tên A-Z</option>
                 <option value="name_desc" {{ $sort == 'name_desc' ? 'selected' : '' }}>Tên Z-A</option>
@@ -162,10 +162,10 @@ $breadcrumbs = [
 <!-- Products Grid View -->
 <div id="gridView" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
     <!-- Add New Product Card - First Position -->
-    <div class="product-card bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-300 overflow-hidden fade-in flex items-center justify-center min-h-[400px] hover:border-primary-400 transition-smooth cursor-pointer">
+    <div class="product-card bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-300 overflow-hidden fade-in flex items-center justify-center min-h-[400px] hover:border-red-400 transition-smooth cursor-pointer">
         <a href="{{ route('admin.products.create') }}" class="text-center p-6">
-            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-plus text-primary-600 text-2xl"></i>
+            <div class="w-16 h-16 bg-gradient-to-r from-red-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-plus text-red-600 text-2xl"></i>
             </div>
             <p class="text-lg font-semibold text-gray-700">Thêm sản phẩm mới</p>
             <p class="text-sm text-gray-500 mt-2">Tạo sản phẩm mới cho cửa hàng</p>
@@ -215,7 +215,7 @@ $breadcrumbs = [
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('admin.products.edit', $product->id) }}" class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-smooth text-center text-sm font-medium">
+                    <a href="{{ route('admin.products.edit', $product->id) }}" class="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-center text-sm font-semibold shadow-lg hover:shadow-xl">
                         <i class="fas fa-edit mr-2"></i>Sửa
                     </a>
                     <a href="{{ route('admin.products.show', $product->id) }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-smooth">
@@ -244,7 +244,7 @@ $breadcrumbs = [
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="loading-overlay">
             <div class="text-center">
-                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
                 <p class="mt-4 text-gray-600">Đang tải...</p>
             </div>
         </div>
@@ -252,7 +252,7 @@ $breadcrumbs = [
         <!-- Table Header Actions -->
         <div class="px-3 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <input type="checkbox" id="selectAll" class="table-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                <input type="checkbox" id="selectAll" class="table-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500">
                 <label for="selectAll" class="text-sm font-medium text-gray-700 cursor-pointer">Chọn tất cả</label>
                 <span id="selectedCount" class="text-sm text-gray-500 hidden">Đã chọn: <span class="font-semibold">0</span></span>
             </div>
@@ -321,7 +321,7 @@ $breadcrumbs = [
                         @endphp
                         <tr class="table-row" style="animation-delay: {{ $index * 0.05 }}s">
             <td class="px-3 py-4 whitespace-nowrap">
-                                <input type="checkbox" class="row-checkbox table-checkbox rounded border-gray-300 text-primary-600 focus:ring-primary-500" data-id="{{ $product->id }}">
+                                <input type="checkbox" class="row-checkbox table-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500" data-id="{{ $product->id }}">
                             </td>
                             <td class="px-3 py-4">
                                 <div class="flex items-center">
@@ -332,7 +332,7 @@ $breadcrumbs = [
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-semibold text-gray-900 hover:text-primary-600 transition-smooth cursor-pointer">{{ $product->name }}</div>
+                                        <div class="text-sm font-semibold text-gray-900 hover:text-red-600 transition-smooth cursor-pointer">{{ $product->name }}</div>
                                         <!-- <div class="text-xs text-gray-500 mt-0.5">
                                             @include('admin.helpers.product-sku', ['product' => $product])
                                         </div> -->
@@ -377,13 +377,13 @@ $breadcrumbs = [
                             <td class="px-3 py-4 whitespace-nowrap text-right" style="min-width: 120px;">
                                 <div class="flex items-center justify-end gap-2" style="visibility: visible !important; opacity: 1 !important; display: flex !important;">
                                     <a href="{{ route('admin.products.edit', $product->id) }}" 
-                                       class="inline-flex items-center justify-center p-2.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-smooth border border-transparent hover:border-primary-200" 
+                                       class="inline-flex items-center justify-center p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-smooth border border-transparent hover:border-red-200" 
                                        title="Sửa"
                                        style="visibility: visible !important; opacity: 1 !important; display: inline-flex !important;">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="{{ route('admin.products.show', $product->id) }}" 
-                                       class="inline-flex items-center justify-center p-2.5 text-green-600 hover:bg-green-50 rounded-lg transition-smooth border border-transparent hover:border-green-200" 
+                                       class="inline-flex items-center justify-center p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-smooth border border-transparent hover:border-red-200" 
                                        title="Xem"
                                        style="visibility: visible !important; opacity: 1 !important; display: inline-flex !important;">
                                         <i class="fas fa-eye"></i>

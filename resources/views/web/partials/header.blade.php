@@ -42,7 +42,17 @@
                     class="h-8 mr-3">
             </a>
             <ul class="flex space-x-6 text-sm font-medium">
-                <li><a href="{{ route('home') }}" class="text-red-600 font-bold hover:text-red-600">{{ config('texts.nav_home') }}</a></li>
+                @php
+                    $currentUrl = request()->url();
+                    $currentPath = request()->path();
+                    $isHome = request()->routeIs('home');
+                @endphp
+                <li>
+                    <a href="{{ route('home') }}" 
+                       class="font-bold hover:text-[#11b3f1] transition-colors {{ $isHome ? 'text-[#11b3f1]' : 'text-gray-600' }}">
+                        {{ config('texts.nav_home') }}
+                    </a>
+                </li>
 
                 @if(isset($categories) && $categories->count() > 0)
                     @foreach($categories as $category)
@@ -70,12 +80,22 @@
                                 $basePath = '/tin-tuc/';
                             }
                             if (isset($category->type) && $category->type === 'brand') {
-                                $basePath = '/';
+                                $basePath = '/thuong-hieu/';
+                            }
+                            
+                            $categoryUrl = $category->alias ? url($basePath . $category->alias) : '#';
+                            $categoryPath = $category->alias ? trim($basePath . $category->alias, '/') : '';
+                            
+                            // Kiểm tra active state - so sánh path hiện tại với path của category
+                            $isActive = false;
+                            if ($categoryPath) {
+                                // Kiểm tra nếu path hiện tại bắt đầu bằng category path
+                                $isActive = str_starts_with($currentPath, $categoryPath);
                             }
                         @endphp
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
-                            <a href="{{ $category->alias ? url($basePath . $category->alias) : '#' }}"
-                                class="{{ $hasChildren ? 'text-red-600 font-bold' : 'text-gray-600 font-bold category-link' }}">
+                            <a href="{{ $categoryUrl }}"
+                                class="font-bold hover:text-[#11b3f1] transition-colors {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
                                 {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                             </a>
                             @if($hasChildren)

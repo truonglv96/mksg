@@ -35,7 +35,7 @@
             
             @for($page = $startPage; $page <= $endPage; $page++)
                 @if($page == $currentPage)
-                    <span class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium shadow-md" style="background-color: #0284c7; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);">{{ $page }}</span>
+                    <span class="px-4 py-2 bg-gradient-to-r from-red-600 to-blue-600 text-white rounded-lg text-sm font-semibold shadow-lg">{{ $page }}</span>
                 @else
                     <a href="{{ $paginator->url($page) }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-smooth">{{ $page }}</a>
                 @endif

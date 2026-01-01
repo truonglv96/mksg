@@ -42,7 +42,7 @@ class StoreProductRequest extends FormRequest
             'weight' => 'nullable|integer|min:0',
             'unit' => 'nullable|string|max:50',
             'type_color' => 'nullable|integer|in:0,1',
-            'type_sale' => 'nullable|integer|in:0,1,2',
+            'type_sale' => 'nullable|integer|in:-1,0,1,2',
             'gender' => 'nullable|string|in:all,male,female,children',
             'kw' => 'nullable|string|max:255',
             'meta_des' => 'nullable|string|max:500',
@@ -61,6 +61,13 @@ class StoreProductRequest extends FormRequest
             'combos.*.price' => 'nullable|numeric|min:0',
             'combos.*.weight' => 'nullable|integer|min:0',
             'combos.*.description' => 'nullable|string',
+            'features_products' => 'nullable|array',
+            'features_products.*' => 'exists:features_product,id',
+            'degree_ranges' => 'nullable|array',
+            'degree_ranges.*.name' => 'nullable|string|max:255',
+            'degree_ranges.*.price' => 'nullable|numeric|min:0',
+            'degree_ranges.*.price_sale' => 'nullable|numeric|min:0',
+            'degree_ranges.*.weight' => 'nullable|integer|min:0',
         ];
     }
 
@@ -111,6 +118,16 @@ class StoreProductRequest extends FormRequest
             'combos.*.price.min' => 'Giá combo không được nhỏ hơn 0.',
             'combos.*.weight.integer' => 'Thứ tự combo phải là số nguyên.',
             'combos.*.weight.min' => 'Thứ tự combo không được nhỏ hơn 0.',
+            'features_products.array' => 'Tính năng sản phẩm phải là mảng.',
+            'features_products.*.exists' => 'Một hoặc nhiều tính năng không tồn tại.',
+            'degree_ranges.array' => 'Dãy độ phải là mảng.',
+            'degree_ranges.*.name.max' => 'Tên dãy độ không được vượt quá 255 ký tự.',
+            'degree_ranges.*.price.numeric' => 'Giá dãy độ phải là số.',
+            'degree_ranges.*.price.min' => 'Giá dãy độ không được nhỏ hơn 0.',
+            'degree_ranges.*.price_sale.numeric' => 'Giá khuyến mãi dãy độ phải là số.',
+            'degree_ranges.*.price_sale.min' => 'Giá khuyến mãi dãy độ không được nhỏ hơn 0.',
+            'degree_ranges.*.weight.integer' => 'Thứ tự dãy độ phải là số nguyên.',
+            'degree_ranges.*.weight.min' => 'Thứ tự dãy độ không được nhỏ hơn 0.',
         ];
     }
 
@@ -148,6 +165,8 @@ class StoreProductRequest extends FormRequest
             'images' => 'hình ảnh',
             'sale_prices' => 'giá sale',
             'combos' => 'combo',
+            'features_products' => 'tính năng sản phẩm',
+            'degree_ranges' => 'dãy độ',
         ];
     }
 }

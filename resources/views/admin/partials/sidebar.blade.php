@@ -1,6 +1,6 @@
 <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 sidebar-transition lg:translate-x-0 -translate-x-full flex flex-col sidebar-main shadow-sm">
     <!-- Logo Section -->
-    <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+    <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-gradient-to-r from-red-50 via-blue-50 to-indigo-50" style="background: linear-gradient(to right, #fef2f2, #eff6ff, #eef2ff);">
         <div class="flex items-center justify-center sidebar-logo-content">
             <img src="{{ asset('img/logo/logo_mksg.png') }}" 
                  alt="Logo" 
@@ -18,7 +18,7 @@
             <!-- Dashboard -->
             <li>
                 <a href="{{ route('admin.dashboard') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.dashboard') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.dashboard') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-home w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Dashboard</span>
                 </a>
@@ -27,7 +27,7 @@
             <!-- Categories -->
             <li>
                 <a href="{{ route('admin.categories.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.categories.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.categories.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-folder-tree w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Danh mục</span>
                 </a>
@@ -37,7 +37,7 @@
             <li>
                 <button type="button" 
                         id="products-menu-toggle"
-                        class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.brands.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                        class="w-full flex items-center justify-between px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.products.*') || request()->routeIs('admin.brands.*') || request()->routeIs('admin.materials.*') || request()->routeIs('admin.colors.*') || request()->routeIs('admin.featured-categories.*') || request()->routeIs('admin.features-product.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <div class="flex items-center">
                         <i class="fas fa-box w-5 flex-shrink-0"></i>
                         <span class="ml-3 sidebar-menu-text font-medium">Sản phẩm</span>
@@ -47,37 +47,44 @@
                 <ul id="products-submenu" class="hidden pl-2 mt-2 space-y-1.5">
                     <li>
                         <a href="{{ route('admin.products.index') }}" 
-                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.products.*') ? 'bg-primary-50 text-primary-600' : '' }}">
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.products.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
                             <i class="fas fa-box w-4 flex-shrink-0"></i>
                             <span class="ml-3 sidebar-menu-text">Sản phẩm</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.brands.index') }}" 
-                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.brands.*') ? 'bg-primary-50 text-primary-600' : '' }}">
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.brands.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
                             <i class="fas fa-star w-4 flex-shrink-0"></i>
                             <span class="ml-3 sidebar-menu-text">Thương hiệu</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" 
-                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
-                            <i class="fas fa-fabric w-4 flex-shrink-0"></i>
+                        <a href="{{ route('admin.materials.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.materials.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
+                            <i class="fas fa-layer-group w-4 flex-shrink-0"></i>
                             <span class="ml-3 sidebar-menu-text">Chất liệu</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" 
-                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
+                        <a href="{{ route('admin.colors.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.colors.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
                             <i class="fas fa-palette w-4 flex-shrink-0"></i>
                             <span class="ml-3 sidebar-menu-text">Màu sắc</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" 
-                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-all duration-250">
+                        <a href="{{ route('admin.featured-categories.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.featured-categories.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
                             <i class="fas fa-star-of-life w-4 flex-shrink-0"></i>
                             <span class="ml-3 sidebar-menu-text">Danh mục nổi bật</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.features-product.index') }}" 
+                           class="flex items-center px-4 py-2.5 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-all duration-250 {{ request()->routeIs('admin.features-product.*') ? 'bg-gradient-to-r from-red-50 to-blue-50 text-primary-600' : '' }}">
+                            <i class="fas fa-star w-4 flex-shrink-0"></i>
+                            <span class="ml-3 sidebar-menu-text">Tính năng</span>
                         </a>
                     </li>
                 </ul>
@@ -86,26 +93,17 @@
             <!-- Orders -->
             <li>
                 <a href="{{ route('admin.orders.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.orders.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.orders.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-shopping-cart w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Đơn hàng</span>
                     <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full sidebar-menu-text font-semibold">3</span>
                 </a>
             </li>
             
-            <!-- Customers -->
-            <li>
-                <a href="{{ route('admin.customers.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.customers.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
-                    <i class="fas fa-users w-5 flex-shrink-0"></i>
-                    <span class="ml-3 sidebar-menu-text font-medium">Khách hàng</span>
-                </a>
-            </li>
-            
             <!-- News -->
             <li>
                 <a href="{{ route('admin.news.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.news.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.news.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-newspaper w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Tin tức</span>
                 </a>
@@ -115,16 +113,25 @@
             <!-- Sliders -->
             <li>
                 <a href="{{ route('admin.sliders.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.sliders.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.sliders.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-images w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Slider</span>
+                </a>
+            </li>
+            
+            <!-- Store Information -->
+            <li>
+                <a href="{{ route('admin.store-information.index') }}" 
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.store-information.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                    <i class="fas fa-store w-5 flex-shrink-0"></i>
+                    <span class="ml-3 sidebar-menu-text font-medium">Thông tin cửa hàng</span>
                 </a>
             </li>
             
             <!-- Settings -->
             <li class="pt-4 border-t border-gray-200">
                 <a href="{{ route('admin.settings.index') }}" 
-                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.settings.*') ? 'menu-item-active bg-primary-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.settings.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-cog w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Cài đặt</span>
                 </a>
@@ -135,7 +142,7 @@
     <!-- User Section -->
     <div class="p-4 border-t border-gray-200 bg-gray-50 sidebar-user-section">
         <div class="flex items-center space-x-3 mb-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+            <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm" style="background: linear-gradient(135deg, #ef4444 0%, #2563eb 100%);">
                 <i class="fas fa-user text-white text-sm"></i>
             </div>
             <div class="flex-1 min-w-0 sidebar-user-info">
@@ -143,7 +150,7 @@
                 <p class="text-xs text-gray-500 truncate">admin@example.com</p>
             </div>
         </div>
-        <a href="{{ route('admin.profile') }}" class="block w-full px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-white hover:text-primary-600 transition-colors text-center sidebar-menu-text font-medium border border-gray-200 hover:border-primary-300">
+        <a href="{{ route('admin.profile') }}" class="block w-full px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors text-center sidebar-menu-text font-medium border border-gray-200 hover:border-primary-300">
             <i class="fas fa-user-circle mr-2"></i>
             <span class="sidebar-menu-text">Hồ sơ</span>
         </a>
@@ -182,7 +189,7 @@
         
         if (productsMenuToggle && productsSubmenu) {
             // Check if any submenu item is active
-            const isSubmenuActive = productsSubmenu.querySelector('a.bg-primary-50');
+            const isSubmenuActive = productsSubmenu.querySelector('a.bg-gradient-to-r');
             if (isSubmenuActive) {
                 productsSubmenu.classList.remove('hidden');
                 if (productsMenuIcon) {

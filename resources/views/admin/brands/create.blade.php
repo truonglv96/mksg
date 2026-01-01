@@ -262,8 +262,7 @@ $breadcrumbs = [
                 Hủy
             </a>
             <button type="submit" 
-                    class="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md"
-                    style="background: linear-gradient(to right, #0284c7, #0369a1); color: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);">
+                    class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl font-semibold">
                 <i class="fas fa-save mr-2"></i>Lưu
             </button>
         </div>
