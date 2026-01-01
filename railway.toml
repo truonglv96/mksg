@@ -3,9 +3,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
+startCommand = "/usr/local/bin/start.sh"
 healthcheckPath = "/up"
-healthcheckTimeout = 100
+healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 

@@ -39,10 +39,11 @@ RUN npm ci
 
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/sites-available/default
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/start.sh /usr/local/bin/start.sh
 
 # Create PHP-FPM socket directory
-RUN mkdir -p /var/run/php
+RUN mkdir -p /var/run/php && \
+    chmod +x /usr/local/bin/start.sh
 
 # Copy application code
 COPY . /var/www/html
@@ -58,9 +59,9 @@ RUN npm run build
 # Run composer scripts after code is in place
 RUN composer dump-autoload --optimize --classmap-authoritative
 
-# Expose port 80
+# Expose port (will be set by Railway via PORT env var)
 EXPOSE 80
 
-# Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start script (handles PORT dynamically)
+CMD ["/usr/local/bin/start.sh"]
 
