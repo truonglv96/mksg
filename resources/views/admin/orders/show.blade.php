@@ -115,12 +115,37 @@ $breadcrumbs = [
             
             @if($order->billItems && $order->billItems->count() > 0)
                 <div class="space-y-4">
+                    @php
+                        $subtotal = 0; // Tổng tiền tạm tính
+                    @endphp
                     @foreach($order->billItems as $item)
                         <div class="product-item border-2 border-gray-200 rounded-xl p-4">
                             <div class="flex items-start gap-4">
-                                @if($item->product && $item->product->url_img)
+                                @php
+                                    $productImage = null;
+                                    // Kiểm tra product tồn tại và có product_id hợp lệ
+                                    if ($item->product && $item->product_id > 0) {
+                                        // Ưu tiên lấy hình ảnh đầu tiên từ product_images
+                                        if ($item->product->images && $item->product->images->count() > 0) {
+                                            $firstImage = $item->product->images->first();
+                                            if ($firstImage && !empty($firstImage->image)) {
+                                                $productImage = asset('img/product/' . $firstImage->image);
+                                            }
+                                        }
+                                        
+                                        // Fallback: lấy từ url_imgs (JSON array) nếu chưa có hình
+                                        if (!$productImage && !empty($item->product->url_imgs)) {
+                                            $urlImgs = is_string($item->product->url_imgs) ? json_decode($item->product->url_imgs, true) : $item->product->url_imgs;
+                                            if (is_array($urlImgs) && !empty($urlImgs[0])) {
+                                                $productImage = asset('img/product/' . $urlImgs[0]);
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                
+                                @if($productImage)
                                     <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                                        <img src="{{ asset('img/product/' . $item->product->url_img) }}" 
+                                        <img src="{{ $productImage }}" 
                                              alt="{{ $item->product->name ?? 'Sản phẩm' }}"
                                              class="w-full h-full object-cover"
                                              onerror="this.src='{{ asset('img/placeholder.png') }}'">
@@ -136,24 +161,76 @@ $breadcrumbs = [
                                         {{ $item->product->name ?? 'Sản phẩm #' . $item->product_id }}
                                     </h3>
                                     
-                                    @if($item->category_name)
-                                        <p class="text-sm text-gray-500 mb-2">
-                                            <i class="fas fa-tag mr-1"></i>{{ $item->category_name }}
-                                        </p>
-                                    @endif
-                                    
-                                    <div class="flex items-center gap-4 text-sm">
-                                        <div>
-                                            <span class="text-gray-500">Số lượng:</span>
-                                            <span class="font-semibold text-gray-900 ml-1">{{ $item->qty ?? 1 }}</span>
-                                        </div>
-                                        
-                                        @if($item->color_id)
-                                            <div>
-                                                <span class="text-gray-500">Màu sắc:</span>
-                                                <span class="font-semibold text-gray-900 ml-1">ID: {{ $item->color_id }}</span>
+                                    <div class="space-y-2 text-sm">
+                                        @if($item->category_name)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-tag mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Danh mục:</span>
+                                                <span class="ml-2">{{ $item->category_name }}</span>
                                             </div>
                                         @endif
+
+                                        @if($item->brand)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-certificate mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Thương hiệu:</span>
+                                                <span class="ml-2">{{ $item->brand }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($item->color_text)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-palette mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Màu sắc:</span>
+                                                <span class="ml-2">{{ $item->color_text }}</span>
+                                            </div>
+                                        @elseif($item->color_id)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-palette mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Màu sắc ID:</span>
+                                                <span class="ml-2">{{ $item->color_id }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($item->unit)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-ruler mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Đơn vị:</span>
+                                                <span class="ml-2">{{ $item->unit }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($item->refractive_index)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-eye mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Chiết suất:</span>
+                                                <span class="ml-2">{{ $item->refractive_index }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($item->degree_range)
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-search mr-2 text-gray-400 w-4"></i>
+                                                <span class="font-medium">Độ cận/loạn:</span>
+                                                <span class="ml-2">{{ $item->degree_range }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($item->lens_package)
+                                            <div class="flex items-start text-gray-600">
+                                                <i class="fas fa-box mr-2 text-gray-400 w-4 mt-0.5"></i>
+                                                <div class="flex-1">
+                                                    <span class="font-medium">Gói tròng kính:</span>
+                                                    <div class="ml-2 mt-1 text-gray-700">{{ $item->lens_package }}</div>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="flex items-center text-gray-600 pt-1 border-t border-gray-200 mt-2">
+                                            <i class="fas fa-shopping-cart mr-2 text-gray-400 w-4"></i>
+                                            <span class="font-medium">Số lượng:</span>
+                                            <span class="ml-2 font-semibold text-gray-900">{{ $item->qty ?? 1 }}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -163,20 +240,26 @@ $breadcrumbs = [
                                         $itemSaleOff = $item->sale_off ?? 0;
                                         $finalPrice = $itemSaleOff > 0 ? $itemSaleOff : $itemPrice;
                                         $totalItemPrice = $finalPrice * ($item->qty ?? 1);
+                                        $subtotal += $totalItemPrice; // Cộng vào tổng tạm tính
                                     @endphp
                                     
-                                    @if($itemSaleOff > 0 && $itemSaleOff != $itemPrice)
-                                        <div class="text-sm text-gray-400 line-through mb-1">
-                                            {{ number_format($itemPrice) }} đ
+                                    <div class="mb-2">
+                                        <div class="text-xs text-gray-500 mb-1">Đơn giá:</div>
+                                        @if($itemSaleOff > 0 && $itemSaleOff != $itemPrice)
+                                            <div class="text-sm text-gray-400 line-through mb-1">
+                                                {{ number_format($itemPrice) }} đ
+                                            </div>
+                                        @endif
+                                        <div class="text-base font-semibold text-gray-900">
+                                            {{ number_format($finalPrice) }} đ
                                         </div>
-                                    @endif
-                                    
-                                    <div class="text-lg font-bold text-gray-900">
-                                        {{ number_format($finalPrice) }} đ
                                     </div>
                                     
-                                    <div class="text-sm text-gray-500 mt-1">
-                                        Tổng: <span class="font-semibold text-red-600">{{ number_format($totalItemPrice) }} đ</span>
+                                    <div class="pt-2 border-t border-gray-200">
+                                        <div class="text-xs text-gray-500 mb-1">Tổng sản phẩm:</div>
+                                        <div class="text-lg font-bold text-red-600">
+                                            {{ number_format($totalItemPrice) }} đ
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -257,11 +340,18 @@ $breadcrumbs = [
                 </div>
                 @endif
                 
-                @if($order->district || $order->city)
+                @if($order->districtArea || $order->cityArea)
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 mb-1">Quận/Huyện - Tỉnh/Thành phố</label>
                     <p class="text-base text-gray-900">
-                        {{ $order->district ?? '' }}{{ $order->district && $order->city ? ', ' : '' }}{{ $order->city ?? '' }}
+                        <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                        @if($order->districtArea && $order->cityArea)
+                            {{ $order->districtArea->name }}, {{ $order->cityArea->name }}
+                        @elseif($order->districtArea)
+                            {{ $order->districtArea->name }}
+                        @elseif($order->cityArea)
+                            {{ $order->cityArea->name }}
+                        @endif
                     </p>
                 </div>
                 @endif

@@ -60,18 +60,57 @@ class OrderController extends Controller
                 $query->orderBy('id', 'DESC');
         }
         
-        // Paginate
-        $orders = $query->paginate(20)->withQueryString();
+        // Paginate và load billItems để tính tổng
+        $orders = $query->with('billItems')->paginate(20)->withQueryString();
         
         // Get total amounts for each order
         $orderIds = $orders->pluck('id')->toArray();
-        $totals = TatalBillDetail::whereIn('bill_id', $orderIds)
-            ->pluck('tatal', 'bill_id')
-            ->toArray();
         
-        // Attach totals to orders
+        // Tính toán tổng từ bill_details cho tất cả đơn hàng
+        $calculatedTotals = [];
+        if (!empty($orderIds)) {
+            $results = DB::table('bill_details')
+                ->whereIn('bill_id', $orderIds)
+                ->selectRaw('bill_id, SUM((price - COALESCE(sale_off, 0)) * qty) as total')
+                ->groupBy('bill_id')
+                ->get();
+            
+            foreach ($results as $result) {
+                $calculatedTotals[(int)$result->bill_id] = (int)$result->total;
+            }
+        }
+        
+        // Lấy từ tatal_bill_details cho các đơn hàng không có trong calculatedTotals
+        $missingIds = array_diff($orderIds, array_keys($calculatedTotals));
+        $tatalTotals = [];
+        if (!empty($missingIds)) {
+            $tatalResults = TatalBillDetail::whereIn('bill_id', $missingIds)->get();
+            foreach ($tatalResults as $result) {
+                $tatalTotals[(int)$result->bill_id] = (int)$result->tatal;
+            }
+        }
+        
+        // Merge: ưu tiên calculatedTotals, sau đó mới dùng tatalTotals
+        $totals = array_merge($tatalTotals, $calculatedTotals);
+        
+        // Attach totals to orders - đảm bảo key khớp với order->id
         foreach ($orders as $order) {
-            $order->total = $totals[$order->id] ?? 0;
+            $orderId = (int)$order->id;
+            if (isset($totals[$orderId])) {
+                $order->total = $totals[$orderId];
+            } else {
+                // Nếu không có trong totals, tính trực tiếp từ billItems
+                $orderTotal = 0;
+                if ($order->billItems) {
+                    foreach ($order->billItems as $item) {
+                        $itemPrice = $item->price ?? 0;
+                        $itemSaleOff = $item->sale_off ?? 0;
+                        $finalPrice = $itemSaleOff > 0 ? $itemSaleOff : $itemPrice;
+                        $orderTotal += $finalPrice * ($item->qty ?? 1);
+                    }
+                }
+                $order->total = $orderTotal;
+            }
         }
         
         // Sort by total if needed
@@ -114,10 +153,22 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        $order = ClientInformation::with('billItems.product')->findOrFail($id);
+        $order = ClientInformation::with(['billItems.product.images', 'cityArea', 'districtArea'])->findOrFail($id);
         
-        // Get total amount
-        $total = TatalBillDetail::where('bill_id', $id)->value('tatal') ?? 0;
+        // Get total amount - ưu tiên lấy từ tatal_bill_details, nếu không có thì tính từ bill_details
+        $total = TatalBillDetail::where('bill_id', $id)->value('tatal');
+        
+        if ($total === null || $total == 0) {
+            // Tính toán tổng từ bill_details nếu không có trong tatal_bill_details
+            $total = 0;
+            foreach ($order->billItems as $item) {
+                $itemPrice = $item->price ?? 0;
+                $itemSaleOff = $item->sale_off ?? 0;
+                $finalPrice = $itemSaleOff > 0 ? $itemSaleOff : $itemPrice;
+                $total += $finalPrice * ($item->qty ?? 1);
+            }
+        }
+        
         $order->total = $total;
         
         // Get status config

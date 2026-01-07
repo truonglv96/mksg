@@ -28,4 +28,12 @@ class ClientInformation extends Model
     public function billItems() {
         return $this->hasMany(Bill::class, 'bill_id', 'id');
     }
+
+    public function cityArea() {
+        return $this->belongsTo(Area::class, 'city', 'id');
+    }
+
+    public function districtArea() {
+        return $this->belongsTo(Area::class, 'district', 'id');
+    }
 }

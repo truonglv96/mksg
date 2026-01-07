@@ -11,7 +11,10 @@ class Bill extends Model
 
     protected $table = 'bill_details';
 
-    protected $primaryKey = 'bill_id';
+    // Bảng bill_details có composite primary key (bill_id, product_id)
+    // Không thể dùng $primaryKey vì Laravel không hỗ trợ composite key trực tiếp
+    // Sử dụng DB::table() để insert thay vì Model::create()
+    protected $primaryKey = null;
     
     public $incrementing = false;
     
@@ -22,7 +25,13 @@ class Bill extends Model
         'sale_off',
         'price',
         'qty',
-        'color_id'
+        'color_id',
+        'brand',
+        'unit',
+        'color_text',
+        'refractive_index',
+        'degree_range',
+        'lens_package'
     ];
 
     public function product()

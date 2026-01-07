@@ -26,6 +26,9 @@
         </div>
     </div>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <section id="order-section" class="order-section">
         <div class="order-header">
             <h1>{{ config('texts.cart_order_info_title') }}</h1>
@@ -221,6 +224,137 @@
     .order-success-actions .btn-primary:hover {
         background-color: #c41e3a;
     }
+
+    /* Toast Notification Styles - Góc dưới bên phải */
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        pointer-events: none;
+    }
+
+    .toast {
+        min-width: 320px;
+        max-width: 450px;
+        animation: slideInUp 0.3s ease-out;
+        pointer-events: auto;
+    }
+
+    @keyframes slideInUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutDown {
+        from {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+    }
+
+    .toast.hiding {
+        animation: slideOutDown 0.3s ease-out forwards;
+    }
+
+    .toast-content {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .toast.toast-success .toast-content {
+        border-left: 4px solid #10b981;
+    }
+
+    .toast.toast-error .toast-content {
+        border-left: 4px solid #ef4444;
+    }
+
+    .toast.toast-info .toast-content {
+        border-left: 4px solid #3b82f6;
+    }
+
+    .toast.toast-warning .toast-content {
+        border-left: 4px solid #f59e0b;
+    }
+
+    .toast-icon {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+
+    .toast.toast-success .toast-icon {
+        color: #10b981;
+    }
+
+    .toast.toast-error .toast-icon {
+        color: #ef4444;
+    }
+
+    .toast.toast-info .toast-icon {
+        color: #3b82f6;
+    }
+
+    .toast.toast-warning .toast-icon {
+        color: #f59e0b;
+    }
+
+    .toast-message {
+        flex: 1;
+        color: #1f2937;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        word-wrap: break-word;
+    }
+
+    .toast-close {
+        flex-shrink: 0;
+        background: transparent;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+        margin-top: -0.25rem;
+    }
+
+    .toast-close:hover {
+        color: #1f2937;
+    }
+
+    @media (max-width: 640px) {
+        .toast-container {
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+        }
+
+        .toast {
+            min-width: auto;
+            max-width: none;
+        }
+    }
 </style>
 
 @endsection
@@ -241,8 +375,77 @@
         const orderEmptyState = document.getElementById('order-empty-state');
         const orderReceipt = document.getElementById('order-receipt');
         const orderSuccessMessage = document.getElementById('order-success-message');
+        const toastContainer = document.getElementById('toast-container');
 
         let cart = [];
+
+        // Function to show toast notification (success, error, info, warning)
+        function showToast(message, type = 'info') {
+            if (!toastContainer) return;
+
+            // Tạo toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Icon theo type
+            let iconSvg = '';
+            switch(type) {
+                case 'success':
+                    iconSvg = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    break;
+                case 'error':
+                    iconSvg = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    break;
+                case 'warning':
+                    iconSvg = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                    break;
+                default: // info
+                    iconSvg = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <div class="toast-icon">${iconSvg}</div>
+                    <div class="toast-message">${message}</div>
+                    <button type="button" class="toast-close" aria-label="Đóng">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            // Thêm vào container
+            toastContainer.appendChild(toast);
+
+            // Xử lý nút đóng
+            const closeBtn = toast.querySelector('.toast-close');
+            const hideToast = () => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            };
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', hideToast);
+            }
+
+            // Tự động ẩn sau 5 giây (hoặc 3 giây cho success)
+            const autoHideDelay = type === 'success' ? 3000 : 5000;
+            setTimeout(hideToast, autoHideDelay);
+        }
+
+        // Alias functions for convenience
+        function showErrorNotification(message) {
+            showToast(message, 'error');
+        }
+
+        function showSuccessNotification(message) {
+            showToast(message, 'success');
+        }
 
         const paymentNotes = {
             bank: `<strong>{{ config('texts.cart_payment_bank_note') }}</strong><br>{{ config('texts.cart_payment_bank_note_detail') }}<br>– {{ config('texts.cart_payment_bank_name') }}<br>– {{ config('texts.cart_payment_bank_account') }} <strong>{{ config('texts.cart_payment_bank_account_value') }}</strong><br>– {{ config('texts.cart_payment_bank_owner') }} <strong>{{ config('texts.cart_payment_bank_owner_value') }}</strong>`,
@@ -357,8 +560,8 @@
                 event.preventDefault();
                 
                 // Kiểm tra giỏ hàng có sản phẩm không
-                if (cart.length === 0) {
-                    alert('{{ config('texts.cart_empty_alert') }}');
+                if (!cart || cart.length === 0) {
+                    showErrorNotification('{{ config('texts.cart_empty_alert') }}');
                     return;
                 }
 
@@ -369,20 +572,26 @@
                     formObject[key] = value;
                 });
 
-                // Chuẩn bị dữ liệu cart items
+                // Chuẩn bị dữ liệu cart items - đơn giản, không filter quá nhiều
                 const cartItems = cart.map(item => ({
-                    id: item.id || item.productId || 0,
+                    id: parseInt(item.id || item.productId || 0) || 0,
                     name: item.name || '',
                     price: parseInt(item.price) || 0,
                     quantity: parseInt(item.quantity) || 1,
                     category: item.category || null,
                     sale_off: item.saleOff || item.sale_off || null,
                     color_id: item.colorId || item.color_id || null,
-                    lensLabel: item.lensLabel || null,
+                    lensLabel: item.lensLabel || item.lens || null,
                     selectedOptions: item.selectedOptions || null,
+                    selectedPriceSale: item.selectedPriceSale || null,
+                    selectedDegreeRange: item.selectedDegreeRange || null,
+                    unit: item.unit || null,
+                    origin: item.origin || null,
+                    brand: item.brand || null,
+                    color: item.color || null,
                 }));
 
-                // Chuẩn bị dữ liệu gửi lên server
+                // Chuẩn bị dữ liệu gửi lên server - ĐẢM BẢO cart luôn được gửi
                 const submitData = {
                     ...formObject,
                     cart: cartItems
@@ -415,6 +624,9 @@
                     const result = await response.json();
 
                     if (result.success) {
+                        // Hiển thị toast thông báo thành công
+                        showSuccessNotification(result.message || 'Đơn hàng đã được tạo thành công!');
+                        
                         // Xóa giỏ hàng sau khi đặt hàng thành công
                         localStorage.removeItem('cart');
                         cart = [];
@@ -444,11 +656,12 @@
                             districtSelect.disabled = true;
                         }
                     } else {
-                        alert(result.message || '{{ config('texts.cart_error') }}');
+                        // Hiển thị lỗi bằng toast notification
+                        showErrorNotification(result.message || '{{ config('texts.cart_error') }}');
                     }
                 } catch (error) {
                     console.error('Checkout error:', error);
-                    alert('{{ config('texts.cart_error') }}');
+                    showErrorNotification('{{ config('texts.cart_error') }}');
                 } finally {
                     // Enable lại submit button
                     if (submitButton) {
@@ -464,7 +677,10 @@
             const optionsKey = item.selectedOptions && item.selectedOptions.length > 0 
                 ? item.selectedOptions.sort().join(',') 
                 : (item.lens || item.lensLabel || '');
-            return [item.name, item.color || '', optionsKey].join('||');
+            // Thêm chiết suất và độ khúc xạ vào key để phân biệt các sản phẩm
+            const priceSaleKey = item.selectedPriceSale || '';
+            const degreeRangeKey = item.selectedDegreeRange || '';
+            return [item.name, item.color || '', optionsKey, priceSaleKey, degreeRangeKey].join('||');
         };
 
         // Hàm chuyển đổi giá trị sang string hợp lệ
@@ -474,17 +690,33 @@
             return String(value);
         };
 
-        // Hàm làm sạch cart item - chỉ giữ lại các trường cần thiết
+        // Hàm làm sạch cart item - chỉ giữ lại các trường cần thiết (không filter quá strict)
         function cleanCartItem(item) {
             if (!item || typeof item !== 'object') {
                 return null;
             }
             
+            // Xử lý brand đặc biệt - nếu là object thì lấy name hoặc alias
+            let brandValue = item.brand;
+            if (brandValue && typeof brandValue === 'object') {
+                brandValue = brandValue.name || brandValue.alias || '';
+            } else if (typeof brandValue === 'string') {
+                // Nếu là JSON string, thử parse
+                try {
+                    const parsed = JSON.parse(brandValue);
+                    if (parsed && typeof parsed === 'object') {
+                        brandValue = parsed.name || parsed.alias || '';
+                    }
+                } catch (e) {
+                    // Không phải JSON, giữ nguyên
+                }
+            }
+            
             return {
                 id: parseInt(item.id || item.productId || 0) || 0,
                 productId: parseInt(item.productId || item.id || 0) || 0,
-                name: toSafeString(item.name),
-                brand: toSafeString(item.brand),
+                name: toSafeString(item.name || ''),
+                brand: toSafeString(brandValue),
                 price: parseInt(item.price) || 0,
                 image: toSafeString(item.image),
                 color: toSafeString(item.color),
@@ -493,6 +725,10 @@
                 selectedOptions: Array.isArray(item.selectedOptions) 
                     ? item.selectedOptions.map(opt => toSafeString(opt)).filter(opt => opt !== '')
                     : [],
+                selectedPriceSale: toSafeString(item.selectedPriceSale || ''),
+                selectedDegreeRange: toSafeString(item.selectedDegreeRange || ''),
+                unit: toSafeString(item.unit || ''),
+                origin: toSafeString(item.origin || ''),
                 quantity: parseInt(item.quantity) || 1
             };
         }
@@ -503,15 +739,10 @@
             if (savedCart) {
                 try {
                     const parsedCart = JSON.parse(savedCart);
-                    // Làm sạch tất cả items để loại bỏ các trường không mong muốn
+                    // Làm sạch tất cả items để loại bỏ các trường không mong muốn (không filter quá strict)
                     const cleanedCart = Array.isArray(parsedCart) 
-                        ? parsedCart.map(cleanCartItem).filter(item => item !== null && item.name) 
+                        ? parsedCart.map(cleanCartItem).filter(item => item !== null) 
                         : [];
-                    
-                    // Nếu có items bị loại bỏ, log để debug
-                    if (cleanedCart.length !== parsedCart.length) {
-                        console.log('Đã làm sạch cart: loại bỏ', parsedCart.length - cleanedCart.length, 'items không hợp lệ');
-                    }
                     
                     cart = cleanedCart;
                     
@@ -618,21 +849,6 @@
             if (orderList) {
                 orderList.innerHTML = cart.map((item, index) => {
                     const itemKey = encodeURIComponent(buildCartItemKey(item));
-                    const optionEntries = [];
-                    if (item.color) {
-                        optionEntries.push({ label: '{{ config('texts.cart_option_color') }}', value: item.color });
-                    }
-                    const lensValue = item.lensLabel || item.lens;
-                    if (lensValue) {
-                        optionEntries.push({ label: '{{ config('texts.cart_option_lens') }}', value: lensValue });
-                    }
-                    if (item.options && typeof item.options === 'object') {
-                        Object.entries(item.options).forEach(([label, value]) => {
-                            if (value) {
-                                optionEntries.push({ label, value });
-                            }
-                        });
-                    }
 
                     // Escape HTML để tránh hiển thị raw HTML/JSON
                     const escapeHtml = (text) => {
@@ -642,11 +858,116 @@
                         return div.innerHTML;
                     };
 
-                    const optionBadges = optionEntries.length
-                        ? `<div class="order-card__options">
-                            ${optionEntries.map(opt => `<span class="order-card__option">${escapeHtml(opt.label)}: <span>${escapeHtml(opt.value)}</span></span>`).join('')}
+                    // Xây dựng danh sách chi tiết sản phẩm
+                    const productDetails = [];
+                    
+                    // Thương hiệu
+                    const brandValue = item.brand ? String(item.brand).trim() : '';
+                    if (brandValue !== '') {
+                        productDetails.push({
+                            icon: '🏷️',
+                            label: 'Thương hiệu',
+                            value: brandValue
+                        });
+                    }
+                    
+                    // Đơn vị - luôn hiển thị nếu có giá trị
+                    const unitValue = item.unit ? String(item.unit).trim() : '';
+                    if (unitValue !== '') {
+                        productDetails.push({
+                            icon: '📦',
+                            label: 'Đơn vị',
+                            value: unitValue
+                        });
+                    }
+                    
+                    // Màu gọng
+                    if (item.color && item.color.trim() !== '') {
+                        productDetails.push({
+                            icon: '🎨',
+                            label: 'Màu gọng',
+                            value: item.color
+                        });
+                    }
+                    
+                    // Chiếc xuất (nếu có)
+                    if (item.origin && item.origin.trim() !== '') {
+                        productDetails.push({
+                            icon: '🌍',
+                            label: 'Chiếc xuất',
+                            value: item.origin
+                        });
+                    }
+                    
+                    // Độ khúc xạ (Chiết suất)
+                    if (item.selectedPriceSale && item.selectedPriceSale.trim() !== '') {
+                        productDetails.push({
+                            icon: '🔍',
+                            label: 'Chiết suất',
+                            value: item.selectedPriceSale
+                        });
+                    }
+                    
+                    // Độ khúc xạ (nếu có)
+                    if (item.selectedDegreeRange && item.selectedDegreeRange.trim() !== '') {
+                        productDetails.push({
+                            icon: '👓',
+                            label: 'Độ khúc xạ',
+                            value: item.selectedDegreeRange
+                        });
+                    }
+                    
+                    // Gói tròng kính
+                    if (item.selectedOptions && Array.isArray(item.selectedOptions) && item.selectedOptions.length > 0) {
+                        const lensOptions = item.selectedOptions
+                            .filter(opt => opt != null && typeof opt !== 'object' && String(opt).trim() !== '')
+                            .map(opt => escapeHtml(String(opt)))
+                            .join(', ');
+                        if (lensOptions) {
+                            productDetails.push({
+                                icon: '🔬',
+                                label: 'Gói tròng kính',
+                                value: lensOptions
+                            });
+                        }
+                    } else if (item.lensLabel && item.lensLabel.trim() !== '') {
+                        productDetails.push({
+                            icon: '🔬',
+                            label: 'Gói tròng kính',
+                            value: item.lensLabel
+                        });
+                    } else if (item.lens && item.lens.trim() !== '') {
+                        productDetails.push({
+                            icon: '🔬',
+                            label: 'Gói tròng kính',
+                            value: item.lens
+                        });
+                    }
+
+                    // Render chi tiết sản phẩm
+                    const productDetailsHtml = productDetails.length > 0
+                        ? `<div class="order-card__details">
+                            <div class="order-card__details-title">
+                                <svg class="order-card__details-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Thông tin sản phẩm</span>
+                            </div>
+                            <div class="order-card__details-list">
+                                ${productDetails.map(detail => `
+                                    <div class="order-card__detail-item">
+                                        <span class="order-card__detail-icon">${detail.icon}</span>
+                                        <div class="order-card__detail-content">
+                                            <span class="order-card__detail-label">${escapeHtml(detail.label)}</span>
+                                            <span class="order-card__detail-value">${escapeHtml(detail.value)}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
                            </div>`
-                        : `<p class="order-card__options--empty">{{ config('texts.cart_no_options') }}</p>`;
+                        : `<div class="order-card__details order-card__details--empty">
+                            <p>{{ config('texts.cart_no_options') }}</p>
+                           </div>`;
 
                     const brandLine = item.brand ? `<p class="order-card__brand">${escapeHtml(item.brand)}</p>` : '';
                     const indexLabel = `#${String(index + 1).padStart(2, '0')}`;
@@ -661,7 +982,7 @@
                                     ${brandLine}
                                 </div>
                             </div>
-                            ${optionBadges}
+                            ${productDetailsHtml}
                             <div class="order-card__body">
                                 <div class="order-card__price-block">
                                     <span>{{ config('texts.cart_unit_price') }}</span>
@@ -702,22 +1023,6 @@
                 const grandTotal = totalPrice + shippingFee - discountValue;
 
                 const receiptItems = cart.map(item => {
-                    const optionEntries = [];
-                    if (item.color) {
-                        optionEntries.push({ label: '{{ config('texts.cart_option_color') }}', value: item.color });
-                    }
-                    const lensValue = item.lensLabel || item.lens;
-                    if (lensValue) {
-                        optionEntries.push({ label: '{{ config('texts.cart_option_lens') }}', value: lensValue });
-                    }
-                    if (item.options && typeof item.options === 'object') {
-                        Object.entries(item.options).forEach(([label, value]) => {
-                            if (value) {
-                                optionEntries.push({ label, value });
-                            }
-                        });
-                    }
-
                     // Escape HTML để tránh hiển thị raw HTML/JSON
                     const escapeHtml = (text) => {
                         if (!text) return '';
@@ -726,10 +1031,79 @@
                         return div.innerHTML;
                     };
 
-                    const metaLines = [
-                        item.brand ? `<span><strong>{{ config('texts.cart_brand') }}</strong> ${escapeHtml(item.brand)}</span>` : null,
-                        ...optionEntries.map(opt => `<span><strong>${escapeHtml(opt.label)}:</strong> ${escapeHtml(opt.value)}</span>`)
-                    ].filter(Boolean).join('');
+                    // Xây dựng danh sách chi tiết sản phẩm đầy đủ
+                    const productDetails = [];
+                    
+                    // Thương hiệu
+                    if (item.brand && String(item.brand).trim() !== '') {
+                        productDetails.push({
+                            label: 'Thương hiệu',
+                            value: String(item.brand).trim()
+                        });
+                    }
+                    
+                    // Đơn vị
+                    if (item.unit && String(item.unit).trim() !== '') {
+                        productDetails.push({
+                            label: 'Đơn vị',
+                            value: String(item.unit).trim()
+                        });
+                    }
+                    
+                    // Màu gọng
+                    if (item.color && String(item.color).trim() !== '') {
+                        productDetails.push({
+                            label: 'Màu gọng',
+                            value: String(item.color).trim()
+                        });
+                    }
+                    
+                    // Chiết suất
+                    if (item.selectedPriceSale && String(item.selectedPriceSale).trim() !== '') {
+                        productDetails.push({
+                            label: 'Chiết suất',
+                            value: String(item.selectedPriceSale).trim()
+                        });
+                    }
+                    
+                    // Độ khúc xạ
+                    if (item.selectedDegreeRange && String(item.selectedDegreeRange).trim() !== '') {
+                        productDetails.push({
+                            label: 'Độ khúc xạ',
+                            value: String(item.selectedDegreeRange).trim()
+                        });
+                    }
+                    
+                    // Gói tròng kính
+                    if (item.selectedOptions && Array.isArray(item.selectedOptions) && item.selectedOptions.length > 0) {
+                        const lensOptions = item.selectedOptions
+                            .filter(opt => opt != null && typeof opt !== 'object' && String(opt).trim() !== '')
+                            .map(opt => escapeHtml(String(opt).trim()))
+                            .join(', ');
+                        if (lensOptions) {
+                            productDetails.push({
+                                label: 'Gói tròng kính',
+                                value: lensOptions
+                            });
+                        }
+                    } else if (item.lensLabel && String(item.lensLabel).trim() !== '') {
+                        productDetails.push({
+                            label: 'Gói tròng kính',
+                            value: String(item.lensLabel).trim()
+                        });
+                    } else if (item.lens && String(item.lens).trim() !== '') {
+                        productDetails.push({
+                            label: 'Gói tròng kính',
+                            value: String(item.lens).trim()
+                        });
+                    }
+
+                    // Render meta lines
+                    const metaLines = productDetails.length > 0
+                        ? productDetails.map(detail => 
+                            `<span><strong>${escapeHtml(detail.label)}:</strong> ${escapeHtml(detail.value)}</span>`
+                          ).join('')
+                        : '<span><strong>Thông tin:</strong> Chưa có</span>';
 
                     return `
                         <div class="receipt-product">
@@ -738,7 +1112,7 @@
                                 <div>
                                     <h3>${escapeHtml(item.name)}</h3>
                                     <div class="receipt-product__meta">
-                                        ${metaLines || '<span><strong>{{ config('texts.cart_option_label') }}</strong> {{ config('texts.cart_option_none') }}</span>'}
+                                        ${metaLines}
                                     </div>
                                 </div>
                             </div>
@@ -808,7 +1182,7 @@
                 const downloadButton = orderReceipt.querySelector('#order-download-pdf');
                 if (downloadButton) {
                     downloadButton.addEventListener('click', () => {
-                        alert('{{ config('texts.cart_receipt_pdf_soon') }}');
+                        showErrorNotification('{{ config('texts.cart_receipt_pdf_soon') }}');
                     });
                 }
 

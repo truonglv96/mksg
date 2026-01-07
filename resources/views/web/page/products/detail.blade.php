@@ -114,7 +114,7 @@
         @include('web.partials.breadcrumb')
 
         <!-- Product Summary -->
-        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10" data-product-id="{{ $product->id }}">
+        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10" data-product-id="{{ $product->id }}" data-product-unit="{{ $product->unit ?? '' }}" data-product-brand="{{ ($brand && $brand->name) ? $brand->name : (($product->brand && $product->brand->name) ? $product->brand->name : '') }}">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10">
                 <!-- Gallery -->
                 <div>
@@ -192,7 +192,7 @@
                         <h1 id="product-name" class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
                             {{ $product->name }}
                         </h1>
-                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-600">
+                        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-base text-gray-600">
                             <!-- <div class="flex items-center gap-1 text-yellow-500">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path
@@ -202,13 +202,13 @@
                             </div> -->
                             @if($product->code)
                             <div class="flex items-center gap-1.5">
-                                <span class="text-gray-400">{{ config('texts.product_code') }}:</span>
+                                <label for="code-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">{{ config('texts.product_code') }}:</label>
                                 <span class="font-semibold text-gray-800">{{ $product->code }}</span>
                             </div>
                             @endif
                             <div class="flex items-center gap-1.5">
-                                <span class="text-gray-400">{{ config('texts.product_brand') }}:</span>
-                                <span class="font-semibold text-emerald-600">
+                                <label for="brand-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">{{ config('texts.product_brand') }}</label>
+                                <span id="product-brand" class="font-semibold text-emerald-600"></span>
                                 @if($brand && $brand->name)
                                     {{ $brand->name }}
                                 @elseif($product->brand && $product->brand->name)
@@ -218,13 +218,13 @@
                             </div>
                             @if($product->unit)
                             <div class="flex items-center gap-1.5">
-                                <span class="text-gray-400">Đơn vị:</span>
-                                <span class="font-semibold text-gray-800">{{ $product->unit }}</span>
+                                <label for="unit-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">Đơn vị:</label>
+                                <span id="product-unit" class="font-semibold text-gray-800">{{ $product->unit }}</span>
                             </div>
                             @endif
                             @if(isset($product->type_sale))
                             <div class="flex items-center gap-1.5">
-                                <span class="text-gray-400">Hình thức:</span>
+                                <label for="type-sale-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">Hình thức:</label>
                                 <span class="font-semibold text-gray-800">
                                     @if($product->type_sale == -1)
                                         Tại Shop & Online
@@ -248,7 +248,7 @@
                                     data-layout="button_count" data-size="large">
                                     <a target="_blank"
                                         href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
-                                    class="fb-xfbml-parse-ignore text-xs">{{ config('texts.product_share') }}</a>
+                                    class="fb-xfbml-parse-ignore text-base">{{ config('texts.product_share') }}</a>
                             </div>
                         </div>
                     </div>
@@ -263,12 +263,17 @@
                             @endphp
                             <span class="price-current text-2xl sm:text-3xl font-bold text-red-600" data-product-price data-base-price="{{ $currentPrice }}">{{ number_format($currentPrice, 0, ',', '.') }} VNĐ</span>
                             @if($hasDiscount)
-                            <div class="flex items-center gap-2 flex-wrap">
+                            <div class="flex items-center gap-2.5 flex-wrap">
                             <span class="price-old text-sm text-gray-500 line-through">{{ number_format($oldPrice, 0, ',', '.') }} VNĐ</span>
                             @php
                                 $savingPercent = round((($oldPrice - $currentPrice) / $oldPrice) * 100);
                             @endphp
-                                <span class="price-saving text-xs font-bold text-white bg-red-600 px-2 py-0.5 rounded-full">{{ config('texts.product_save') }} {{ $savingPercent }}%</span>
+                                <span class="price-saving inline-flex items-center gap-1.5 text-base font-bold text-white bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-3 py-1.5 rounded-full shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 hover:scale-105">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                    <span>{{ config('texts.product_save') }} {{ $savingPercent }}%</span>
+                                </span>
                             </div>
                             @endif
                         </div>
@@ -279,7 +284,8 @@
                         @if(isset($productColors) && $productColors && $productColors->count() > 0)
                         <div class="bg-gray-50/50 rounded-lg px-2.5 py-1.5 border border-gray-200">
                             <div class="flex items-center gap-2">
-                                <p class="text-xs font-semibold text-gray-700  tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_frame_color') }}:</p>
+                                <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">{{ config('texts.product_frame_color') }}</label>
+                                <!-- <p class="text-base font-semibold text-gray-700  tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_frame_color') }}:</p> -->
                                 <div class="flex flex-wrap gap-1.5 flex-1">
                                 @foreach($productColors as $index => $color)
                                     <button type="button" class="color-chip w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-gray-300 shadow-sm bg-cover bg-center transition-all duration-200 hover:scale-105 hover:shadow hover:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-500 {{ $index === 0 ? 'active ring-1 ring-red-500 border-red-500' : '' }}"
@@ -301,9 +307,9 @@
                         <div class="bg-gray-50/50 rounded-lg p-2.5 border border-gray-200 flex flex-col lg:flex-row lg:gap-2.5">
                             @if(isset($productPriceSales) && $productPriceSales->count() > 0)
                             <div class="flex-1">
-                                <label for="price-sale-select" class="block text-[10px] font-bold text-gray-800 mb-1 uppercase tracking-wide">Chiết Suất</label>
+                                <label for="price-sale-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">Chiết Suất</label>
                                 <select id="price-sale-select" 
-                                        class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
+                                        class="w-full px-2.5 py-1.5 text-base border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
                                         <option value="" data-price="0">Chưa chọn</option>
                                         @foreach($productPriceSales as $priceSale)
                                             @php
@@ -329,9 +335,9 @@
                             
                             @if(isset($productDegreeRanges) && $productDegreeRanges->count() > 0)
                             <div class="flex-1 {{ isset($productPriceSales) && $productPriceSales->count() > 0 ? 'mt-2.5 lg:mt-0' : '' }}">
-                                <label for="degree-range-select" class="block text-[10px] font-bold text-gray-800 mb-1 uppercase tracking-wide">Độ Khúc Xạ</label>
+                                <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">Độ Khúc Xạ</label>
                                 <select id="degree-range-select" 
-                                        class="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
+                                        class="w-full px-2.5 py-1.5 text-base border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
                                         <option value="" data-price="0">Chưa chọn</option>
                                         @foreach($productDegreeRanges as $degreeRange)
                                             @if(!empty($degreeRange->name))
@@ -358,22 +364,22 @@
                         @endif
 
                         @if(isset($discountedCombos) && $discountedCombos && $discountedCombos->count() > 0)
-                        <div class="bg-gray-50/50 rounded-lg p-2.5 border border-gray-200">
-                            <p class="text-[10px] font-bold text-gray-800 mb-1.5 uppercase tracking-wide">{{ config('texts.product_lens_package') }}</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div class="bg-gray-50/50 rounded-lg p-2 border border-gray-200">
+                            <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">{{ config('texts.product_lens_package') }}</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @foreach($discountedCombos as $index => $combo)
                                 <button type="button" 
-                                    class="option-pill rounded-lg px-2.5 py-2 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200 {{ $index === 0 ? 'active border-red-500 bg-red-50 ring-1 ring-red-500' : '' }}"
+                                    class="option-pill rounded-lg px-2 py-1.5 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200 {{ $index === 0 ? 'active border-red-500 bg-red-50 ring-1 ring-red-500' : '' }}"
                                     data-option="{{ $combo->name }}" 
                                     data-combo-id="{{ $combo->id }}"
                                     data-option-price="{{ $combo->price ?? 0 }}"
                                     aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
-                                    <p class="font-bold text-gray-900 text-[10px] leading-tight">{{ $combo->name }}</p>
+                                    <p class="font-bold text-gray-900 text-base leading-tight">{{ $combo->name }}</p>
                                     @if($combo->description)
-                                    <p class="text-[9px] text-gray-600 mt-0.5 leading-tight">{{ $combo->description }}</p>
+                                    <p class="text-base text-gray-600 mt-0.5 leading-tight">{{ $combo->description }}</p>
                                     @endif
                                     @if($combo->price && $combo->price > 0)
-                                    <p class="text-[9px] font-bold text-red-600 mt-0.5">+{{ number_format($combo->price, 0, ',', '.') }} VNĐ</p>
+                                    <p class="text-base font-bold text-red-600 mt-0.5">+{{ number_format($combo->price, 0, ',', '.') }} VNĐ</p>
                                     @endif
                                 </button>
                                 @endforeach
@@ -384,7 +390,7 @@
                         <!-- Features Product - Clean 2 Column Design -->
                         @if(isset($productFeatures) && $productFeatures->count() > 0)
                         <div class="bg-gray-50/50 rounded-lg p-2.5 border border-gray-200">
-                            <h3 class="text-[10px] font-bold text-gray-900 mb-2 uppercase tracking-wide">Tính năng</h3>
+                            <h3 class="text-base font-bold text-gray-900 mb-2 uppercase tracking-wide">Tính năng</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 @php
                                     $featuresArray = $productFeatures->values()->all();
@@ -404,7 +410,7 @@
                                             <span class="text-gray-500 text-base">📋</span>
                                         </div>
                                         @endif
-                                        <p class="text-xs text-gray-700 leading-tight">
+                                        <p class="text-base text-gray-700 leading-tight">
                                             {{ $feature->name }}
                                         </p>
                                     </div>
@@ -423,7 +429,7 @@
                                             <span class="text-gray-500 text-base">📋</span>
                                         </div>
                                         @endif
-                                        <p class="text-xs text-gray-700 leading-tight">
+                                        <p class="text-base text-gray-700 leading-tight">
                                             {{ $feature->name }}
                                         </p>
                                     </div>
@@ -436,22 +442,36 @@
                     </div>
 
                     <!-- Tổng hợp lựa chọn -->
-                    <div class="bg-blue-50/50 border border-blue-200 rounded-lg p-3">
-                        <p class="text-xs font-semibold text-gray-800 mb-1.5">
-                            {{ config('texts.product_selected') }}:
-                        </p>
-                        <p class="text-xs font-medium text-gray-700 leading-relaxed" id="selected-summary">
-                                    @php
-                                        $summary = [];
-                                        if(isset($productColors) && $productColors->count() > 0) {
-                                            $summary[] = ($productColors->first()->name ?? '');
-                                        }
-                                        if(isset($discountedCombos) && $discountedCombos->count() > 0) {
-                                            $summary[] = ($discountedCombos->first()->name ?? '');
-                                        }
-                                        echo implode(' - ', array_filter($summary)) ?: 'Chưa chọn';
-                                    @endphp
+                    @php
+                        $summary = [];
+                        if(isset($productColors) && $productColors->count() > 0) {
+                            $summary[] = ($productColors->first()->name ?? '');
+                        }
+                        if(isset($discountedCombos) && $discountedCombos->count() > 0) {
+                            $summary[] = ($discountedCombos->first()->name ?? '');
+                        }
+                        $summaryText = implode(' - ', array_filter($summary)) ?: 'Chưa chọn';
+                        $summaryCount = count(array_filter($summary));
+                        $isInline = $summaryCount <= 1;
+                    @endphp
+                    <div class="bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50/30 border border-blue-200/80 rounded-lg p-3 shadow-sm">
+                        @if($isInline)
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-base font-semibold text-gray-800 whitespace-nowrap">
+                                    {{ config('texts.product_selected') }}:
+                                </span>
+                                <span class="text-base font-medium text-gray-700" id="selected-summary">
+                                    {{ $summaryText }}
+                                </span>
+                            </div>
+                        @else
+                            <p class="text-base font-semibold text-gray-800 mb-1.5">
+                                {{ config('texts.product_selected') }}:
                             </p>
+                            <p class="text-base font-medium text-gray-700 leading-relaxed" id="selected-summary">
+                                {{ $summaryText }}
+                            </p>
+                        @endif
                     </div>
 
                     <!-- Action Buttons -->
@@ -466,7 +486,7 @@
                         </button>
                     </div>
 
-                    <div class="support-chips flex flex-wrap items-center gap-3 text-sm">
+                    <div class="support-chips flex flex-wrap items-center gap-3 text-base">
                         <span class="px-3 py-2 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-2">
                             🛠️ {{ config('texts.product_install_time') }}
                         </span>
@@ -603,84 +623,6 @@
                             <p>{{ config('texts.product_no_time') }}</p>
                         </div>
                     @endif
-                </div>
-            </div>
-        </section>
-
-        <!-- Showrooms -->
-        <section class="showroom-section bg-gradient-to-br from-red-50 via-white to-white border border-red-100 rounded-2xl p-6 md:p-8 mb-10">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div class="max-w-xl">
-                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">{{ config('texts.product_showroom_title') }}</h2>
-                    <p class="text-sm text-gray-600 mb-4">{{ config('texts.product_showroom_desc') }}</p>
-                    @if(isset($address_sale) && isset($address_sale->text) && $address_sale->text)
-                        <div class="text-sm text-gray-700 mb-4">
-                            {!! $address_sale->text !!}
-                        </div>
-                    @else
-                    <ul class="space-y-3 text-sm text-gray-700 font-sans">
-                        <li><strong>{{ config('texts.product_showroom_1') }}</strong> {{ config('texts.product_showroom_1_address') }}</li>
-                        <li><strong>{{ config('texts.product_showroom_2') }}</strong> {{ config('texts.product_showroom_2_address') }}</li>
-                        <li><strong>{{ config('texts.product_showroom_3') }}</strong> {{ config('texts.product_showroom_3_address') }}</li>
-                    </ul>
-                    @endif
-                    @if(isset($open_time) && isset($open_time->text) && $open_time->text)
-                        <div class="text-sm text-gray-700 mt-4">
-                            {!! $open_time->text !!}
-                        </div>
-                    @else
-                        <p class="text-sm text-gray-700 mt-4"><strong>{{ config('texts.product_work_time') }}</strong> {{ config('texts.product_work_time_value') }}</p>
-                    @endif
-                </div>
-                <div class="flex-1 w-full">
-                    <div class="consult-form-card h-full">
-                        <div class="consult-form-header">
-                            <span>📅</span>
-                            <div>
-                                <h3 class="consult-form-title">{{ config('texts.product_book_appointment_title') }}</h3>
-                                <p class="consult-form-subtitle">{{ config('texts.product_book_appointment_desc') }}</p>
-                            </div>
-                        </div>
-                        <form class="consult-form" autocomplete="on">
-                            <div class="consult-form-grid">
-                                <div class="form-field">
-                                    <label for="consult-name">{{ config('texts.product_form_name') }}</label>
-                                    <input id="consult-name" type="text" name="name" placeholder="{{ config('texts.product_form_name_placeholder') }}" autocomplete="name"
-                                        required>
-                                </div>
-                                <div class="form-field">
-                                    <label for="consult-phone">{{ config('texts.product_form_phone') }}</label>
-                                    <input id="consult-phone" type="tel" name="phone" placeholder="{{ config('texts.product_form_phone_placeholder') }}" autocomplete="tel"
-                                        required>
-                                </div>
-                            </div>
-                            <div class="consult-form-grid">
-                                <div class="form-field form-field--select">
-                                    <label for="consult-showroom">{{ config('texts.product_form_showroom') }}</label>
-                                    <select id="consult-showroom" name="showroom" required>
-                                        <option value="" disabled selected>{{ config('texts.product_form_showroom_placeholder') }}</option>
-                                        <option>{{ config('texts.product_form_showroom_1') }}</option>
-                                        <option>{{ config('texts.product_form_showroom_2') }}</option>
-                                        <option>{{ config('texts.product_form_showroom_3') }}</option>
-                                    </select>
-                                </div>
-                                <div class="form-field form-field--datetime">
-                                    <label for="consult-datetime">{{ config('texts.product_form_datetime') }}</label>
-                                    <input id="consult-datetime" type="datetime-local" name="datetime" required>
-                                </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="consult-message">{{ config('texts.product_form_message') }}</label>
-                                <textarea id="consult-message" name="message" rows="3"
-                                    placeholder="{{ config('texts.product_form_message_placeholder') }}"></textarea>
-                            </div>
-                            <button type="submit">
-                                <span>📨</span> {{ config('texts.product_form_submit') }}
-                            </button>
-                        </form>
-                        <p class="consult-form-help">{{ config('texts.product_form_help') }} <a href="tel:0966666301">0966 666 301</a> • <a
-                                href="mailto:mksgvn@gmail.com">mksgvn@gmail.com</a></p>
-                    </div>
                 </div>
             </div>
         </section>

@@ -159,3 +159,11 @@
         background-color: #f9fafb;
     }
 }
+
+/* Form field hint text */
+.form-field-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}

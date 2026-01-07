@@ -636,6 +636,7 @@
                         productId: parseInt(button.dataset.productId) || 0,
                         name: button.dataset.productName,
                         brand: button.dataset.productBrand || '',
+                        unit: button.dataset.productUnit || '',
                         price: parseInt(button.dataset.productPrice) || 0,
                         image: button.dataset.productImage,
                         color: '',
@@ -649,7 +650,12 @@
                 const productSummary = document.getElementById('product-summary');
                 if (productSummary && productSummary.contains(button)) {
                     const name = productSummary.querySelector('#product-name')?.textContent.trim() || '';
-                    const brand = productSummary.querySelector('#product-brand')?.textContent.trim() || '';
+                    // Lấy brand từ data attribute (ưu tiên) hoặc từ element - luôn lấy từ sản phẩm
+                    const brand = productSummary.dataset.productBrand || 
+                                  productSummary.querySelector('#product-brand')?.textContent.trim() || '';
+                    // Lấy unit từ data attribute (ưu tiên) hoặc từ element - luôn lấy từ sản phẩm
+                    const unit = productSummary.dataset.productUnit || 
+                                 productSummary.querySelector('#product-unit')?.textContent.trim() || '';
                     const priceText = productSummary.querySelector('[data-product-price]')?.textContent.trim() || '';
                     const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
                     const image = document.getElementById('main-product-image')?.src || '';
@@ -692,7 +698,8 @@
                         id: parseInt(productId) || 0,
                         productId: parseInt(productId) || 0,
                         name,
-                        brand,
+                        brand, // Luôn lấy từ sản phẩm
+                        unit,  // Luôn lấy từ sản phẩm
                         price,
                         image,
                         color,
@@ -777,8 +784,13 @@
                         const priceText = priceEl.textContent.trim();
                         const price = parseInt(priceText.replace(/[^\d]/g, ''));
                         const image = imageEl.src;
+                        // Lấy productId từ button's data-product-id hoặc từ product-card
+                        const productId = button.dataset.productId || button.getAttribute('data-product-id') || 
+                                        productCard.dataset.productId || productCard.getAttribute('data-product-id') || '0';
 
                         return {
+                            id: parseInt(productId) || 0,
+                            productId: parseInt(productId) || 0,
                             name,
                             brand,
                             price,
@@ -805,8 +817,13 @@
                         const priceText = priceEl.textContent.trim();
                         const price = parseInt(priceText.replace(/[^\d]/g, ''));
                         const image = imageEl.src;
+                        // Lấy productId từ button's data-product-id hoặc từ swiper-slide
+                        const productId = button.dataset.productId || button.getAttribute('data-product-id') || 
+                                        swiperSlide.dataset.productId || swiperSlide.getAttribute('data-product-id') || '0';
 
                         return {
+                            id: parseInt(productId) || 0,
+                            productId: parseInt(productId) || 0,
                             name,
                             brand,
                             price,
@@ -1052,6 +1069,25 @@
                     updateSelectedSummary();
                 };
 
+                const toggleColor = (chip) => {
+                    const isCurrentlyActive = chip.classList.contains('active');
+                    
+                    if (isCurrentlyActive) {
+                        chip.classList.remove('active');
+                        chip.classList.remove('ring-1', 'ring-red-500', 'border-red-500');
+                        chip.setAttribute('aria-pressed', 'false');
+                    } else {
+                        chip.classList.add('active');
+                        chip.classList.add('ring-1', 'ring-red-500', 'border-red-500');
+                        chip.setAttribute('aria-pressed', 'true');
+                    }
+                    
+                    // Cập nhật selected color (lấy màu đầu tiên được chọn)
+                    const activeColorChip = colorChips.find(c => c.classList.contains('active'));
+                    productSummary.dataset.selectedColor = activeColorChip?.dataset.color || '';
+                    updateSelectedSummary();
+                };
+
                 // Option pills - multi-select với tính giá tổng
                 const priceElement = productSummary.querySelector('[data-product-price]');
                 const selectedOptionsLabel = document.getElementById('selected-options-list');
@@ -1183,7 +1219,7 @@
                     chip.addEventListener('click', (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setSelectedColor(chip);
+                        toggleColor(chip);
                     });
                 });
 

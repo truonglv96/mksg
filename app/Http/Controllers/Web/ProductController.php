@@ -12,10 +12,12 @@ use App\Models\DiscountedCombo;
 use App\Models\Area;
 use App\Models\ClientInformation;
 use App\Models\Bill as BillDetail;
+use App\Models\Contact;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -217,6 +219,7 @@ class ProductController extends Controller
             'productFeatures' => \App\Models\FeaturesProduct::whereIn('id', is_array($product->id_features_product) ? $product->id_features_product : [])
                 ->orderBy('id', 'ASC')
                 ->get(),
+            'contacts' => Contact::getContact(), // Lấy danh sách địa chỉ từ bảng contacts
         ], $decodedData));
         
         // Debug: Log để kiểm tra data
@@ -238,13 +241,13 @@ class ProductController extends Controller
 
     public function shoppingCart()
     {
-        // Lấy danh sách thành phố từ database (parent_id = 0)
-        $cities = Area::where('parent_id', 0)
+        // Lấy tất cả 34 tỉnh/thành phố từ database (parent_id IS NULL)
+        $cities = Area::whereNull('parent_id')
             ->orderByDesc('weight')
-            ->get();
+            ->get(['id', 'name', 'parent_id']);
         
-        // Lấy tất cả quận/huyện (parent_id != 0) với parent_id để filter
-        $districts = Area::where('parent_id', '!=', 0)
+        // Lấy tất cả xã/phường/thị trấn (parent_id IS NOT NULL) với parent_id để filter
+        $districts = Area::whereNotNull('parent_id')
             ->orderByDesc('weight')
             ->get(['id', 'name', 'parent_id']);
         
@@ -257,6 +260,24 @@ class ProductController extends Controller
 
     public function checkout(Request $request)
     {
+        // Xử lý cart nếu là JSON string
+        if ($request->has('cart') && is_string($request->input('cart'))) {
+            $cartData = json_decode($request->input('cart'), true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($cartData)) {
+                $request->merge(['cart' => $cartData]);
+            }
+        }
+
+        // Kiểm tra cart trước khi validate
+        $cart = $request->input('cart');
+        if (empty($cart) || !is_array($cart) || count($cart) === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Giỏ hàng không được để trống. Vui lòng chọn ít nhất 1 sản phẩm.',
+                'errors' => ['cart' => ['Giỏ hàng không được để trống. Vui lòng chọn ít nhất 1 sản phẩm.']]
+            ], 422);
+        }
+
         // Validate form data
         $validated = $request->validate([
             'name' => 'required|string|max:191',
@@ -269,7 +290,7 @@ class ProductController extends Controller
             'note' => 'nullable|string',
             'payment-method' => 'required|string|in:bank,cod,store',
             'cart' => 'required|array|min:1',
-            'cart.*.id' => 'required|integer',
+            'cart.*.id' => 'required|integer|min:0', // Cho phép id = 0 cho các sản phẩm đặc biệt (tròng kính)
             'cart.*.name' => 'required|string',
             'cart.*.price' => 'required|integer',
             'cart.*.quantity' => 'required|integer|min:1',
@@ -278,6 +299,12 @@ class ProductController extends Controller
             'cart.*.color_id' => 'nullable|integer',
             'cart.*.lensLabel' => 'nullable|string',
             'cart.*.selectedOptions' => 'nullable|array',
+            'cart.*.selectedPriceSale' => 'nullable|string',
+            'cart.*.selectedDegreeRange' => 'nullable|string',
+            'cart.*.unit' => 'nullable|string',
+            'cart.*.origin' => 'nullable|string',
+            'cart.*.brand' => 'nullable|string',
+            'cart.*.color' => 'nullable|string',
         ]);
 
         try {
@@ -301,36 +328,87 @@ class ProductController extends Controller
                 'note' => $validated['note'] ?? null,
                 'code_bill' => $codeBill,
                 'payment' => $validated['payment-method'],
-                'status' => 'pending', // Trạng thái mặc định
+                'status' => '0', // Trạng thái mặc định: 0 = Chờ xử lý
             ]);
 
-            // Create bill details
+            // Group sản phẩm cùng product_id (cộng quantity), giữ nguyên các sản phẩm khác nhau
+            // Lưu ý: id = 0 có thể là sản phẩm đặc biệt (tròng kính), vẫn xử lý bình thường
+            $processedItems = [];
             foreach ($validated['cart'] as $item) {
-                // Lấy category_name từ product nếu chưa có trong cart
-                $categoryName = $item['category'] ?? null;
-                if (!$categoryName && isset($item['id'])) {
-                    $product = Products::find($item['id']);
-                    if ($product && $product->category) {
-                        $categoryName = $product->category->name ?? null;
+                $productId = (int)($item['id'] ?? 0);
+                
+                // Chỉ group nếu có product_id > 0, id = 0 thì giữ nguyên từng item riêng
+                if ($productId > 0) {
+                    $found = false;
+                    foreach ($processedItems as $index => $processed) {
+                        if ($processed['id'] == $productId) {
+                            $processedItems[$index]['quantity'] += $item['quantity'];
+                            $found = true;
+                            break;
+                        }
                     }
+                    if (!$found) $processedItems[] = $item;
+                } else {
+                    // id = 0: sản phẩm đặc biệt, giữ nguyên từng item
+                    $processedItems[] = $item;
+                }
+            }
+
+            // Tạo dữ liệu bill_details - dùng DB::table() để insert trực tiếp (tránh vấn đề primary key của Model)
+            $billDetailsData = [];
+            foreach ($processedItems as $item) {
+                $productId = (int)($item['id'] ?? 0);
+                
+                // Lấy category_name - nếu id > 0 thì tìm từ database, nếu id = 0 thì dùng từ cart
+                $categoryName = $item['category'] ?? null;
+                if (!$categoryName && $productId > 0) {
+                    $product = Products::find($productId);
+                    $categoryName = $product->category->name ?? null;
                 }
 
-                // Lưu lensLabel (selectedOptions) vào category_name nếu có
                 $lensLabel = $item['lensLabel'] ?? null;
-                if (!$lensLabel && isset($item['selectedOptions']) && is_array($item['selectedOptions'])) {
-                    $lensLabel = implode(', ', $item['selectedOptions']);
+                if (!$lensLabel && !empty($item['selectedOptions'])) {
+                    $lensLabel = implode(', ', array_filter($item['selectedOptions']));
                 }
-                $finalCategoryName = $lensLabel ?: $categoryName;
 
-                BillDetail::create([
+                $billDetailsData[] = [
                     'bill_id' => $bill->id,
-                    'product_id' => $item['id'],
-                    'category_name' => $finalCategoryName,
+                    'product_id' => $productId,
+                    'category_name' => $categoryName,
                     'sale_off' => $item['sale_off'] ?? null,
                     'price' => $item['price'],
                     'qty' => $item['quantity'],
                     'color_id' => $item['color_id'] ?? null,
-                ]);
+                    'brand' => $item['brand'] ?? null,
+                    'unit' => $item['unit'] ?? null,
+                    'color_text' => $item['color'] ?? null,
+                    'refractive_index' => $item['selectedPriceSale'] ?? null,
+                    'degree_range' => $item['selectedDegreeRange'] ?? null,
+                    'lens_package' => $lensLabel,
+                ];
+            }
+            
+            // Insert bill_details - dùng DB::table() để tránh vấn đề primary key của Model
+            if (!empty($billDetailsData)) {
+                foreach ($billDetailsData as $data) {
+                    try {
+                        // Kiểm tra duplicate trước khi insert
+                        $exists = DB::table('bill_details')
+                            ->where('bill_id', $data['bill_id'])
+                            ->where('product_id', $data['product_id'])
+                            ->exists();
+                        
+                        if (!$exists) {
+                            DB::table('bill_details')->insert($data);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to insert bill detail', [
+                            'bill_id' => $data['bill_id'],
+                            'product_id' => $data['product_id'],
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
             }
 
             // Load bill details với product information
@@ -364,11 +442,30 @@ class ProductController extends Controller
                 'bill_id' => $bill->id
             ]);
 
-        } catch (\Exception $e) {
-            \Log::error('Checkout error: ' . $e->getMessage());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Checkout validation error', [
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['password', '_token']),
+                'has_cart' => $request->has('cart'),
+                'cart_type' => gettype($request->input('cart'))
+            ]);
+            
+            $errors = $e->errors();
+            if (isset($errors['cart'])) {
+                $errors['cart'] = ['Vui lòng gửi thông tin giỏ hàng. Field "cart" là bắt buộc và phải là mảng có ít nhất 1 sản phẩm.'];
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.'
+                'message' => 'Vui lòng kiểm tra lại thông tin đơn hàng.',
+                'errors' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Checkout error: ' . $e->getMessage());
+            \Log::error('Checkout error trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại sau.'
             ], 500);
         }
     }

@@ -318,10 +318,10 @@ $breadcrumbs = [
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-2xl font-bold text-gray-900 mb-1">
+                    <div class="text-2xl font-bold text-red-600 mb-1">
                         {{ number_format($order->total ?? 0) }} đ
                     </div>
-                    <p class="text-xs text-gray-500">Tổng tiền</p>
+                    <p class="text-xs text-gray-500 font-medium">Tổng tiền đơn hàng</p>
                 </div>
             </div>
             
