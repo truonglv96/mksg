@@ -97,7 +97,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'alias' => 'nullable|string|max:255',
-            'type' => 'required|string|in:product,new,brand',
+            'type' => 'required|string|in:product,new,brand,partner',
             'parent_id' => 'nullable|integer',
             'des' => 'nullable|string|max:500',
             'kw' => 'nullable|string|max:255',
@@ -171,7 +171,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'alias' => 'nullable|string|max:255',
-            'type' => 'required|string|in:product,new,brand',
+            'type' => 'required|string|in:product,new,brand,partner',
             'parent_id' => 'nullable|integer',
             'des' => 'nullable|string|max:500',
             'kw' => 'nullable|string|max:255',

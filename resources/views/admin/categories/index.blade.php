@@ -123,6 +123,11 @@ $breadcrumbs = [
         color: #9f1239;
     }
     
+    .type-partner {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
     .sortable-ghost {
         opacity: 0.4;
     }
@@ -240,6 +245,7 @@ $breadcrumbs = [
                     <option value="product">Sản phẩm</option>
                     <option value="new">Tin tức</option>
                     <option value="brand">Thương hiệu</option>
+                    <option value="partner">Đối Tác</option>
                 </select>
             </div>
             

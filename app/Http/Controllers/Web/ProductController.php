@@ -356,14 +356,48 @@ class ProductController extends Controller
 
             // Tạo dữ liệu bill_details - dùng DB::table() để insert trực tiếp (tránh vấn đề primary key của Model)
             $billDetailsData = [];
+            $now = now(); // Lấy thời gian hiện tại cho created_at
+            
             foreach ($processedItems as $item) {
                 $productId = (int)($item['id'] ?? 0);
                 
-                // Lấy category_name - nếu id > 0 thì tìm từ database, nếu id = 0 thì dùng từ cart
-                $categoryName = $item['category'] ?? null;
-                if (!$categoryName && $productId > 0) {
+                // Lấy thông tin product nếu có product_id
+                $product = null;
+                if ($productId > 0) {
                     $product = Products::find($productId);
-                    $categoryName = $product->category->name ?? null;
+                }
+                
+                // Lấy category_name - ưu tiên từ cart, sau đó từ product
+                $categoryName = $item['category'] ?? null;
+                if (!$categoryName && $product) {
+                    // Lấy category đầu tiên từ product
+                    $categories = $product->categoriesProductByID();
+                    if (!empty($categories)) {
+                        $firstCategory = reset($categories);
+                        $categoryName = $firstCategory->name ?? null;
+                    }
+                }
+
+                // Lấy unit - ưu tiên từ cart, sau đó từ product
+                $unit = $item['unit'] ?? null;
+                if (!$unit && $product) {
+                    $unit = $product->unit ?? null;
+                }
+
+                // Lấy sale_off từ cart (nếu có)
+                $saleOff = $item['sale_off'] ?? null;
+                if ($saleOff === null || $saleOff === '') {
+                    $saleOff = null;
+                } else {
+                    $saleOff = (int)$saleOff;
+                }
+
+                // Lấy color_id từ cart (nếu có)
+                $colorId = $item['color_id'] ?? null;
+                if ($colorId === null || $colorId === '') {
+                    $colorId = null;
+                } else {
+                    $colorId = (int)$colorId;
                 }
 
                 $lensLabel = $item['lensLabel'] ?? null;
@@ -375,16 +409,18 @@ class ProductController extends Controller
                     'bill_id' => $bill->id,
                     'product_id' => $productId,
                     'category_name' => $categoryName,
-                    'sale_off' => $item['sale_off'] ?? null,
+                    'sale_off' => $saleOff,
                     'price' => $item['price'],
                     'qty' => $item['quantity'],
-                    'color_id' => $item['color_id'] ?? null,
+                    'color_id' => $colorId,
                     'brand' => $item['brand'] ?? null,
-                    'unit' => $item['unit'] ?? null,
+                    'unit' => $unit,
                     'color_text' => $item['color'] ?? null,
                     'refractive_index' => $item['selectedPriceSale'] ?? null,
                     'degree_range' => $item['selectedDegreeRange'] ?? null,
                     'lens_package' => $lensLabel,
+                    'created_at' => $now,
+                    'updated_at' => $now,
                 ];
             }
             

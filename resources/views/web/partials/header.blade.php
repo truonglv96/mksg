@@ -76,11 +76,17 @@
 
                             // Xác định base path theo type của category
                             $basePath = '/san-pham/';
+                            // Tin tức
                             if (isset($category->type) && $category->type === 'new') {
-                                $basePath = '/tin-tuc/';
+                                $basePath = '/';
                             }
+                            // Thương hiệu
                             if (isset($category->type) && $category->type === 'brand') {
-                                $basePath = '/thuong-hieu/';
+                                $basePath = '/';
+                            }
+                            // Đối tác
+                            if (isset($category->type) && $category->type === 'partner') {
+                                $basePath = '/';
                             }
                             
                             $categoryUrl = $category->alias ? url($basePath . $category->alias) : '#';
@@ -95,7 +101,7 @@
                         @endphp
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
                             <a href="{{ $categoryUrl }}"
-                                class="font-bold hover:text-[#11b3f1] transition-colors {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
+                                class="font-bold hover:text-[#11b3f1] transition-colors text-base {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
                                 {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                             </a>
                             @if($hasChildren)
