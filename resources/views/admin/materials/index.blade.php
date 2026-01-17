@@ -649,7 +649,8 @@ function saveMaterial(event) {
         ? `/admin/materials/${materialId}`
         : '/admin/materials';
     
-    const method = materialId ? 'PUT' : 'POST';
+    // Always POST with _method override to ensure Laravel reads FormData
+    const method = 'POST';
     
     // Add CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
@@ -662,7 +663,7 @@ function saveMaterial(event) {
     }
     
     formData.append('_token', csrfToken.content);
-    if (method === 'PUT') {
+    if (materialId) {
         formData.append('_method', 'PUT');
     }
     
@@ -671,14 +672,21 @@ function saveMaterial(event) {
         body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken.content
+        },
+        credentials: 'same-origin'
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.message || `HTTP error! status: ${response.status}`);
-            });
+            let errorMessage = `HTTP error! status: ${response.status}`;
+            try {
+                const err = await response.json();
+                errorMessage = err.message || errorMessage;
+            } catch (e) {
+                // Non-JSON response (e.g., 419 HTML)
+            }
+            throw new Error(errorMessage);
         }
         return response.json();
     })
@@ -704,6 +712,10 @@ function saveMaterial(event) {
                 Object.keys(data.errors).forEach(field => {
                     showError('material' + field.charAt(0).toUpperCase() + field.slice(1), data.errors[field][0]);
                 });
+            } else if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Có lỗi xảy ra', 'error');
+            } else if (typeof showError === 'function') {
+                showError(data.message || 'Có lỗi xảy ra');
             } else {
                 alert(data.message || 'Có lỗi xảy ra');
             }
@@ -714,7 +726,14 @@ function saveMaterial(event) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Có lỗi xảy ra khi lưu chất liệu');
+        const message = error.message || 'Có lỗi xảy ra khi lưu chất liệu';
+        if (typeof showNotification === 'function') {
+            showNotification(message, 'error');
+        } else if (typeof showError === 'function') {
+            showError(message);
+        } else {
+            alert(message);
+        }
         submitBtn.disabled = false;
         submitText.textContent = originalText;
     });

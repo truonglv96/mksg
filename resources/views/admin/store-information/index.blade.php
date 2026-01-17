@@ -841,7 +841,8 @@ function saveContact(event) {
     }
     
     fetch(url, {
-        method: method,
+        // Laravel method spoofing for multipart form data
+        method: method === 'PUT' ? 'POST' : method,
         body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
@@ -897,54 +898,8 @@ function saveContact(event) {
 
 // Delete function
 function confirmDelete(id, name) {
-    if (!confirm(`Bạn có chắc chắn muốn xóa thông tin cửa hàng "${name}"?`)) {
-        return;
-    }
-    
     const deleteUrl = `/admin/store-information/${id}`;
-    const csrfToken = document.querySelector('meta[name="csrf-token"]');
-    
-    if (!csrfToken) {
-        alert('Lỗi bảo mật: Không tìm thấy CSRF token');
-        return;
-    }
-    
-    fetch(deleteUrl, {
-        method: 'DELETE',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken.content,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.message || `HTTP error! status: ${response.status}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            if (typeof showNotification === 'function') {
-                showNotification(data.message, 'success');
-            } else {
-                alert(data.message);
-            }
-            
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
-        } else {
-            alert(data.message || 'Có lỗi xảy ra khi xóa thông tin cửa hàng');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi xóa thông tin cửa hàng: ' + error.message);
-    });
+    window.openDeleteModal('deleteContactModal', deleteUrl, name);
 }
 
 // Close modal when clicking outside

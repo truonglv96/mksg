@@ -183,7 +183,7 @@ class FeaturedCategoryController extends Controller
     /**
      * Remove the specified featured category from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $featuredCategory = FeaturedCategory::findOrFail($id);
@@ -195,16 +195,30 @@ class FeaturedCategoryController extends Controller
             
             $featuredCategory->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Danh mục nổi bật đã được xóa thành công!'
-            ]);
+            $successMessage = 'Danh mục nổi bật đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
+            return redirect()
+                ->route('admin.featured-categories.index')
+                ->with('success', $successMessage);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+            $message = 'Có lỗi xảy ra: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()
+                ->route('admin.featured-categories.index')
+                ->with('error', $message);
         }
     }
 

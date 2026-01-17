@@ -834,7 +834,8 @@ function saveColor(event) {
     }
     
     fetch(url, {
-        method: method,
+        // Laravel method spoofing for multipart form data
+        method: method === 'PUT' ? 'POST' : method,
         body: formData,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',

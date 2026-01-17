@@ -178,7 +178,7 @@ class ContactController extends Controller
     /**
      * Remove the specified contact from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $contact = Contact::findOrFail($id);
@@ -186,15 +186,29 @@ class ContactController extends Controller
             // Delete contact
             $contact->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Thông tin cửa hàng đã được xóa thành công!'
-            ]);
+            $successMessage = 'Thông tin cửa hàng đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
+            return redirect()
+                ->route('admin.store-information.index')
+                ->with('success', $successMessage);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi xóa thông tin cửa hàng!'
-            ], 500);
+            $message = 'Có lỗi xảy ra khi xóa thông tin cửa hàng!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()
+                ->route('admin.store-information.index')
+                ->with('error', $message);
         }
     }
 }

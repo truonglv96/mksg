@@ -1019,9 +1019,9 @@ function saveFeaturedCategory(event) {
     
     // CSRF token will be handled by apiFetch helper
     
-    // Use API helper
+    // Use API helper (method spoofing handled inside apiFetch)
     const fetchPromise = apiFetch(url, {
-        method: method === 'PUT' ? 'POST' : method,
+        method,
         body: formData
     });
     

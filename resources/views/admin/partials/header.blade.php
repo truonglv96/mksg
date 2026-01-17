@@ -5,6 +5,14 @@
         <button id="sidebar-toggle" class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Toggle Sidebar">
             <i class="fas fa-indent text-xl"></i>
         </button>
+        <!-- Home Page Link -->
+        <a href="{{ url('/') }}"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="flex items-center justify-center w-10 h-10 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+           title="Về trang chủ">
+            <i class="fas fa-home text-xl"></i>
+        </a>
     </div>
     
     <!-- Right Section: User Menu -->

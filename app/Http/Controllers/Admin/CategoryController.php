@@ -232,7 +232,7 @@ class CategoryController extends Controller
     /**
      * Remove the specified category from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $category = Category::findOrFail($id);
         
@@ -246,10 +246,17 @@ class CategoryController extends Controller
             $category->delete();
         }
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Danh mục đã được xóa thành công!'
-        ]);
+        $successMessage = 'Danh mục đã được xóa thành công!';
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', $successMessage);
     }
 
     /**

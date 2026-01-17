@@ -123,20 +123,17 @@
                         $mainImageUrl = $mainImage ? asset('img/product/' . $mainImage->image) : asset('img/product/no-image.png');
                     @endphp
                     <button type="button" id="lightbox-trigger"
-                        class="relative w-full h-[420px] lg:h-[520px] bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                        class="relative w-full bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                         aria-label="{{ config('texts.product_lightbox_zoom') }}">
                         <img id="main-product-image"
                             src="{{ $mainImageUrl }}"
                             alt="{{ $product->name }}"
-                            class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-110">
+                            class="w-full h-auto object-contain transition-transform duration-500 ease-out group-hover:scale-110">
                         @if(isset($product) && $product->price_sale && $product->price && $product->price > $product->price_sale)
                             @php
                                 $discount = round((($product->price - $product->price_sale) / $product->price) * 100);
                             @endphp
-                            <span
-                                class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 text-xs font-semibold rounded-full shadow">
-                                -{{ $discount }}%
-                            </span>
+                            
                         @endif
                     </button>
                     @if(isset($productImages) && $productImages && $productImages->count() > 0)

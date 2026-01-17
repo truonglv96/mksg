@@ -203,7 +203,7 @@ $breadcrumbs = [
                                       id="description"
                                       rows="6"
                                       class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-smooth @error('description') border-red-500 @enderror"
-                                      placeholder="Nhập mô tả ngắn về tin tức">{{ old('description') }}</textarea>
+                                      placeholder="Nhập mô tả ngắn về tin tức">{!! old('description') !!}</textarea>
                             @error('description')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -218,7 +218,7 @@ $breadcrumbs = [
                                           id="content"
                                           rows="15"
                                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-smooth @error('content') border-red-500 @enderror"
-                                          placeholder="Nhập nội dung chi tiết của tin tức">{{ old('content') }}</textarea>
+                                          placeholder="Nhập nội dung chi tiết của tin tức">{!! old('content') !!}</textarea>
                                 <button type="button" 
                                         onclick="insertDefaultContent()"
                                         id="insertDefaultContentBtn"

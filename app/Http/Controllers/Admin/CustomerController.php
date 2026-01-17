@@ -56,14 +56,21 @@ class CustomerController extends Controller
     /**
      * Remove the specified customer from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         // TODO: Implement customer deletion logic
         // Check if customer has orders
         // Delete customer
         // Redirect with success message
-        
-        return redirect()->route('admin.customers.index')->with('success', 'Khách hàng đã được xóa thành công!');
+        $successMessage = 'Khách hàng đã được xóa thành công!';
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage
+            ]);
+        }
+
+        return redirect()->route('admin.customers.index')->with('success', $successMessage);
     }
 }
 

@@ -135,7 +135,7 @@ class MaterialController extends Controller
     /**
      * Remove the specified material from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $material = Material::findOrFail($id);
@@ -146,24 +146,45 @@ class MaterialController extends Controller
                 ->count();
             
             if ($productCount > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể xóa chất liệu này vì đang được sử dụng trong ' . $productCount . ' sản phẩm.'
-                ], 400);
+                $message = 'Không thể xóa chất liệu này vì đang được sử dụng trong ' . $productCount . ' sản phẩm.';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message
+                    ], 400);
+                }
+
+                return redirect()
+                    ->route('admin.materials.index')
+                    ->with('error', $message);
             }
             
             $material->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Chất liệu đã được xóa thành công!'
-            ]);
+            $successMessage = 'Chất liệu đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
+            return redirect()
+                ->route('admin.materials.index')
+                ->with('success', $successMessage);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+            $message = 'Có lỗi xảy ra: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()
+                ->route('admin.materials.index')
+                ->with('error', $message);
         }
     }
 

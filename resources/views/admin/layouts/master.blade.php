@@ -300,6 +300,9 @@
     <!-- Admin JS - Defer for better performance -->
     <script src="{{ asset('js/admin/app_admin.js') }}" defer></script>
     
+    <!-- API Handler Helper -->
+    <script src="{{ asset('js/admin/api-handler.js') }}"></script>
+    
     @stack('scripts')
     
     <!-- API Handler Helper - Load sau để có thể dùng trong @stack('scripts') -->

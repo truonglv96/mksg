@@ -188,7 +188,7 @@ class FeaturesProductController extends Controller
     /**
      * Remove the specified features product from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $featuresProduct = FeaturesProduct::findOrFail($id);
@@ -201,15 +201,29 @@ class FeaturesProductController extends Controller
             // Delete features product
             $featuresProduct->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Tính năng sản phẩm đã được xóa thành công!'
-            ]);
+            $successMessage = 'Tính năng sản phẩm đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
+            return redirect()
+                ->route('admin.features-product.index')
+                ->with('success', $successMessage);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi xóa tính năng sản phẩm!'
-            ], 500);
+            $message = 'Có lỗi xảy ra khi xóa tính năng sản phẩm!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()
+                ->route('admin.features-product.index')
+                ->with('error', $message);
         }
     }
 }

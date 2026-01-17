@@ -248,7 +248,7 @@
                                 <h3 class="font-bold text-base mb-2 line-clamp-2 min-h-[3rem] news-title hover:text-red-600 transition-colors">{{ $newsItem->title ?? $newsItem->name }}</h3>
                             </a>
                             @if(!empty($newsItem->description))
-                            <p class="text-sm text-gray-600 line-clamp-2">{{ strip_tags($newsItem->description) }}</p>
+                            <p class="text-sm text-gray-600 line-clamp-2">{!! strip_tags($newsItem->description) !!}</p>
                             @endif
                         </div>
                     </div>

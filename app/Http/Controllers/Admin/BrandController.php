@@ -310,7 +310,7 @@ class BrandController extends Controller
     /**
      * Remove the specified brand from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $brand = Brand::findOrFail($id);
         
@@ -351,12 +351,28 @@ class BrandController extends Controller
             
             DB::commit();
             
+            $successMessage = 'Thương hiệu đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
             return redirect()->route('admin.brands.index')
-                ->with('success', 'Thương hiệu đã được xóa thành công!');
+                ->with('success', $successMessage);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+            $message = 'Có lỗi xảy ra: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return back()->with('error', $message);
         }
     }
 

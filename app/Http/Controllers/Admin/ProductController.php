@@ -663,7 +663,7 @@ class ProductController extends Controller
     /**
      * Remove the specified product from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             DB::beginTransaction();
@@ -672,8 +672,16 @@ class ProductController extends Controller
             $product = Products::find($id);
             
             if (!$product) {
+                $message = 'Sản phẩm không tồn tại!';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message
+                    ], 404);
+                }
+
                 return redirect()->route('admin.products.index')
-                    ->with('error', 'Sản phẩm không tồn tại!');
+                    ->with('error', $message);
             }
             
             // Delete all product images and their files
@@ -712,14 +720,30 @@ class ProductController extends Controller
             
             DB::commit();
             
+            $successMessage = 'Sản phẩm đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
             return redirect()->route('admin.products.index')
-                ->with('success', 'Sản phẩm đã được xóa thành công!');
+                ->with('success', $successMessage);
                 
         } catch (Exception $e) {
             DB::rollBack();
             
+            $message = 'Có lỗi xảy ra khi xóa sản phẩm: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
             return redirect()->route('admin.products.index')
-                ->with('error', 'Có lỗi xảy ra khi xóa sản phẩm: ' . $e->getMessage());
+                ->with('error', $message);
         }
     }
     

@@ -200,17 +200,11 @@ $breadcrumbs = [
                                class="flex-1 px-3 py-2 text-center text-sm bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl font-semibold">
                                 <i class="fas fa-edit mr-1"></i>Sửa
                             </a>
-                            <form action="{{ route('admin.news.destroy', $item->id) }}" 
-                                  method="POST" 
-                                  class="inline"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa tin tức này?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" 
-                                        class="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                            <button type="button"
+                                    onclick="confirmDelete({{ $item->id }}, '{{ addslashes($item->name) }}')"
+                                    class="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -296,18 +290,12 @@ $breadcrumbs = [
                                            title="Sửa">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.news.destroy', $item->id) }}" 
-                                              method="POST" 
-                                              class="inline"
-                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa tin tức này?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" 
-                                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
-                                                    title="Xóa">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                onclick="confirmDelete({{ $item->id }}, '{{ addslashes($item->name) }}')"
+                                                class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -335,10 +323,22 @@ $breadcrumbs = [
         </div>
     @endif
 </div>
+<!-- Delete Confirmation Modal -->
+@include('admin.helpers.delete-modal', [
+    'id' => 'deleteNewsModal',
+    'title' => 'Xác nhận xóa tin tức',
+    'message' => 'Bạn có chắc chắn muốn xóa tin tức "{name}"?',
+    'confirmText' => 'Xóa tin tức'
+])
 @endsection
 
 @push('scripts')
 <script>
+function confirmDelete(id, name) {
+    const deleteUrl = `/admin/news/${id}`;
+    window.openDeleteModal('deleteNewsModal', deleteUrl, name);
+}
+
 // View Toggle
 document.addEventListener('DOMContentLoaded', function() {
     const viewToggle = document.getElementById('viewToggle');

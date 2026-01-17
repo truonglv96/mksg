@@ -169,7 +169,7 @@ class ColorController extends Controller
     /**
      * Remove the specified color from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $color = Color::findOrFail($id);
@@ -180,10 +180,17 @@ class ColorController extends Controller
                 ->count();
             
             if ($productImageCount > 0) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể xóa màu sắc này vì đang được sử dụng trong ' . $productImageCount . ' hình ảnh sản phẩm.'
-                ], 400);
+                $message = 'Không thể xóa màu sắc này vì đang được sử dụng trong ' . $productImageCount . ' hình ảnh sản phẩm.';
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message
+                    ], 400);
+                }
+
+                return redirect()
+                    ->route('admin.colors.index')
+                    ->with('error', $message);
             }
             
             // Delete image file if exists
@@ -193,16 +200,30 @@ class ColorController extends Controller
             
             $color->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => 'Màu sắc đã được xóa thành công!'
-            ]);
+            $successMessage = 'Màu sắc đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
+            return redirect()
+                ->route('admin.colors.index')
+                ->with('success', $successMessage);
             
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+            $message = 'Có lỗi xảy ra: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return redirect()
+                ->route('admin.colors.index')
+                ->with('error', $message);
         }
     }
 

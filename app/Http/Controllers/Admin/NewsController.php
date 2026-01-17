@@ -106,47 +106,73 @@ class NewsController extends Controller
             'categories' => 'nullable|array',
             'categories.*' => 'integer|exists:category,id',
         ]);
-        
-        // Generate alias if not provided
-        if (empty($validated['alias'])) {
-            $validated['alias'] = Str::slug($validated['name']);
-            
-            // Ensure uniqueness
-            $count = 1;
-            $originalAlias = $validated['alias'];
-            while (News::where('alias', $validated['alias'])->exists()) {
-                $validated['alias'] = $originalAlias . '-' . $count;
-                $count++;
+
+        DB::beginTransaction();
+        try {
+            // Generate alias if not provided
+            if (empty($validated['alias'])) {
+                $validated['alias'] = Str::slug($validated['name']);
+
+                // Ensure uniqueness
+                $count = 1;
+                $originalAlias = $validated['alias'];
+                while (News::where('alias', $validated['alias'])->exists()) {
+                    $validated['alias'] = $originalAlias . '-' . $count;
+                    $count++;
+                }
             }
-        }
-        
-        // Handle image upload
-        if ($request->hasFile('url_img')) {
-            $image = $request->file('url_img');
-            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('img/news'), $imageName);
-            $validated['url_img'] = $imageName;
-        }
-        
-        // Set defaults
-        $validated['weight'] = $validated['weight'] ?? 0;
-        $validated['hidden'] = $request->has('hidden') ? ($validated['hidden'] ?? 0) : 0;
-        $validated['views'] = 0;
-        
-        $news = News::create($validated);
-        
-        // Handle categories (many-to-many)
-        if ($request->has('categories') && is_array($request->categories)) {
-            foreach ($request->categories as $categoryId) {
-                NewsCategories::create([
-                    'newsID' => $news->id,
-                    'categoryID' => $categoryId,
+
+            // Handle image upload
+            if ($request->hasFile('url_img')) {
+                $image = $request->file('url_img');
+                $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('img/news'), $imageName);
+                $validated['url_img'] = $imageName;
+            }
+
+            // Set defaults
+            $validated['weight'] = $validated['weight'] ?? 0;
+            $validated['hidden'] = $request->has('hidden') ? ($validated['hidden'] ?? 0) : 0;
+            $validated['views'] = 0;
+
+            $news = News::create($validated);
+
+            // Handle categories (many-to-many)
+            if ($request->has('categories') && is_array($request->categories)) {
+                foreach ($request->categories as $categoryId) {
+                    NewsCategories::create([
+                        'newsID' => $news->id,
+                        'categoryID' => $categoryId,
+                        'type' => 'new',
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            $successMessage = 'Tin tức đã được tạo thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage,
+                    'redirect' => route('admin.news.index')
                 ]);
             }
+
+            return redirect()->route('admin.news.index')
+                ->with('success', $successMessage);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $message = 'Có lỗi xảy ra: ' . $e->getMessage();
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return back()->withInput()->with('error', $message);
         }
-        
-        return redirect()->route('admin.news.index')
-            ->with('success', 'Tin tức đã được tạo thành công!');
     }
 
     /**
@@ -249,6 +275,7 @@ class NewsController extends Controller
                 NewsCategories::create([
                     'newsID' => $news->id,
                     'categoryID' => $categoryId,
+                    'type' => 'new',
                 ]);
             }
         }
@@ -260,7 +287,7 @@ class NewsController extends Controller
     /**
      * Remove the specified news article from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $news = News::findOrFail($id);
         
@@ -271,8 +298,16 @@ class NewsController extends Controller
         
         $news->delete();
         
+        $successMessage = 'Tin tức đã được xóa thành công!';
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage
+            ]);
+        }
+
         return redirect()->route('admin.news.index')
-            ->with('success', 'Tin tức đã được xóa thành công!');
+            ->with('success', $successMessage);
     }
     
     /**

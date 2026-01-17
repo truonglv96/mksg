@@ -994,7 +994,7 @@ function saveSlider(event) {
     
     // Use API helper
     const fetchPromise = apiFetch(url, {
-        method: method === 'PUT' ? 'POST' : method,
+        method,
         body: formData
     });
     

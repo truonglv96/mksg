@@ -210,7 +210,7 @@ class OrderController extends Controller
     /**
      * Remove the specified order from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             // Start transaction to ensure data consistency
@@ -233,14 +233,30 @@ class OrderController extends Controller
             // Commit transaction
             DB::commit();
             
+            $successMessage = 'Đơn hàng #' . $orderCode . ' đã được xóa thành công!';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage
+                ]);
+            }
+
             return redirect()->route('admin.orders.index')
-                ->with('success', 'Đơn hàng #' . $orderCode . ' đã được xóa thành công!');
+                ->with('success', $successMessage);
                 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             // Order not found
             DB::rollBack();
+            $message = 'Không tìm thấy đơn hàng cần xóa.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 404);
+            }
+
             return redirect()->route('admin.orders.index')
-                ->with('error', 'Không tìm thấy đơn hàng cần xóa.');
+                ->with('error', $message);
                 
         } catch (\Exception $e) {
             // Rollback transaction on error
@@ -252,8 +268,16 @@ class OrderController extends Controller
                 'exception' => $e
             ]);
             
+            $message = 'Không thể xóa đơn hàng. Vui lòng thử lại sau.';
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
             return redirect()->route('admin.orders.index')
-                ->with('error', 'Không thể xóa đơn hàng. Vui lòng thử lại sau.');
+                ->with('error', $message);
         }
     }
 }
