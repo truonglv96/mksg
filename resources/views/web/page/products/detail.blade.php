@@ -108,13 +108,13 @@
 @endsection
 
 @section('content')
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 overflow-x-hidden">
 
         {{-- Breadcrumb Component --}}
         @include('web.partials.breadcrumb')
 
         <!-- Product Summary -->
-        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10" data-product-id="{{ $product->id }}" data-product-unit="{{ $product->unit ?? '' }}" data-product-brand="{{ ($brand && $brand->name) ? $brand->name : (($product->brand && $product->brand->name) ? $product->brand->name : '') }}">
+        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10 overflow-x-hidden" data-product-id="{{ $product->id }}" data-product-unit="{{ $product->unit ?? '' }}" data-product-brand="{{ ($brand && $brand->name) ? $brand->name : (($product->brand && $product->brand->name) ? $product->brand->name : '') }}">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10">
                 <!-- Gallery -->
                 <div>
@@ -201,14 +201,14 @@
                                 4.8 (128 đánh giá)
                             </div> -->
                             @if($product->code)
-                            <div class="flex items-center gap-1.5">
-                                <label for="code-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">{{ config('texts.product_code') }}:</label>
-                                <span class="font-semibold text-gray-800">{{ $product->code }}</span>
+                            <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
+                                <label for="code-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_code') }}:</label>
+                                <span class="font-semibold text-gray-800 truncate">{{ $product->code }}</span>
                             </div>
                             @endif
-                            <div class="flex items-center gap-1.5">
-                                <label for="brand-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">{{ config('texts.product_brand') }}</label>
-                                <span id="product-brand" class="font-semibold text-emerald-600"></span>
+                            <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
+                                <label for="brand-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_brand') }}</label>
+                                <span id="product-brand" class="font-semibold text-emerald-600 truncate">
                                 @if($brand && $brand->name)
                                     {{ $brand->name }}
                                 @elseif($product->brand && $product->brand->name)
@@ -217,15 +217,15 @@
                                 </span>
                             </div>
                             @if($product->unit)
-                            <div class="flex items-center gap-1.5">
-                                <label for="unit-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">Đơn vị:</label>
-                                <span id="product-unit" class="font-semibold text-gray-800">{{ $product->unit }}</span>
+                            <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
+                                <label for="unit-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Đơn vị:</label>
+                                <span id="product-unit" class="font-semibold text-gray-800 truncate">{{ $product->unit }}</span>
                             </div>
                             @endif
                             @if(isset($product->type_sale))
-                            <div class="flex items-center gap-1.5">
-                                <label for="type-sale-select" class="text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap min-w-[100px]">Hình thức:</label>
-                                <span class="font-semibold text-gray-800">
+                            <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
+                                <label for="type-sale-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Hình thức:</label>
+                                <span class="font-semibold text-gray-800 truncate">
                                     @if($product->type_sale == -1)
                                         Tại Shop & Online
                                     @elseif($product->type_sale == 0)
@@ -456,11 +456,11 @@
                     @endphp
                     <div class="bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50/30 border border-blue-200/80 rounded-lg p-3 shadow-sm">
                         @if($isInline)
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-base font-semibold text-gray-800 whitespace-nowrap">
+                            <div class="flex items-center gap-2 flex-wrap min-w-0">
+                                <span class="text-sm sm:text-base font-semibold text-gray-800 whitespace-nowrap flex-shrink-0">
                                     {{ config('texts.product_selected') }}:
                                 </span>
-                                <span class="text-base font-medium text-gray-700" id="selected-summary">
+                                <span class="text-sm sm:text-base font-medium text-gray-700 min-w-0 flex-1" id="selected-summary">
                                     {{ $summaryText }}
                                 </span>
                             </div>
@@ -539,8 +539,8 @@
         
 
         <!-- Tabs -->
-        <section class="product-tabs bg-white border border-gray-100 rounded-2xl shadow-sm mb-10">
-            <div class="flex items-center gap-6 px-4 sm:px-6 border-b overflow-x-auto">
+        <section class="product-tabs bg-white border border-gray-100 rounded-2xl shadow-sm mb-10 overflow-hidden">
+            <div class="flex items-center gap-4 sm:gap-6 px-4 sm:px-6 border-b overflow-x-auto" style="-webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none;">
                 <button class="tab-button active py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
                     data-tab-target="tab-description">{{ $content->name ?? config('texts.product_tab_description') }}</button>
                 <button class="tab-button py-4 text-sm font-semibold text-gray-600 whitespace-nowrap"
@@ -650,23 +650,21 @@
                         @endphp
                         <div class="swiper-slide group">
                             <div class="product-card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition">
-                                <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}">
-                                    <div class="relative overflow-hidden">
-                                        <img src="{{ $mainImageUrl }}"
-                                            alt="{{ $relatedProduct->name }}"
-                                            class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
-                                        @if($hoverImage && $hoverImage->id !== $mainImage->id)
-                                        <img src="{{ $hoverImageUrl }}"
-                                            alt="{{ $relatedProduct->name }} - Hover"
-                                            class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                                        @endif
-                                        @if($hasRelatedDiscount)
-                                            @php
-                                                $relatedDiscount = round((($relatedOldPrice - $relatedPrice) / $relatedOldPrice) * 100);
-                                            @endphp
-                                            <span class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">-{{ $relatedDiscount }}%</span>
-                                        @endif
-                                    </div>
+                                <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}" class="block relative overflow-hidden">
+                                    <img src="{{ $mainImageUrl }}"
+                                        alt="{{ $relatedProduct->name }}"
+                                        class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                    @if($hoverImage && $hoverImage->id !== $mainImage->id)
+                                    <img src="{{ $hoverImageUrl }}"
+                                        alt="{{ $relatedProduct->name }} - Hover"
+                                        class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                    @endif
+                                    @if($hasRelatedDiscount)
+                                        @php
+                                            $relatedDiscount = round((($relatedOldPrice - $relatedPrice) / $relatedOldPrice) * 100);
+                                        @endphp
+                                        <span class="discount-badge absolute top-3 left-3 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">-{{ $relatedDiscount }}%</span>
+                                    @endif
                                 </a>
                                 <div class="p-4 space-y-2">
                                     @if($relatedBrand)

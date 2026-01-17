@@ -66,7 +66,7 @@ class Color extends Model
         return Color::select('color.*', \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT product_images.product_id) as product_count'))
             ->join('product_images', 'product_images.color_id', '=', 'color.id')
             ->whereIn('product_images.product_id', $productIds->toArray())
-            ->groupBy('color.id', 'color.name', 'color.url_img', 'color.weight')
+            ->groupBy('color.id', 'color.name', 'color.url_img', 'color.weight', 'color.created_at', 'color.updated_at')
             ->having('product_count', '>', 0)
             ->orderBy('color.weight', 'ASC')
             ->get();

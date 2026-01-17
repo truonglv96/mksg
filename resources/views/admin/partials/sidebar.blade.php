@@ -96,7 +96,6 @@
                    class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.orders.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
                     <i class="fas fa-shopping-cart w-5 flex-shrink-0"></i>
                     <span class="ml-3 sidebar-menu-text font-medium">Đơn hàng</span>
-                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full sidebar-menu-text font-semibold">3</span>
                 </a>
             </li>
             

@@ -63,6 +63,45 @@ Route::post('/search', [SearchController::class, 'search'])->name('search');
 Route::get('/gio-hang', [ProductController::class, 'shoppingCart'])->name('cart');
 Route::post('/checkout', [ProductController::class, 'checkout'])->name('checkout');
 
+// Clear Cache
+Route::get('/clear-cache', function () {
+    $results = [];
+    
+    // try {
+    //     \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    //     $results['cache'] = 'Application cache cleared';
+    // } catch (\Exception $e) {
+    //     $results['cache'] = 'Cache clear skipped: ' . $e->getMessage();
+    // }
+    
+    try {
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        $results['config'] = 'Configuration cache cleared';
+    } catch (\Exception $e) {
+        $results['config'] = 'Config clear skipped: ' . $e->getMessage();
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        $results['view'] = 'View cache cleared';
+    } catch (\Exception $e) {
+        $results['view'] = 'View clear skipped: ' . $e->getMessage();
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        $results['route'] = 'Route cache cleared';
+    } catch (\Exception $e) {
+        $results['route'] = 'Route clear skipped: ' . $e->getMessage();
+    }
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Cache clear completed!',
+        'details' => $results
+    ]);
+})->name('clear.cache');
+
 // Admin Routes
 require __DIR__.'/admin.php';
 

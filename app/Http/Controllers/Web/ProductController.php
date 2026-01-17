@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -241,16 +242,18 @@ class ProductController extends Controller
 
     public function shoppingCart()
     {
-        // Lấy tất cả 34 tỉnh/thành phố từ database (parent_id IS NULL)
-        $cities = Area::whereNull('parent_id')
+        // Cities: lấy tất cả các thành phố/tỉnh (parent_id IS NULL hoặc parent_id = 0)
+        $cities = Area::where(function($query) {
+                $query->whereNull('parent_id')
+                      ->orWhere('parent_id', 0);
+            })
             ->orderByDesc('weight')
-            ->get(['id', 'name', 'parent_id']);
+            ->get();
         
-        // Lấy tất cả xã/phường/thị trấn (parent_id IS NOT NULL) với parent_id để filter
         $districts = Area::whereNotNull('parent_id')
+            ->where('parent_id', '>', 0)
             ->orderByDesc('weight')
-            ->get(['id', 'name', 'parent_id']);
-        
+            ->get();
         return view('web.page.products.shopping-cart', [
             'title' => 'Giỏ Hàng - Mắt Kính Sài Gòn',
             'cities' => $cities,
@@ -506,4 +509,5 @@ class ProductController extends Controller
         }
     }
 }
+
 

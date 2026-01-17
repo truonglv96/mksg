@@ -32,67 +32,63 @@
 
         <!-- Desktop: Grid tĩnh 4 cột -->
         <div class="hidden md:grid md:grid-cols-4 gap-6">
-            <div
-                class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="text-5xl mb-3">👓</div>
-                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
-            </div>
-            <div
-                class="bg-amber-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="text-5xl mb-3">🔵</div>
-                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_lenses') }}</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
-            </div>
-            <div
-                class="bg-pink-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="text-5xl mb-3">🕶️</div>
-                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_sunglasses') }}</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
-            </div>
-            <div
-                class="bg-cyan-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
-                <div class="text-5xl mb-3">🎁</div>
-                <h3 class="font-bold text-lg mb-2">{{ config('texts.category_promotion') }}</h3>
-                <a href="#" class="text-sm text-gray-600" style="--hover-color: #ed1c24;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color=''">{{ config('texts.view_now') }}</a>
-            </div>
+            @if(isset($featuredCategories) && $featuredCategories->count() > 0)
+                @foreach($featuredCategories as $item)
+                <a href="{{ $item->link ?? '#' }}" 
+                   class="p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer block"
+                   style="background-color: {{ $item->getBackgroundColor() }};">
+                    @if($item->image)
+                        <div class="mb-3 flex justify-center">
+                            <img src="{{ $item->getImage() }}" alt="{{ $item->name }}" class="w-16 h-16 object-contain">
+                        </div>
+                    @else
+                        <div class="text-5xl mb-3">👓</div>
+                    @endif
+                    <h3 class="font-bold text-lg mb-2">{{ $item->name }}</h3>
+                    <span class="text-sm text-gray-600 hover:text-[#ed1c24] transition-colors">{{ config('texts.view_now') }}</span>
+                </a>
+                @endforeach
+            @else
+                <!-- Fallback nếu không có dữ liệu -->
+                <div class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 cursor-pointer">
+                    <div class="text-5xl mb-3">👓</div>
+                    <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
+                    <a href="#" class="text-sm text-gray-600 hover:text-[#ed1c24] transition-colors">{{ config('texts.view_now') }}</a>
+                </div>
+            @endif
         </div>
 
         <!-- Mobile: Swiper slider 2 cột -->
         <div class="md:hidden swiper-container categories-slider">
             <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div
-                        class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
-                        <div class="text-5xl mb-3">👓</div>
-                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
+                @if(isset($featuredCategories) && $featuredCategories->count() > 0)
+                    @foreach($featuredCategories as $item)
+                    <div class="swiper-slide">
+                        <a href="{{ $item->link ?? '#' }}" 
+                           class="p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300 block"
+                           style="background-color: {{ $item->getBackgroundColor() }};">
+                            @if($item->image)
+                                <div class="mb-3 flex justify-center">
+                                    <img src="{{ $item->getImage() }}" alt="{{ $item->name }}" class="w-16 h-16 object-contain">
+                                </div>
+                            @else
+                                <div class="text-5xl mb-3">👓</div>
+                            @endif
+                            <h3 class="font-bold text-lg mb-2">{{ $item->name }}</h3>
+                            <span class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</span>
+                        </a>
                     </div>
-                </div>
-                <div class="swiper-slide">
-                    <div
-                        class="bg-amber-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
-                        <div class="text-5xl mb-3">🔵</div>
-                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_lenses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
+                    @endforeach
+                @else
+                    <!-- Fallback nếu không có dữ liệu -->
+                    <div class="swiper-slide">
+                        <div class="bg-purple-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
+                            <div class="text-5xl mb-3">👓</div>
+                            <h3 class="font-bold text-lg mb-2">{{ config('texts.category_glasses') }}</h3>
+                            <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
+                        </div>
                     </div>
-                </div>
-                <div class="swiper-slide">
-                    <div
-                        class="bg-pink-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
-                        <div class="text-5xl mb-3">🕶️</div>
-                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_sunglasses') }}</h3>
-                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
-                    </div>
-                </div>
-                <div class="swiper-slide">
-                    <div
-                        class="bg-cyan-50 p-6 rounded-2xl text-center shadow hover:shadow-xl transition-all duration-300">
-                        <div class="text-5xl mb-3">🎁</div>
-                        <h3 class="font-bold text-lg mb-2">{{ config('texts.category_promotion') }}</h3>
-                        <a href="#" class="text-sm text-gray-600 hover:text-red-600 transition-colors">{{ config('texts.view_now') }}</a>
-                    </div>
-                </div>
+                @endif
             </div>
         </div>
     </section>
@@ -107,7 +103,7 @@
                 @if(isset($categoriesProduct) && $categoriesProduct->count() > 0)
                 @foreach($categoriesProduct as $index => $category)
                 <a data-category="{{ $category->alias }}"
-                    class="product-tab text-sm font-medium transition-colors relative pb-1 border-b-2 hover:text-red-600 {{ $index === 0 ? 'active border-red-600 text-red-600' : 'border-transparent text-gray-800' }}">{{ $category->name }}</a>
+                    class="product-tab text-base font-medium transition-colors relative pb-1 border-b-2 hover:text-red-600 {{ $index === 0 ? 'active border-red-600 text-red-600' : 'border-transparent text-gray-800' }}">{{ $category->name }}</a>
                 @endforeach
                 @endif
             </div>
@@ -138,7 +134,7 @@
                         <div class="swiper-slide group">
                             <div
                                 class="border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white">
-                                <div class="relative overflow-hidden">
+                                <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}" class="relative overflow-hidden block">
                                     <img src="{{ $mainImage }}"
                                         alt="{{ $product->name }}"
                                         loading="lazy"
@@ -156,7 +152,7 @@
                                     <span
                                         class="discount-badge absolute top-2 right-2 text-white text-xs font-bold px-2 py-1 rounded shadow-lg" style="background-color: #ed1c24;">-{{ $discount }}%</span>
                                     @endif
-                                </div>
+                                </a>
                                 <div class="p-4">
                                     <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
                                         <h3 class="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.5rem] product-title hover:text-red-600 transition-colors">{{ $product->name }}</h3>
@@ -231,7 +227,7 @@
                 <div class="swiper-slide">
                     <div
                         class="border rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 bg-white">
-                        <div class="relative">
+                        <a href="{{ $detailUrl }}" class="relative block">
                             @if(!empty($imageUrl))
                             <img src="{{ $imageUrl }}"
                                 alt="{{ $newsItem->title ?? $newsItem->name }}" 
@@ -240,7 +236,7 @@
                                 height="192"
                                 class="w-full h-48 object-cover">
                             @endif
-                        </div>
+                        </a>
                         <div class="p-4">
                             @if(!empty($date))
                             <div

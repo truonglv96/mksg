@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Products;
 use App\Models\News;
 use App\Models\Brand;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -30,6 +31,7 @@ class SearchController extends Controller
             'products' => collect(),
             'news' => collect(),
             'brands' => collect(),
+            'partners' => collect(),
         ];
 
         // Tìm kiếm sản phẩm
@@ -271,11 +273,88 @@ class SearchController extends Controller
             }
         }
 
+        // Tìm kiếm đối tác
+        if ($type === 'all' || $type === 'partner') {
+            try {
+                $cacheKey = "search_partners_" . md5($keyword);
+                $results['partners'] = Cache::remember($cacheKey, 300, function () use ($keyword) {
+                    $like = '%' . $keyword . '%';
+                    return Partner::where('hidden', 1)
+                        ->where(function ($query) use ($like) {
+                            $query->where('name', 'like', $like)
+                                  ->orWhere('address', 'like', $like)
+                                  ->orWhere('city', 'like', $like);
+                        })
+                        ->orderBy('weight', 'asc')
+                        ->orderBy('id', 'desc')
+                        ->limit(8)
+                        ->get()
+                        ->map(function ($partner) {
+                            $logoUrl = '';
+                            try {
+                                if (method_exists($partner, 'getImage')) {
+                                    $logoUrl = $partner->getImage();
+                                } elseif (!empty($partner->logo)) {
+                                    $logoUrl = asset('img/partner/' . $partner->logo);
+                                }
+                            } catch (\Exception $e) {
+                                // Fallback
+                            }
+                            
+                            return [
+                                'id' => $partner->id,
+                                'name' => $partner->name,
+                                'alias' => $partner->alias,
+                                'logo' => $logoUrl,
+                                'url' => $partner->alias ? route('partner.detail', ['alias' => $partner->alias]) : '#',
+                            ];
+                        });
+                });
+            } catch (\Exception $e) {
+                // Fallback nếu cache lỗi - tìm kiếm trực tiếp
+                try {
+                    $like = '%' . $keyword . '%';
+                    $results['partners'] = Partner::where('hidden', 1)
+                        ->where(function ($query) use ($like) {
+                            $query->where('name', 'like', $like)
+                                  ->orWhere('address', 'like', $like)
+                                  ->orWhere('city', 'like', $like);
+                        })
+                        ->orderBy('weight', 'asc')
+                        ->orderBy('id', 'desc')
+                        ->limit(8)
+                        ->get()
+                        ->map(function ($partner) {
+                            $logoUrl = '';
+                            try {
+                                if (method_exists($partner, 'getImage')) {
+                                    $logoUrl = $partner->getImage();
+                                } elseif (!empty($partner->logo)) {
+                                    $logoUrl = asset('img/partner/' . $partner->logo);
+                                }
+                            } catch (\Exception $e) {
+                                // Fallback
+                            }
+                            
+                            return [
+                                'id' => $partner->id,
+                                'name' => $partner->name,
+                                'alias' => $partner->alias,
+                                'logo' => $logoUrl,
+                                'url' => $partner->alias ? route('partner.detail', ['alias' => $partner->alias]) : '#',
+                            ];
+                        });
+                } catch (\Exception $e2) {
+                    $results['partners'] = collect();
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'keyword' => $keyword,
             'results' => $results,
-            'total' => $results['products']->count() + $results['news']->count() + $results['brands']->count(),
+            'total' => $results['products']->count() + $results['news']->count() + $results['brands']->count() + $results['partners']->count(),
         ]);
     }
 }

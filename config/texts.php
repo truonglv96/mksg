@@ -64,6 +64,7 @@ return [
     'search_product' => 'Sản phẩm',
     'search_news' => 'Tin tức',
     'search_brand' => 'Thương hiệu',
+    'search_partner' => 'Đối tác',
     'search_enter_keyword' => 'Nhập từ khóa để tìm kiếm',
     'search_loading' => 'Đang tìm kiếm...',
     'search_please_enter' => 'Vui lòng nhập từ khóa tìm kiếm',

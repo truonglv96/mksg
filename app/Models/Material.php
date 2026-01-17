@@ -41,7 +41,7 @@ class Material extends Model
             ->join('products', 'products.material_id', '=', 'material.id')
             ->whereIn('products.id', $productIds)
             ->where('products.hidden', 1)
-            ->groupBy('material.id', 'material.name', 'material.weight')
+            ->groupBy('material.id', 'material.name', 'material.weight', 'material.created_at', 'material.updated_at')
             ->having('product_count', '>', 0)
             ->orderBy('material.weight', 'ASC')
             ->get();
@@ -69,7 +69,7 @@ class Material extends Model
             ->join('products', 'products.material_id', '=', 'material.id')
             ->whereIn('products.id', $productIds)
             ->where('products.hidden', 1)
-            ->groupBy('material.id', 'material.name', 'material.weight')
+            ->groupBy('material.id', 'material.name', 'material.weight', 'material.created_at', 'material.updated_at')
             ->having('product_count', '>', 0)
             ->orderBy('material.weight', 'ASC')
             ->get();

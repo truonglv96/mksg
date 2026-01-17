@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Products;
 use App\Models\News;
 use App\Models\Brand;
+use App\Models\FeaturedCategory;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\Cache;
 
@@ -143,6 +144,15 @@ class IndexController extends Controller
             $brands = Brand::where('hidden', 1)->orderBy('weight', 'asc')->get();
         }
 
+        // Cache featured categories - 1 giờ
+        try {
+            $featuredCategories = Cache::remember('home_featured_categories', 3600, function () {
+                return FeaturedCategory::getAllActive(4);
+            });
+        } catch (\Exception $e) {
+            $featuredCategories = FeaturedCategory::getAllActive(4);
+        }
+
         return view('web.page.home.index', [
             'banners' => $banners,
             'categoriesProduct' => $categoriesProduct,
@@ -151,6 +161,7 @@ class IndexController extends Controller
             'news' => $news, // Giữ lại để backward compatibility
             'processedNews' => $processedNews,
             'brands' => $brands,
+            'featuredCategories' => $featuredCategories,
         ]);
     }
 }

@@ -29,10 +29,14 @@
                         // Xác định base path theo type của category (giống desktop)
                         $basePath = '/san-pham/';
                         if (isset($category->type) && $category->type === 'new') {
-                            $basePath = '/tin-tuc/';
+                            $basePath = '/';
                         }
                         if (isset($category->type) && $category->type === 'brand') {
-                            $basePath = '/thuong-hieu/';
+                            $basePath = '/';
+                        }
+
+                        if (isset($category->type) && $category->type === 'partner') {
+                            $basePath = '/';
                         }
                         
                         $categoryUrl = $category->alias ? url($basePath . $category->alias) : '#';

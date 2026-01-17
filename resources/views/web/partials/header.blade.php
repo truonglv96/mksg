@@ -49,7 +49,7 @@
                 @endphp
                 <li>
                     <a href="{{ route('home') }}" 
-                       class="font-bold hover:text-[#11b3f1] transition-colors {{ $isHome ? 'text-[#11b3f1]' : 'text-gray-600' }}">
+                       class="font-bold hover:text-[#11b3f1] transition-colors {{ $isHome ? 'text-[#11b3f1]' : 'text-[#ed1c24]' }}">
                         {{ config('texts.nav_home') }}
                     </a>
                 </li>
@@ -101,7 +101,7 @@
                         @endphp
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
                             <a href="{{ $categoryUrl }}"
-                                class="font-bold hover:text-[#11b3f1] transition-colors text-base {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
+                                class="font-bold hover:text-[#11b3f1] transition-colors text-base {{ $isActive ? 'text-[#11b3f1]' : 'text-[#ed1c24]' }}">
                                 {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
                             </a>
                             @if($hasChildren)
@@ -239,6 +239,9 @@
                 </button>
                 <button data-search-type="brand" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
                     {{ config('texts.search_brand') }}
+                </button>
+                <button data-search-type="partner" class="search-tab px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+                    {{ config('texts.search_partner') }}
                 </button>
             </div>
         </div>
@@ -381,8 +384,9 @@
         const hasProducts = results.products && results.products.length > 0;
         const hasNews = results.news && results.news.length > 0;
         const hasBrands = results.brands && results.brands.length > 0;
+        const hasPartners = results.partners && results.partners.length > 0;
         
-        if (!hasProducts && !hasNews && !hasBrands) {
+        if (!hasProducts && !hasNews && !hasBrands && !hasPartners) {
             html = `
                 <div class="text-center text-gray-500 py-8">
                     <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,6 +440,20 @@
                         <a href="${brand.url}" class="flex flex-col items-center justify-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 group">
                             ${brand.logo ? `<img src="${brand.logo}" alt="${brand.name}" class="w-16 h-16 object-contain mb-2 group-hover:scale-110 transition-transform" loading="lazy">` : '<div class="w-16 h-16 bg-gray-200 rounded mb-2 flex items-center justify-center"><svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg></div>'}
                             <h4 class="text-xs font-semibold text-gray-900 text-center line-clamp-2 group-hover:text-red-600 transition-colors">${brand.name}</h4>
+                        </a>
+                    `;
+                });
+                html += '</div></div>';
+            }
+            
+            // Đối tác
+            if (hasPartners && (currentSearchType === 'all' || currentSearchType === 'partner')) {
+                html += '<div class="mb-6"><h3 class="text-sm font-bold text-gray-800 mb-3 flex items-center"><svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>{{ config('texts.search_partner') }} (' + results.partners.length + ')</h3><div class="grid grid-cols-2 md:grid-cols-4 gap-3">';
+                results.partners.forEach(partner => {
+                    html += `
+                        <a href="${partner.url}" class="flex flex-col items-center justify-center p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 group">
+                            ${partner.logo ? `<img src="${partner.logo}" alt="${partner.name}" class="w-16 h-16 object-contain mb-2 group-hover:scale-110 transition-transform" loading="lazy">` : '<div class="w-16 h-16 bg-gray-200 rounded mb-2 flex items-center justify-center"><svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>'}
+                            <h4 class="text-xs font-semibold text-gray-900 text-center line-clamp-2 group-hover:text-red-600 transition-colors">${partner.name}</h4>
                         </a>
                     `;
                 });

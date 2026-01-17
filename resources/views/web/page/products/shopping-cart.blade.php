@@ -85,18 +85,46 @@
                             <label for="checkout-city">{{ config('texts.cart_form_city') }}</label>
                             <select id="checkout-city" name="city" required>
                                 <option value="" disabled selected>{{ config('texts.cart_form_city_placeholder') }}</option>
-                                @if(isset($cities) && $cities->count() > 0)
+                                @php
+                                    // Kiểm tra và đảm bảo $cities là collection và có dữ liệu
+                                    $hasCities = false;
+                                    $citiesCount = 0;
+                                    
+                                    if (isset($cities) && !empty($cities)) {
+                                        if ($cities instanceof \Illuminate\Support\Collection) {
+                                            $citiesCount = $cities->count();
+                                            $hasCities = $citiesCount > 0;
+                                        } elseif (is_array($cities)) {
+                                            $citiesCount = count($cities);
+                                            $hasCities = $citiesCount > 0;
+                                        }
+                                    }
+                                    
+                                    // Debug: Log để kiểm tra
+                                    if (config('app.debug')) {
+                                        \Log::info('Shopping Cart View - Cities check', [
+                                            'isset_cities' => isset($cities),
+                                            'cities_type' => gettype($cities),
+                                            'is_collection' => $cities instanceof \Illuminate\Support\Collection,
+                                            'cities_count' => $citiesCount,
+                                            'has_cities' => $hasCities,
+                                            'first_city' => $hasCities ? (is_object($cities->first()) ? $cities->first()->name : $cities[0]['name'] ?? null) : null
+                                        ]);
+                                    }
+                                @endphp
+                                @if($hasCities)
                                     @foreach($cities as $city)
-                                        <option value="{{ $city->id }}">
-                                            {{ $city->name }}
+                                        <option value="{{ is_object($city) ? ($city->id ?? '') : ($city['id'] ?? '') }}">
+                                            {{ is_object($city) ? ($city->name ?? '') : ($city['name'] ?? '') }}
                                         </option>
                                     @endforeach
                                 @else
-                                    <option value="hcm">TP. Hồ Chí Minh</option>
-                                    <option value="hn">Hà Nội</option>
-                                    <option value="dn">Đà Nẵng</option>
-                                    <option value="brvt">Bà Rịa - Vũng Tàu</option>
-                                    <option value="other">Khác</option>
+                                    {{-- Fallback cities nếu không có dữ liệu từ database --}}
+                                    <option value="1">TP. Hồ Chí Minh</option>
+                                    <option value="2">Hà Nội</option>
+                                    <option value="3">Đà Nẵng</option>
+                                    <option value="4">Bà Rịa - Vũng Tàu</option>
+                                    <option value="5">Khác</option>
                                 @endif
                             </select>
                         </div>
@@ -511,7 +539,169 @@
         }
 
         // Dữ liệu quận/huyện từ server
-        const districtsData = @json($districts ?? []);
+        const rawDistrictsData = @json($districts ?? []);
+        console.log('Raw districts data from server:', rawDistrictsData);
+        console.log('Raw districts data type:', typeof rawDistrictsData);
+        console.log('Raw districts data is array?', Array.isArray(rawDistrictsData));
+        
+        let districtsData = rawDistrictsData;
+        if (districtsData && typeof districtsData === 'object' && !Array.isArray(districtsData)) {
+            console.log('Converting object to array...');
+            districtsData = Object.keys(districtsData).map(key => districtsData[key]);
+        }
+        districtsData = Array.isArray(districtsData) ? districtsData : [];
+        
+        // Dữ liệu thành phố để debug
+        const citiesData = @json($cities ?? []);
+        console.log('Cities data loaded:', citiesData.length, 'cities');
+        console.log('Raw cities data:', citiesData);
+        if (citiesData.length > 0) {
+            console.log('Sample cities:', citiesData.slice(0, 3).map(c => ({ id: c.id, name: c.name, parent_id: c.parent_id })));
+        }
+        
+        console.log('Districts data loaded:', districtsData.length, 'districts');
+        console.log('Districts data:', districtsData);
+        if (districtsData.length > 0) {
+            console.log('Sample district:', districtsData[0]);
+            // Lấy danh sách unique parent_ids trong districts
+            const uniqueParentIds = [...new Set(districtsData.map(d => parseInt(d.parent_id)).filter(id => !isNaN(id)))].sort((a, b) => a - b);
+            console.log('Unique parent_ids in districts (first 20):', uniqueParentIds.slice(0, 20));
+            
+            // Lấy danh sách city IDs từ citiesData
+            const cityIds = citiesData.map(c => parseInt(c.id)).filter(id => !isNaN(id));
+            console.log('City IDs from cities data:', cityIds);
+            
+            // Kiểm tra xem có city ID nào match với district parent_ids không
+            const matchingIds = cityIds.filter(cityId => uniqueParentIds.includes(cityId));
+            console.log('Matching city IDs in district parent_ids:', matchingIds);
+            
+            // Kiểm tra xem có district parent_id nào match với city IDs không
+            const matchingParentIds = uniqueParentIds.filter(parentId => cityIds.includes(parentId));
+            console.log('Matching district parent_ids in city IDs:', matchingParentIds);
+        } else {
+            console.warn('Districts data is empty');
+            console.warn('Raw districts data was:', rawDistrictsData);
+        }
+        
+        // Hàm xử lý load quận/huyện khi chọn thành phố
+        function handleCityChange(cityId) {
+            console.log('City changed, cityId:', cityId);
+            
+            const districtSelect = document.getElementById('checkout-district');
+            if (!districtSelect) {
+                console.error('District select element not found');
+                return;
+            }
+            
+            // Reset dropdown quận/huyện
+            districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_form_district_placeholder') }}</option>';
+            districtSelect.disabled = true;
+            
+            if (!cityId || isNaN(cityId)) {
+                console.log('Invalid cityId:', cityId);
+                return;
+            }
+            
+            // Kiểm tra districtsData có tồn tại và là array không
+            if (!districtsData || !Array.isArray(districtsData)) {
+                console.error('districtsData is not available or not an array', districtsData);
+                districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_district_no_data') }}</option>';
+                return;
+            }
+            
+            // Kiểm tra nếu districtsData rỗng
+            if (districtsData.length === 0) {
+                console.warn('districtsData is empty, cannot filter districts');
+                districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_district_no_data') }}</option>';
+                return;
+            }
+            
+            console.log('Filtering districts for cityId:', cityId, 'type:', typeof cityId);
+            console.log('Total districts available:', districtsData.length);
+            
+            // Debug: Kiểm tra sample districts để xem parent_id có giá trị gì
+            const sampleDistricts = districtsData.slice(0, 5);
+            console.log('Sample districts parent_ids:', sampleDistricts.map(d => ({ id: d.id, name: d.name, parent_id: d.parent_id })));
+            
+            // Lấy danh sách city IDs từ citiesData
+            const cityIds = citiesData.map(c => parseInt(c.id)).filter(id => !isNaN(id));
+            const cityIdInt = parseInt(cityId);
+            
+            // Tạo mapping: city ID -> index trong mảng cities
+            // Districts có parent_id = 1, 2, 3... tương ứng với city index 0, 1, 2...
+            const cityIndexMap = new Map();
+            citiesData.forEach((city, index) => {
+                const cityId = parseInt(city.id);
+                if (!isNaN(cityId)) {
+                    cityIndexMap.set(cityId, index + 1); // parent_id bắt đầu từ 1
+                }
+            });
+            
+            // Lấy parent_id tương ứng với cityId được chọn
+            const expectedParentId = cityIndexMap.get(cityIdInt);
+            console.log('City ID:', cityIdInt, '-> Expected parent_id:', expectedParentId);
+            
+            // Filter quận/huyện theo parent_id
+            // Nếu cityId match trực tiếp với parent_id, dùng cityId
+            // Nếu không, dùng mapping dựa trên index
+            const filteredDistricts = districtsData.filter(district => {
+                if (!district || district.parent_id === undefined || district.parent_id === null) {
+                    return false;
+                }
+                const districtParentId = parseInt(district.parent_id);
+                
+                // Thử match trực tiếp trước
+                if (districtParentId === cityIdInt) {
+                    return true;
+                }
+                
+                // Nếu không match, dùng mapping dựa trên index
+                if (expectedParentId && districtParentId === expectedParentId) {
+                    return true;
+                }
+                
+                return false;
+            });
+            
+            console.log('Filtered districts count:', filteredDistricts.length);
+            if (filteredDistricts.length === 0) {
+                // Debug: Kiểm tra xem có districts nào có parent_id gần với cityId không
+                const uniqueParentIds = [...new Set(districtsData.map(d => parseInt(d.parent_id)).filter(id => !isNaN(id)))].sort((a, b) => a - b);
+                console.warn('No districts found for cityId:', cityId);
+                console.log('Available parent_ids in districts (first 20):', uniqueParentIds.slice(0, 20));
+                console.log('City IDs from cities data:', cityIds);
+                console.log('Matching check - cityIdInt in uniqueParentIds?', cityIds.includes(cityIdInt));
+                
+                // Kiểm tra xem có districts nào có parent_id match với bất kỳ city ID nào không
+                const districtsWithMatchingParentIds = districtsData.filter(d => {
+                    const parentId = parseInt(d.parent_id);
+                    return !isNaN(parentId) && cityIds.includes(parentId);
+                });
+                console.log('Districts with parent_ids matching any city ID:', districtsWithMatchingParentIds.length);
+                if (districtsWithMatchingParentIds.length > 0) {
+                    console.log('Sample districts with matching parent_ids:', districtsWithMatchingParentIds.slice(0, 3).map(d => ({
+                        id: d.id,
+                        name: d.name,
+                        parent_id: d.parent_id
+                    })));
+                }
+            }
+            
+            // Cập nhật dropdown quận/huyện
+            if (filteredDistricts.length > 0) {
+                filteredDistricts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.id || '';
+                    option.textContent = district.name || '';
+                    districtSelect.appendChild(option);
+                });
+                districtSelect.disabled = false;
+                console.log('District dropdown updated with', filteredDistricts.length, 'options');
+            } else {
+                console.warn('No districts found for cityId:', cityId);
+                districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_district_no_data') }}</option>';
+            }
+        }
         
         if (checkoutForm) {
             const paymentRadios = checkoutForm.querySelectorAll('input[name="payment-method"]');
@@ -520,39 +710,21 @@
             });
             updatePaymentNote();
 
-            // Xử lý load quận/huyện khi chọn thành phố
-            const citySelect = document.getElementById('checkout-city');
-            const districtSelect = document.getElementById('checkout-district');
+            // Sử dụng event delegation để xử lý change event của city select
+            checkoutForm.addEventListener('change', function(e) {
+                // Kiểm tra nếu là city select
+                if (e.target && e.target.id === 'checkout-city') {
+                    const cityId = parseInt(e.target.value);
+                    handleCityChange(cityId);
+                }
+            });
             
-            if (citySelect && districtSelect) {
+            // Đảm bảo attach event listener trực tiếp nếu element đã tồn tại
+            const citySelect = document.getElementById('checkout-city');
+            if (citySelect) {
                 citySelect.addEventListener('change', function() {
                     const cityId = parseInt(this.value);
-                    
-                    // Reset dropdown quận/huyện
-                    districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_form_district_placeholder') }}</option>';
-                    districtSelect.disabled = true;
-                    
-                    if (!cityId) {
-                        return;
-                    }
-                    
-                    // Filter quận/huyện theo parent_id (cityId)
-                    const filteredDistricts = districtsData.filter(district => {
-                        return parseInt(district.parent_id) === cityId;
-                    });
-                    
-                    // Cập nhật dropdown quận/huyện
-                    if (filteredDistricts.length > 0) {
-                        filteredDistricts.forEach(district => {
-                            const option = document.createElement('option');
-                            option.value = district.id;
-                            option.textContent = district.name;
-                            districtSelect.appendChild(option);
-                        });
-                        districtSelect.disabled = false;
-                    } else {
-                        districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_district_no_data') }}</option>';
-                    }
+                    handleCityChange(cityId);
                 });
             }
 
@@ -651,6 +823,7 @@
                         updatePaymentNote();
                         
                         // Reset dropdown quận/huyện
+                        const districtSelect = document.getElementById('checkout-district');
                         if (districtSelect) {
                             districtSelect.innerHTML = '<option value="" disabled selected>{{ config('texts.cart_form_district_placeholder') }}</option>';
                             districtSelect.disabled = true;

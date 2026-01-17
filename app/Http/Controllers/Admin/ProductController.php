@@ -37,12 +37,23 @@ class ProductController extends Controller
         $brand = $request->get('brand', '');
         $sort = $request->get('sort', 'newest');
         
-        // Build query
+        // Build optimized query - sử dụng subquery để tối ưu performance
         $query = Products::select('products.*')
-            ->leftJoin('product_categories', 'product_categories.ProductID', '=', 'products.id')
-            ->leftJoin('category', 'category.id', '=', 'product_categories.CategoryID')
-            ->leftJoin('brand', 'brand.id', '=', 'products.brand_id')
-            ->groupBy('products.id');
+            ->distinct();
+        
+        // Apply filters using subqueries when possible để tránh duplicate rows
+        if (!empty($category) && $category != '-1') {
+            $query->whereExists(function($q) use ($category) {
+                $q->select(DB::raw(1))
+                  ->from('product_categories')
+                  ->whereColumn('product_categories.ProductID', 'products.id')
+                  ->where('product_categories.CategoryID', $category);
+            });
+        }
+        
+        if (!empty($brand) && $brand != '' && $brand != '-1') {
+            $query->where('products.brand_id', $brand);
+        }
         
         // Search - tìm theo tên, mã sản phẩm (code_sp), và mô tả
         if (!empty($search)) {
@@ -51,16 +62,6 @@ class ProductController extends Controller
                   ->orWhere('products.code_sp', 'LIKE', '%' . $search . '%')
                   ->orWhere('products.description', 'LIKE', '%' . $search . '%');
             });
-        }
-        
-        // Category filter
-        if (!empty($category) && $category != '-1') {
-            $query->where('category.id', $category);
-        }
-        
-        // Brand filter
-        if (!empty($brand) && $brand != '' && $brand != '-1') {
-            $query->where('brand.id', $brand);
         }
         
         // Sort
@@ -72,42 +73,61 @@ class ProductController extends Controller
                 $query->orderBy('products.name', 'DESC');
                 break;
             case 'price_asc':
-                $query->orderBy('products.price_sale', 'ASC')->orderBy('products.price', 'ASC');
+                $query->orderBy('products.price_sale', 'ASC')
+                      ->orderBy('products.price', 'ASC');
                 break;
             case 'price_desc':
-                $query->orderBy('products.price_sale', 'DESC')->orderBy('products.price', 'DESC');
+                $query->orderBy('products.price_sale', 'DESC')
+                      ->orderBy('products.price', 'DESC');
                 break;
             default: // newest
-                $query->orderBy('products.id', 'DESC')->orderBy('products.weight', 'ASC');
+                $query->orderBy('products.id', 'DESC')
+                      ->orderBy('products.weight', 'ASC');
         }
         
-        // Paginate
-        $products = $query->paginate(20)->withQueryString();
+        // Paginate với eager loading images và categories trong cùng query
+        $products = $query->with(['images' => function($q) {
+                $q->orderBy('weight', 'ASC');
+            }])
+            ->paginate(20)
+            ->withQueryString();
         
-        // Eager load images to avoid N+1 queries
-        $products->load('images');
-        
-        // Eager load categories to avoid N+1 queries
+        // Eager load categories cho products trong current page
         $productIds = $products->pluck('id')->toArray();
-        $productCategories = DB::table('product_categories')
-            ->join('category', 'product_categories.CategoryID', '=', 'category.id')
-            ->whereIn('product_categories.ProductID', $productIds)
-            ->where('category.type', 'product')
-            ->select('product_categories.ProductID', 'category.*')
-            ->get()
-            ->groupBy('ProductID');
-        
-        // Attach categories to products
-        foreach ($products as $product) {
-            $product->categories = $productCategories->get($product->id, collect());
+        if (!empty($productIds)) {
+            $productCategories = DB::table('product_categories')
+                ->join('category', 'product_categories.CategoryID', '=', 'category.id')
+                ->whereIn('product_categories.ProductID', $productIds)
+                ->where('category.type', 'product')
+                ->select('product_categories.ProductID', 'category.*')
+                ->get()
+                ->groupBy('ProductID');
+            
+            // Attach categories to products
+            foreach ($products as $product) {
+                $product->categories = $productCategories->get($product->id, collect());
+            }
         }
         
-        // Get stats - Optimize with single query using conditional aggregation
-        $stats = Products::selectRaw('
-            COUNT(*) as total,
-            SUM(CASE WHEN hidden = 1 THEN 1 ELSE 0 END) as active,
-            SUM(CASE WHEN hidden = 0 THEN 1 ELSE 0 END) as hidden
-        ')->first();
+        // Get stats - Cache for 5 minutes để tăng tốc độ
+        // Cache sẽ tự động hoạt động trên cPanel khi bảng cache đã được tạo
+        try {
+            $stats = Cache::remember('admin_products_stats', 300, function() {
+                return Products::selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN hidden = 1 THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN hidden = 0 THEN 1 ELSE 0 END) as hidden
+                ')->first();
+            });
+        } catch (\Exception $e) {
+            // Fallback: Query trực tiếp nếu cache chưa được setup
+            \Log::warning('Cache not available, using direct query', ['error' => $e->getMessage()]);
+            $stats = Products::selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN hidden = 1 THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN hidden = 0 THEN 1 ELSE 0 END) as hidden
+            ')->first();
+        }
         
         $totalProducts = $stats->total ?? 0;
         $activeProducts = $stats->active ?? 0;
@@ -115,11 +135,9 @@ class ProductController extends Controller
         $hiddenProducts = $stats->hidden ?? 0;
         
         // Get hierarchical categories for filter - Cache for 1 hour
-        // Use file cache to avoid database dependency
         $categories = $this->getCachedCategories();
         
         // Get brands for filter - Cache for 1 hour
-        // Use file cache to avoid database dependency
         $brands = $this->getCachedBrands();
         
         return view('admin.products.index', compact(
@@ -800,12 +818,13 @@ class ProductController extends Controller
     private function getCachedCategories()
     {
         try {
-            // Try to use file cache to avoid database dependency
-            return Cache::store('file')->remember('admin_categories_hierarchical', 3600, function() {
+            // Try to use cache (database or file)
+            return Cache::remember('admin_categories_hierarchical', 3600, function() {
                 return $this->getHierarchicalCategories();
             });
         } catch (\Exception $e) {
-            // Fallback: return without cache if file cache is not available
+            // Fallback: return without cache if cache is not available
+            \Log::warning('Cache not available for categories, using direct query', ['error' => $e->getMessage()]);
             return $this->getHierarchicalCategories();
         }
     }
@@ -816,12 +835,13 @@ class ProductController extends Controller
     private function getCachedBrands()
     {
         try {
-            // Try to use file cache to avoid database dependency
-            return Cache::store('file')->remember('admin_brands_list', 3600, function() {
+            // Try to use cache (database or file)
+            return Cache::remember('admin_brands_list', 3600, function() {
                 return Brand::orderBy('name', 'ASC')->get();
             });
         } catch (\Exception $e) {
-            // Fallback: return without cache if file cache is not available
+            // Fallback: return without cache if cache is not available
+            \Log::warning('Cache not available for brands, using direct query', ['error' => $e->getMessage()]);
             return Brand::orderBy('name', 'ASC')->get();
         }
     }

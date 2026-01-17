@@ -197,7 +197,7 @@ class Brand extends Model
             ->whereIn('products.id', $productIds->toArray())
             ->where('products.hidden', 1)
             ->where('brand.hidden', 1)
-            ->groupBy('brand.id', 'brand.name', 'brand.logo', 'brand.weight', 'brand.alias')
+            ->groupBy('brand.id', 'brand.name', 'brand.alias', 'brand.content', 'brand.url_imgs', 'brand.weight', 'brand.hidden', 'brand.logo', 'brand.created_at', 'brand.updated_at')
             ->having('product_count', '>', 0)
             ->orderBy('brand.weight', 'ASC')
             ->get();

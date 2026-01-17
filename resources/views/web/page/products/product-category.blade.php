@@ -229,11 +229,7 @@
                             @if($color->url_img)
                             style="background-image: url('{{ asset('img/color/' . $color->url_img) }}'); background-color: #ffffff; background-size: contain; background-repeat: no-repeat;"
                             @endif
-                            title="{{ $color->name ?? config('texts.color_fallback') }}"
                             >
-                            @if($color->url_img && $color->name)
-                            <span class="text-[7px] font-bold text-gray-800 leading-tight px-0.5" style="text-shadow: 0 0 2px white, 0 0 2px white, 0 0 3px white;">{{ $color->name }}</span>
-                            @endif
                         </button>
                         @endforeach
                     </div>
@@ -277,7 +273,7 @@
                     $brandName = $product->brand_name ?? ($product->brand ? $product->brand->name : '');
                 @endphp
                 <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                    <div class="relative overflow-hidden">
+                    <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}" class="relative overflow-hidden block">
                         @if($discount > 0)
                         <span class="discount-badge absolute top-2 right-2 text-white text-xs font-bold px-2 py-1 rounded shadow-lg z-10" style="background-color: #ed1c24;">-{{ $discount }}%</span>
                         @endif
@@ -287,7 +283,7 @@
                         <img src="{{ $hoverImage }}"
                             alt="{{ $product->name }} - Hover"
                             class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                    </div>
+                    </a>
                     <div class="p-3">
                         <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
                             <h3 class="text-sm font-medium text-gray-800 mb-1 line-clamp-2 min-h-[2.5rem] product-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $product->name }}</h3>

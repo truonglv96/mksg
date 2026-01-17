@@ -17,14 +17,14 @@
             <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
                 {{-- Image Slider Section (Left on desktop, top on mobile) --}}
                 @if($hasImages)
-                <div class="w-full lg:w-1/2 flex-shrink-0">
+                <div class="w-full lg:w-1/2 flex-shrink-0 -mx-6 md:-mx-8 lg:mx-0">
                     <div class="brand-image-slider relative">
-                        <div class="swiper-container brand-slider-main rounded-xl overflow-hidden bg-white shadow-md">
+                        <div class="swiper-container brand-slider-main lg:rounded-xl overflow-hidden bg-white shadow-md">
                             <div class="swiper-wrapper">
                                 {{-- Image slides --}}
                                 @foreach($brandImages as $brandImage)
                                 <div class="swiper-slide">
-                                    <div class="w-full flex items-center justify-center bg-white p-4" style="min-height: 300px;">
+                                    <div class="w-full flex items-center justify-center bg-white p-0 lg:p-4">
                                         <img src="{{ $brandImage->getImage() }}" 
                                              alt="{{ $brand->name }} - Hình {{ $loop->iteration }}" 
                                              class="w-full h-auto max-w-full object-contain">
@@ -149,7 +149,7 @@
                 $discount = $price > 0 && $priceSale < $price ? round((($price - $priceSale) / $price) * 100) : 0;
             @endphp
             <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <div class="relative overflow-hidden">
+                <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}" class="relative overflow-hidden block">
                     @if($discount > 0)
                     <span class="discount-badge absolute top-2 right-2 text-white text-xs font-bold px-2 py-1 rounded shadow-lg z-10" style="background-color: #ed1c24;">-{{ $discount }}%</span>
                     @endif
@@ -159,7 +159,7 @@
                     <img src="{{ $hoverImage }}"
                         alt="{{ $product->name }} - Hover"
                         class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
-                </div>
+                </a>
                 <div class="p-3">
                     <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
                         <h3 class="text-sm font-medium text-gray-800 mb-1 line-clamp-2 min-h-[2.5rem] product-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $product->name }}</h3>
@@ -473,6 +473,13 @@ document.addEventListener('DOMContentLoaded', function() {
     height: auto;
     max-width: 100%;
     object-fit: contain;
+}
+
+/* Mobile: Full image without padding */
+@media (max-width: 1023px) {
+    .brand-slider-main {
+        border-radius: 0;
+    }
 }
 </style>
 @endsection
