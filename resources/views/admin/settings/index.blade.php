@@ -674,12 +674,20 @@ $breadcrumbs = [
 
 <script>
 // Image Upload Functions
+function notify(message, type = 'info') {
+    if (typeof showNotification === 'function') {
+        showNotification(message, type);
+    } else {
+        alert(message);
+    }
+}
+
 function handleImageUpload(event, fieldName) {
     const file = event.target.files[0];
     if (file) {
         const maxSize = fieldName === 'logo' ? 2048 * 1024 : 1024 * 1024; // 2MB for logo, 1MB for icons
         if (file.size > maxSize) {
-            alert(`Kích thước ảnh không được vượt quá ${fieldName === 'logo' ? '2MB' : '1MB'}`);
+            notify(`Kích thước ảnh không được vượt quá ${fieldName === 'logo' ? '2MB' : '1MB'}`, 'error');
             return;
         }
         
@@ -842,7 +850,7 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
     // Add CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
     if (!csrfToken) {
-        alert('Lỗi bảo mật: Không tìm thấy CSRF token');
+        notify('Lỗi bảo mật: Không tìm thấy CSRF token', 'error');
         submitBtn.disabled = false;
         submitText.textContent = originalText;
         return;
@@ -859,22 +867,31 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
             'Accept': 'application/json'
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => {
-                throw new Error(err.message || `HTTP error! status: ${response.status}`);
-            });
+    .then(async response => {
+        const contentType = response.headers.get('content-type') || '';
+        let data = null;
+
+        if (contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            if (!response.ok) {
+                throw new Error(text || `HTTP error! status: ${response.status}`);
+            }
+            throw new Error('Phản hồi không hợp lệ từ máy chủ.');
         }
-        return response.json();
+
+        if (!response.ok) {
+            const errorMessage = data && data.message ? data.message : `HTTP error! status: ${response.status}`;
+            throw new Error(errorMessage);
+        }
+
+        return data;
     })
     .then(data => {
         if (data.success) {
             // Show success message
-            if (typeof showNotification === 'function') {
-                showNotification(data.message, 'success');
-            } else {
-                alert(data.message);
-            }
+            notify(data.message, 'success');
             
             // Reload page after a short delay
             setTimeout(() => {
@@ -883,13 +900,15 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
         } else {
             // Show error
             if (data.errors) {
-                let errorMsg = 'Có lỗi xảy ra:\n';
+                const errorMessages = [];
                 Object.keys(data.errors).forEach(field => {
-                    errorMsg += '- ' + data.errors[field][0] + '\n';
+                    if (data.errors[field] && data.errors[field][0]) {
+                        errorMessages.push(data.errors[field][0]);
+                    }
                 });
-                alert(errorMsg);
+                notify(errorMessages.length ? errorMessages.join('; ') : 'Có lỗi xảy ra', 'error');
             } else {
-                alert(data.message || 'Có lỗi xảy ra');
+                notify(data.message || 'Có lỗi xảy ra', 'error');
             }
             
             submitBtn.disabled = false;
@@ -898,7 +917,11 @@ document.getElementById('settingsForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Có lỗi xảy ra khi lưu cài đặt: ' + error.message);
+        let errorMessage = error && error.message ? error.message : 'Có lỗi xảy ra khi lưu cài đặt';
+        if (errorMessage.includes('419')) {
+            errorMessage = 'Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang và thử lại.';
+        }
+        notify('Có lỗi xảy ra khi lưu cài đặt: ' + errorMessage, 'error');
         submitBtn.disabled = false;
         submitText.textContent = originalText;
     });

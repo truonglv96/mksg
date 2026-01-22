@@ -12,7 +12,8 @@
     
         <button id="mobile-menu-btn" class="text-3xl text-gray-700">☰</button>
         <a href="{{ route('home') }}" class="flex flex-col items-center flex-shrink-0">
-            <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="{{ config('texts.alt_logo_premium') }}"
+            <img src="{{ ($settings && $settings->logo) ? $settings->getLogo() : asset('img/logo.png') }}"
+                alt="{{ config('texts.alt_logo_premium') }}"
                 class="h-12 md:h-14">
         </a>
         <div class="flex items-center space-x-4">
@@ -38,7 +39,8 @@
     <nav class="hidden lg:block bg-white shadow-lg">
         <div class="container mx-auto flex justify-between items-center py-3">
             <a href="{{ route('home') }}" class="flex items-center">
-                <img src="https://matkinhsaigon.com.vn/img/setting/1751185753-Logo_mksg_2025.png" alt="{{ config('texts.alt_logo') }}"
+                <img src="{{ ($settings && $settings->logo) ? $settings->getLogo() : asset('img/logo.png') }}"
+                    alt="{{ config('texts.alt_logo') }}"
                     class="h-8 mr-3">
             </a>
             <ul class="flex space-x-6 text-sm font-medium">
@@ -49,7 +51,7 @@
                 @endphp
                 <li>
                     <a href="{{ route('home') }}" 
-                       class="font-bold hover:text-[#11b3f1] transition-colors {{ $isHome ? 'text-[#11b3f1]' : 'text-[#ed1c24]' }}">
+                       class="font-bold hover:text-[#11b3f1] text-base transition-colors {{ $isHome ? 'text-[#11b3f1]' : 'text-[#ed1c24]' }}">
                         {{ config('texts.nav_home') }}
                     </a>
                 </li>
@@ -403,7 +405,7 @@
                 results.products.forEach(product => {
                     html += `
                         <a href="${product.url}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
-                            <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded" loading="lazy">
+                            <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-contain rounded" loading="lazy">
                             <div class="flex-1 min-w-0">
                                 <h4 class="text-sm font-semibold text-gray-900 line-clamp-2">${product.name}</h4>
                                 <p class="text-sm font-bold text-red-600 mt-1">${formatPrice(product.priceSale)}</p>

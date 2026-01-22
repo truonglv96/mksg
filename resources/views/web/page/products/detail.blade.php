@@ -14,10 +14,40 @@
         $seoTitle = $title
             ?? ($productName . ($brandName ? ' - ' . $brandName : '') . ' | Mắt Kính Sài Gòn');
 
-        $seoDescription = $product->meta_description
-            ?? $product->description
-            ?? Str::limit(strip_tags($content->text ?? ''), 160)
-            ?? Str::limit(strip_tags($tech->text ?? ''), 160);
+        $extractText = function ($value) {
+            if (!is_string($value)) {
+                return $value;
+            }
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded)) {
+                    return $decoded['text'] ?? $decoded['value'] ?? '';
+                }
+                if (is_string($decoded)) {
+                    $decodedInner = json_decode($decoded, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decodedInner)) {
+                        return $decodedInner['text'] ?? $decodedInner['value'] ?? '';
+                    }
+                }
+            }
+            return $value;
+        };
+
+        $rawDescription = $extractText($product->meta_description ?? null);
+        if (empty($rawDescription) && !empty($product->description)) {
+            $rawDescription = $extractText($product->description);
+        }
+        $rawDescription = $rawDescription
+            ?? $content->text
+            ?? $tech->text
+            ?? '';
+
+        $seoDescription = trim(strip_tags($rawDescription));
+        if ($seoDescription === '') {
+            $fallback = trim(strip_tags($settings->meta_description ?? ''));
+            $seoDescription = $fallback ?: ($productName . ($brandName ? ' - ' . $brandName : ''));
+        }
+        $seoDescription = Str::limit($seoDescription, 160);
 
         $seoKeywords = $product->kw
             ?? $product->keyword
@@ -74,7 +104,7 @@
     @endphp
 
     @if(!empty($seoDescription))
-        <meta name="description" content="{{ trim(strip_tags($seoDescription)) }}">
+        <meta name="description" content="{{ strip_tags($seoDescription) }}">
     @endif
     @if(!empty($seoKeywords))
         <meta name="keywords" content="{{ $seoKeywords }}">
@@ -87,7 +117,7 @@
     <meta property="og:type" content="product">
     <meta property="og:title" content="{{ $seoTitle }}">
     @if(!empty($seoDescription))
-        <meta property="og:description" content="{{ trim(strip_tags($seoDescription)) }}">
+        <meta property="og:description" content="{!! strip_tags($seoDescription) !!}">
     @endif
     <meta property="og:url" content="{{ $canonicalUrl }}">
     <meta property="og:site_name" content="Mắt Kính Sài Gòn">
@@ -97,7 +127,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $seoTitle }}">
     @if(!empty($seoDescription))
-        <meta name="twitter:description" content="{{ trim(strip_tags($seoDescription)) }}">
+        <meta name="twitter:description" content="{!! strip_tags($seoDescription) !!}">
     @endif
     <meta name="twitter:image" content="{{ $imageUrl }}">
 
@@ -142,43 +172,26 @@
                         <button type="button" data-image-src="{{ asset('img/product/' . $image->image) }}"
                             class="thumbnail-button flex-shrink-0 border-2 border-transparent rounded-xl overflow-hidden w-24 h-24">
                             <img src="{{ asset('img/product/' . $image->image) }}"
-                                alt="{{ $product->name }} - Hình {{ $loop->iteration }}" class="w-full h-full object-cover">
+                                alt="{{ $product->name }} - Hình {{ $loop->iteration }}" class="w-full h-full object-contain">
                         </button>
                         @endforeach
                     </div>
                     @endif
                     
                     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-                        <div
-                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
-                                🚚
-                            </span>
-                            <div>
-                                <p class="font-semibold text-gray-800">{{ config('texts.product_free_shipping') }}</p>
-                                <p class="text-xs text-gray-500">{{ config('texts.product_shipping_time') }}</p>
+                        @foreach($summaryHighlights as $item)
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                                <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
+                                    {{ $item['icon'] ?? '•' }}
+                                </span>
+                                <div>
+                                    <p class="font-semibold text-gray-800">{{ $item['title'] ?? '' }}</p>
+                                    @if(!empty($item['description']))
+                                        <p class="text-xs text-gray-500">{{ $item['description'] }}</p>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                        <div
-                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
-                                🔁
-                            </span>
-                            <div>
-                                <p class="font-semibold text-gray-800">{{ config('texts.product_return_policy') }}</p>
-                                <p class="text-xs text-gray-500">{{ config('texts.product_return_free') }}</p>
-                            </div>
-                        </div>
-                        <div
-                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                            <span class="flex items-center justify-center w-10 h-10 rounded-full bg-red-50 text-red-600">
-                                🛡️
-                            </span>
-                            <div>
-                                <p class="font-semibold text-gray-800">{{ config('texts.product_warranty') }}</p>
-                                <p class="text-xs text-gray-500">{{ config('texts.product_warranty_info') }}</p>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -519,18 +532,17 @@
 
         <!-- Highlights -->
         <section class="highlights-grid grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-10">
-            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_guarantee_title') }}</h3>
-                <p class="text-sm text-gray-600">{{ config('texts.product_guarantee_desc') }}</p>
-            </div>
-            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_eye_test_title') }}</h3>
-                <p class="text-sm text-gray-600">{{ config('texts.product_eye_test_desc') }}</p>
-            </div>
-            <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ config('texts.product_after_sale_title') }}</h3>
-                <p class="text-sm text-gray-600">{{ config('texts.product_after_sale_desc') }}</p>
-            </div>
+            @foreach($detailHighlights as $item)
+                <div class="highlight-card p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    @if(!empty($item['icon']))
+                        <div class="text-2xl mb-2">{{ $item['icon'] }}</div>
+                    @endif
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ $item['title'] ?? '' }}</h3>
+                    @if(!empty($item['description']))
+                        <p class="text-sm text-gray-600">{{ $item['description'] }}</p>
+                    @endif
+                </div>
+            @endforeach
         </section>
 
         
@@ -650,11 +662,11 @@
                                 <a href="{{ route('product.detail', ['categoryPath' => $relatedProduct->getCategoryPath(), 'productAlias' => $relatedProduct->alias]) }}" class="block relative overflow-hidden">
                                     <img src="{{ $mainImageUrl }}"
                                         alt="{{ $relatedProduct->name }}"
-                                        class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                        class="product-img-main w-full h-48 object-contain transition-opacity duration-300">
                                     @if($hoverImage && $hoverImage->id !== $mainImage->id)
                                     <img src="{{ $hoverImageUrl }}"
                                         alt="{{ $relatedProduct->name }} - Hover"
-                                        class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                        class="product-img-hover w-full h-48 object-contain transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
                                     @endif
                                     @if($hasRelatedDiscount)
                                         @php

@@ -81,6 +81,16 @@ class UpdateProductRequest extends FormRequest
             'degree_ranges.*.price' => 'nullable|numeric|min:0',
             'degree_ranges.*.price_sale' => 'nullable|numeric|min:0',
             'degree_ranges.*.weight' => 'nullable|integer|min:0',
+            'summary_highlights' => 'nullable|array',
+            'summary_highlights.*.icon' => 'nullable|string|max:50',
+            'summary_highlights.*.title' => 'nullable|string|max:191',
+            'summary_highlights.*.description' => 'nullable|string',
+            'summary_highlights.*.sort' => 'nullable|integer|min:0',
+            'detail_highlights' => 'nullable|array',
+            'detail_highlights.*.icon' => 'nullable|string|max:50',
+            'detail_highlights.*.title' => 'nullable|string|max:191',
+            'detail_highlights.*.description' => 'nullable|string',
+            'detail_highlights.*.sort' => 'nullable|integer|min:0',
         ];
     }
 
@@ -142,6 +152,12 @@ class UpdateProductRequest extends FormRequest
             'degree_ranges.*.price_sale.min' => 'Giá khuyến mãi dãy độ không được nhỏ hơn 0.',
             'degree_ranges.*.weight.integer' => 'Thứ tự dãy độ phải là số nguyên.',
             'degree_ranges.*.weight.min' => 'Thứ tự dãy độ không được nhỏ hơn 0.',
+            'summary_highlights.array' => 'Tóm tắt dịch vụ phải là mảng.',
+            'summary_highlights.*.sort.integer' => 'Thứ tự tóm tắt phải là số nguyên.',
+            'summary_highlights.*.sort.min' => 'Thứ tự tóm tắt không được nhỏ hơn 0.',
+            'detail_highlights.array' => 'Cam kết dịch vụ phải là mảng.',
+            'detail_highlights.*.sort.integer' => 'Thứ tự cam kết phải là số nguyên.',
+            'detail_highlights.*.sort.min' => 'Thứ tự cam kết không được nhỏ hơn 0.',
         ];
     }
 
@@ -182,6 +198,8 @@ class UpdateProductRequest extends FormRequest
             'combos' => 'combo',
             'features_products' => 'tính năng sản phẩm',
             'degree_ranges' => 'dãy độ',
+            'summary_highlights' => 'tóm tắt dịch vụ',
+            'detail_highlights' => 'cam kết dịch vụ',
         ];
     }
 }

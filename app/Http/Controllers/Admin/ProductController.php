@@ -22,6 +22,7 @@ use App\Models\ProductPriceSale;
 use App\Models\DiscountedCombo;
 use App\Models\FeaturesProduct;
 use App\Models\ProductDegreeRange;
+use App\Models\ProductHighlight;
 use Exception;
 
 class ProductController extends Controller
@@ -301,6 +302,53 @@ class ProductController extends Controller
                     }
                 }
             }
+
+            $summaryIcons = ['🚚', '🔁', '🛡️'];
+            $detailIcons = ['', '', ''];
+
+            $summaryHighlights = $validated['summary_highlights'] ?? [];
+            foreach ($summaryHighlights as $index => $item) {
+                $title = trim($item['title'] ?? '');
+                $description = trim($item['description'] ?? '');
+                $icon = trim($item['icon'] ?? '');
+                if ($icon === '' && isset($summaryIcons[$index])) {
+                    $icon = $summaryIcons[$index];
+                }
+                $sort = isset($item['sort']) && is_numeric($item['sort']) ? (int)$item['sort'] : $index;
+                if ($title === '' && $description === '') {
+                    continue;
+                }
+                ProductHighlight::create([
+                    'product_id' => $product->id,
+                    'group' => 'summary',
+                    'icon' => $icon ?: null,
+                    'title' => $title,
+                    'description' => $description ?: null,
+                    'sort' => $sort,
+                ]);
+            }
+
+            $detailHighlights = $validated['detail_highlights'] ?? [];
+            foreach ($detailHighlights as $index => $item) {
+                $title = trim($item['title'] ?? '');
+                $description = trim($item['description'] ?? '');
+                $icon = trim($item['icon'] ?? '');
+                if ($icon === '' && isset($detailIcons[$index])) {
+                    $icon = $detailIcons[$index];
+                }
+                $sort = isset($item['sort']) && is_numeric($item['sort']) ? (int)$item['sort'] : $index;
+                if ($title === '' && $description === '') {
+                    continue;
+                }
+                ProductHighlight::create([
+                    'product_id' => $product->id,
+                    'group' => 'highlight',
+                    'icon' => $icon ?: null,
+                    'title' => $title,
+                    'description' => $description ?: null,
+                    'sort' => $sort,
+                ]);
+            }
             
             DB::commit();
             
@@ -356,6 +404,14 @@ class ProductController extends Controller
         
         // Get product combos
         $productCombos = DiscountedCombo::where('product_id', $product->id)->orderBy('weight', 'ASC')->get();
+
+        $productHighlights = ProductHighlight::where('product_id', $product->id)
+            ->orderBy('group', 'ASC')
+            ->orderBy('sort', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
+        $summaryHighlights = $productHighlights->where('group', 'summary')->values();
+        $detailHighlights = $productHighlights->where('group', 'highlight')->values();
         
         // Get product features (many-to-many relationship)
         // With model cast, id_features_product is automatically decoded to array
@@ -392,7 +448,9 @@ class ProductController extends Controller
             'materials',
             'colors',
             'combos',
-            'featuresProducts'
+            'featuresProducts',
+            'summaryHighlights',
+            'detailHighlights'
         ));
     }
 
@@ -627,6 +685,55 @@ class ProductController extends Controller
             } else {
                 // If no degree ranges provided, delete all existing ones
                 ProductDegreeRange::where('product_id', $product->id)->delete();
+            }
+
+            ProductHighlight::where('product_id', $product->id)->delete();
+
+            $summaryIcons = ['🚚', '🔁', '🛡️'];
+            $detailIcons = ['', '', ''];
+
+            $summaryHighlights = $validated['summary_highlights'] ?? [];
+            foreach ($summaryHighlights as $index => $item) {
+                $title = trim($item['title'] ?? '');
+                $description = trim($item['description'] ?? '');
+                $icon = trim($item['icon'] ?? '');
+                if ($icon === '' && isset($summaryIcons[$index])) {
+                    $icon = $summaryIcons[$index];
+                }
+                $sort = isset($item['sort']) && is_numeric($item['sort']) ? (int)$item['sort'] : $index;
+                if ($title === '' && $description === '') {
+                    continue;
+                }
+                ProductHighlight::create([
+                    'product_id' => $product->id,
+                    'group' => 'summary',
+                    'icon' => $icon ?: null,
+                    'title' => $title,
+                    'description' => $description ?: null,
+                    'sort' => $sort,
+                ]);
+            }
+
+            $detailHighlights = $validated['detail_highlights'] ?? [];
+            foreach ($detailHighlights as $index => $item) {
+                $title = trim($item['title'] ?? '');
+                $description = trim($item['description'] ?? '');
+                $icon = trim($item['icon'] ?? '');
+                if ($icon === '' && isset($detailIcons[$index])) {
+                    $icon = $detailIcons[$index];
+                }
+                $sort = isset($item['sort']) && is_numeric($item['sort']) ? (int)$item['sort'] : $index;
+                if ($title === '' && $description === '') {
+                    continue;
+                }
+                ProductHighlight::create([
+                    'product_id' => $product->id,
+                    'group' => 'highlight',
+                    'icon' => $icon ?: null,
+                    'title' => $title,
+                    'description' => $description ?: null,
+                    'sort' => $sort,
+                ]);
             }
             
             // Handle colors

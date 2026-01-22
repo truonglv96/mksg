@@ -7,7 +7,43 @@
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.ico">
     <title>@yield('title', config('texts.page_title'))</title>
-    @yield('meta')
+    @php
+        $defaultTitle = $settings->meta_title ?? config('texts.page_title');
+        $defaultDescription = $settings->meta_description ?? null;
+        $defaultKeywords = $settings->meta_keyword ?? null;
+        $defaultCanonical = request()->url();
+        $defaultImage = ($settings && $settings->logo)
+            ? $settings->getLogo()
+            : asset('img/logo.png');
+        $defaultImageSecure = preg_replace('/^http:/i', 'https:', $defaultImage);
+    @endphp
+    @hasSection('meta')
+        @yield('meta')
+    @else
+        @if(!empty($defaultDescription))
+            <meta name="description" content="{{ trim(strip_tags($defaultDescription)) }}">
+        @endif
+        @if(!empty($defaultKeywords))
+            <meta name="keywords" content="{{ $defaultKeywords }}">
+        @endif
+        <link rel="canonical" href="{{ $defaultCanonical }}">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="{{ $defaultTitle }}">
+        @if(!empty($defaultDescription))
+            <meta property="og:description" content="{{ trim(strip_tags($defaultDescription)) }}">
+        @endif
+        <meta property="og:url" content="{{ $defaultCanonical }}">
+        <meta property="og:site_name" content="{{ $defaultTitle }}">
+        <meta property="og:image" content="{{ $defaultImage }}">
+        <meta property="og:image:secure_url" content="{{ $defaultImageSecure }}">
+        <meta property="og:image:alt" content="{{ $defaultTitle }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $defaultTitle }}">
+        @if(!empty($defaultDescription))
+            <meta name="twitter:description" content="{{ trim(strip_tags($defaultDescription)) }}">
+        @endif
+        <meta name="twitter:image" content="{{ $defaultImage }}">
+    @endif
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>

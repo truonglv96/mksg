@@ -1,59 +1,182 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MKS G - Mắt Kính Sài Gòn (Upgrade v2)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Tổng quan
+Đây là dự án website thương mại điện tử/giới thiệu sản phẩm mắt kính với đầy đủ
+front-end (web) và admin panel để quản trị nội dung. Hệ thống tập trung vào:
+- Trưng bày danh mục và chi tiết sản phẩm theo nhiều cấp danh mục.
+- Tin tức theo chuyên mục, bài viết chi tiết, và SEO.
+- Giỏ hàng, đặt hàng/checkout, lưu hóa đơn và gửi email xác nhận.
+- Quản trị sản phẩm, đơn hàng, khách hàng, tin tức, slider, cài đặt hệ thống.
 
-## About Laravel
+## Công nghệ chính
+- Backend: Laravel 12, PHP 8.4
+- Frontend: Blade + Vite + Tailwind CSS v4
+- CSDL: MySQL (Sail), có sẵn `database/database.sqlite`
+- Cache/Queue: Redis (Sail)
+- Mail: SMTP (Mailpit trong dev)
+- Rich text: CKEditor (public/ckeditor)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Cấu trúc thư mục nổi bật
+- `app/Http/Controllers/Web`: controller cho trang web public.
+- `app/Http/Controllers/Admin`: controller cho admin panel.
+- `app/Models`: model chính của hệ thống (Products, Category, Bill, News...).
+- `resources/views/web`: giao diện frontend.
+- `resources/views/admin`: giao diện admin.
+- `routes/web.php`: routes public.
+- `routes/admin.php`: routes admin.
+- `database/migrations`: migrations cơ bản.
+- `database/seeders/*.sql`: dữ liệu khu vực (areas).
+- `public/img`, `public/upload`: tài nguyên và ảnh sản phẩm.
+- `docker/`, `Dockerfile`, `compose.yaml`: cấu hình Docker/Sail.
+- `RAILWAY.md`, `RUNNER-GUIDE.md`: hướng dẫn deploy/runner.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Chức năng web (public)
+Tập trung trong `routes/web.php` và `app/Http/Controllers/Web/*`:
+- Trang chủ `/`:
+  - Banner slider, danh mục nổi bật, sản phẩm theo danh mục.
+  - Tin tức mới, thương hiệu, featured categories (có cache).
+- Sản phẩm `/san-pham`:
+  - Danh sách sản phẩm theo danh mục hoặc đường dẫn nhiều cấp.
+  - Filter theo giá, màu, chất liệu, thương hiệu.
+  - Chi tiết sản phẩm kèm hình ảnh, màu sắc, combo giảm giá, range độ.
+- Tin tức `/tin-tuc`:
+  - Danh mục theo nhiều cấp, lọc theo từ khóa.
+  - Chi tiết bài viết, SEO schema, bài viết liên quan.
+- Thương hiệu `/thuong-hieu`, đối tác `/doi-tac`.
+- Trang tĩnh `/trang/{alias}`.
+- Tìm kiếm `POST /search`.
+- Giỏ hàng `/gio-hang`, checkout `POST /checkout`:
+  - Lưu đơn hàng vào bảng hóa đơn.
+  - Gửi email xác nhận đơn hàng.
+- Xóa cache `GET /clear-cache` (chỉ dùng khi cần).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Chức năng admin
+- Auth: `/admin/login`, logout (middleware `admin.guest`/`admin.auth`).
+- Dashboard và Profile.
+- Products:
+  - CRUD sản phẩm, upload nhiều ảnh, sắp xếp ảnh, màu sắc.
+  - Gán danh mục, thương hiệu, chất liệu, màu, combo giảm giá.
+  - Thiết lập giá theo category, features sản phẩm, range độ.
+- Categories: tạo/sửa/xóa, reorder.
+- Orders: danh sách, chi tiết, cập nhật trạng thái, xóa đơn.
+- Customers: danh sách, cập nhật, xóa.
+- News: CRUD bài viết.
+- Brands, Sliders.
+- Store information (Contacts).
+- Settings (logo, meta, social, nội dung footer...).
+- Materials, Colors.
+- Featured Categories, Features Product.
 
-## Learning Laravel
+## Routing và middleware
+Middleware admin được alias trong `bootstrap/app.php`:
+- `admin.auth` → `AuthenticateAdmin`
+- `admin.guest` → `RedirectIfAdminAuthenticated`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Routes chính:
+- Web: `routes/web.php`
+- Admin: `routes/admin.php`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Model và bảng dữ liệu chính (tham khảo)
+Các model trong `app/Models` phản ánh dữ liệu:
+- Sản phẩm: `Products`, `ProductImage`, `ProductCategories`, `ProductColor`,
+  `ProductPriceSale`, `ProductDegreeRange`, `DiscountedCombo`, `FeaturesProduct`.
+- Danh mục: `Category`, `FeaturedCategory`.
+- Tin tức: `News`, `NewsCategories`.
+- Đơn hàng: `ClientInformation` (bill), `Bill` (bill_details),
+  `TatalBillDetail` (tổng tiền).
+- Khách hàng: `Customer`, `CustomerRole`, `CustomerAttribute`.
+- Thương hiệu/đối tác: `Brand`, `Partner`.
+- Cấu hình: `Setting`, `Contact`, `Slider`.
+- Khu vực: `Area` (seed từ SQL: `database/seeders/*.sql`).
 
-## Laravel Sponsors
+## Cache và hiệu năng
+- Trang chủ và tin tức sử dụng `Cache::remember` để giảm truy vấn.
+- Có fallback query nếu cache không khả dụng.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Mail
+Checkout gửi email xác nhận bằng `App\Mail\OrderConfirmationMail`
+(`resources/views/emails/order-confirmation`).
 
-### Premium Partners
+## Tài nguyên frontend (Vite)
+Vite entrypoint: `vite.config.js`
+- `resources/css/app.css`
+- `resources/js/app.js`
+- `resources/js/admin/app_admin.js`
+- `resources/js/admin/api-handler.js`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Trạng thái build:
+- Có `public/hot` → đang dùng dev server.
+- Có `public/build/manifest.json` → đã build production.
 
-## Contributing
+## Cách chạy dự án (local)
+### 1) Cài đặt nhanh
+```bash
+composer run setup
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2) Chạy dev
+```bash
+composer run dev
+```
+Script này chạy đồng thời: server, queue, logs, và Vite.
 
-## Code of Conduct
+### 3) Chạy test
+```bash
+composer run test
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Chạy bằng Laravel Sail (Docker)
+Các service chính: `laravel.test`, `mysql`, `redis`, `meilisearch`, `mailpit`,
+`selenium`, `gitlab-runner`.
 
-## Security Vulnerabilities
+Ví dụ:
+```bash
+./vendor/bin/sail up -d
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run dev
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Biến môi trường quan trọng
+Tối thiểu cho production:
+```
+APP_NAME=Laravel
+APP_ENV=production
+APP_KEY=base64:...
+APP_DEBUG=false
+APP_URL=https://your-domain
 
-## License
+DB_CONNECTION=mysql
+DB_HOST=...
+DB_PORT=3306
+DB_DATABASE=...
+DB_USERNAME=...
+DB_PASSWORD=...
+```
+Tùy chọn:
+```
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+MAIL_MAILER=smtp
+MAIL_HOST=...
+MAIL_PORT=...
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM_ADDRESS=...
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Deploy Railway
+Xem chi tiết `RAILWAY.md`:
+- Đã có `Dockerfile`, `railway.toml`, `docker/nginx.conf`,
+  `docker/supervisord.conf`.
+- Cần cấu hình env, tạo MySQL, chạy migrations.
+
+## GitLab Runner
+Xem `RUNNER-GUIDE.md`:
+- Service `gitlab-runner` đã được cấu hình trong `compose.yaml`.
+- Hướng dẫn start/stop, logs, verify runner.
+
+## Lưu ý vận hành
+- Ảnh sản phẩm lưu trong `public/img/product` và `public/upload`.
+- Nếu deploy production, cân nhắc storage ngoài (S3/Volumes).
+- Nếu gặp lỗi ViteManifestNotFoundException, xem `VITE-BUILD-INSTRUCTIONS.md`.

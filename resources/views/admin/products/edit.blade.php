@@ -245,6 +245,167 @@ $breadcrumbs = [
                             'rows' => 3,
                             'helpText' => 'Mô tả ngắn gọn về sản phẩm để tối ưu SEO'
                         ])
+
+                        @php
+                            $summaryHighlightRows = old('summary_highlights');
+                            if (!is_array($summaryHighlightRows)) {
+                                $summaryHighlightRows = isset($summaryHighlights)
+                                    ? $summaryHighlights->map(fn($item) => [
+                                        'icon' => $item->icon,
+                                        'title' => $item->title,
+                                        'description' => $item->description,
+                                        'sort' => $item->sort ?? 0,
+                                    ])->toArray()
+                                    : [];
+                            }
+                            if (count($summaryHighlightRows) === 0) {
+                                $summaryHighlightRows = [[]];
+                            }
+
+                            $detailHighlightRows = old('detail_highlights');
+                            if (!is_array($detailHighlightRows)) {
+                                $detailHighlightRows = isset($detailHighlights)
+                                    ? $detailHighlights->map(fn($item) => [
+                                        'icon' => $item->icon,
+                                        'title' => $item->title,
+                                        'description' => $item->description,
+                                        'sort' => $item->sort ?? 0,
+                                    ])->toArray()
+                                    : [];
+                            }
+                            if (count($detailHighlightRows) === 0) {
+                                $detailHighlightRows = [[]];
+                            }
+                        @endphp
+
+                        <!-- Product Highlights -->
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                            <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-bullhorn text-white text-lg"></i>
+                                </div>
+                                Nội dung nổi bật hiển thị
+                            </h2>
+                            <p class="text-sm text-gray-600 mb-6">
+                                Thiết lập nhanh các ô thông tin hiển thị ở trang chi tiết sản phẩm. Có thể nhập icon bằng emoji.
+                            </p>
+
+                            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                                    <div class="flex items-start justify-between gap-4 mb-4">
+                                        <div>
+                                            <h3 class="text-base font-semibold text-gray-900">Tóm tắt dịch vụ</h3>
+                                            <p class="text-xs text-gray-500">Hiển thị dưới ảnh sản phẩm (3 ô)</p>
+                                        </div>
+                                        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Summary</span>
+                                    </div>
+
+                                    <div id="summaryHighlightsContainer" class="space-y-3">
+                                        @foreach($summaryHighlightRows as $index => $row)
+                                            <div class="summary-highlight-row bg-gray-50/60 border border-gray-200 rounded-lg p-4 space-y-3">
+                                                <input type="hidden"
+                                                       name="summary_highlights[{{ $index }}][icon]"
+                                                       value="{{ $row['icon'] ?? '' }}">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tiêu đề</label>
+                                                    <input type="text"
+                                                           name="summary_highlights[{{ $index }}][title]"
+                                                           value="{{ $row['title'] ?? '' }}"
+                                                           placeholder="Miễn phí vận chuyển"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Mô tả</label>
+                                                    <textarea name="summary_highlights[{{ $index }}][description]"
+                                                              rows="2"
+                                                              placeholder="Giao nhanh 24-72h toàn quốc"
+                                                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition resize-none">{{ $row['description'] ?? '' }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Thứ tự</label>
+                                                    <input type="number"
+                                                           name="summary_highlights[{{ $index }}][sort]"
+                                                           value="{{ $row['sort'] ?? 0 }}"
+                                                           min="0"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+                                                </div>
+                                                <div class="flex justify-end">
+                                                    <button type="button"
+                                                            onclick="removeSummaryHighlightRow(this)"
+                                                            class="remove-summary-highlight-btn text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                                                        <i class="fas fa-trash-alt mr-1"></i> Xóa dòng
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <button type="button"
+                                            onclick="addSummaryHighlightRow()"
+                                            class="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span>Thêm dòng tóm tắt</span>
+                                    </button>
+                                </div>
+
+                                <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                                    <div class="flex items-start justify-between gap-4 mb-4">
+                                        <div>
+                                            <h3 class="text-base font-semibold text-gray-900">Cam kết & dịch vụ</h3>
+                                            <p class="text-xs text-gray-500">Hiển thị dưới phần sản phẩm (3 ô)</p>
+                                        </div>
+                                        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">Highlights</span>
+                                    </div>
+
+                                    <div id="detailHighlightsContainer" class="space-y-3">
+                                        @foreach($detailHighlightRows as $index => $row)
+                                            <div class="detail-highlight-row bg-gray-50/60 border border-gray-200 rounded-lg p-4 space-y-3">
+                                                <input type="hidden"
+                                                       name="detail_highlights[{{ $index }}][icon]"
+                                                       value="{{ $row['icon'] ?? '' }}">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tiêu đề</label>
+                                                    <input type="text"
+                                                           name="detail_highlights[{{ $index }}][title]"
+                                                           value="{{ $row['title'] ?? '' }}"
+                                                           placeholder="Cam kết chính hãng 100%"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Mô tả</label>
+                                                    <textarea name="detail_highlights[{{ $index }}][description]"
+                                                              rows="2"
+                                                              placeholder="Có đầy đủ tem chống hàng giả, hóa đơn VAT..."
+                                                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition resize-none">{{ $row['description'] ?? '' }}</textarea>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Thứ tự</label>
+                                                    <input type="number"
+                                                           name="detail_highlights[{{ $index }}][sort]"
+                                                           value="{{ $row['sort'] ?? 0 }}"
+                                                           min="0"
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+                                                </div>
+                                                <div class="flex justify-end">
+                                                    <button type="button"
+                                                            onclick="removeDetailHighlightRow(this)"
+                                                            class="remove-detail-highlight-btn text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                                                        <i class="fas fa-trash-alt mr-1"></i> Xóa dòng
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <button type="button"
+                                            onclick="addDetailHighlightRow()"
+                                            class="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span>Thêm dòng cam kết</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1080,6 +1241,8 @@ document.addEventListener('DOMContentLoaded', function() {
     renderExistingImages();
     initializeSalePrices();
     initializeCombos();
+    updateSummaryHighlightRemoveButtons();
+    updateDetailHighlightRemoveButtons();
 });
 
 // Function to insert default tech content into CKEditor
@@ -2026,6 +2189,168 @@ function updateDegreeRangeRemoveButtons() {
     const rows = document.querySelectorAll('.degree-range-row');
     rows.forEach((row, index) => {
         const removeBtn = row.querySelector('.remove-degree-range-btn');
+        if (removeBtn) {
+            if (index === 0 && rows.length === 1) {
+                removeBtn.classList.add('hidden');
+            } else {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+    });
+}
+
+// Highlights Management
+let summaryHighlightRowIndex = document.querySelectorAll('.summary-highlight-row').length;
+let detailHighlightRowIndex = document.querySelectorAll('.detail-highlight-row').length;
+
+function addSummaryHighlightRow() {
+    const container = document.getElementById('summaryHighlightsContainer');
+    if (!container) {
+        console.error('summaryHighlightsContainer not found');
+        return;
+    }
+
+    const rowIndex = summaryHighlightRowIndex;
+    summaryHighlightRowIndex++;
+
+    const newRow = document.createElement('div');
+    newRow.className = 'summary-highlight-row bg-gray-50/60 border border-gray-200 rounded-lg p-4 space-y-3 fade-in';
+    newRow.innerHTML = `
+        <input type="hidden"
+               name="summary_highlights[${rowIndex}][icon]"
+               value="🚚">
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Tiêu đề</label>
+            <input type="text"
+                   name="summary_highlights[${rowIndex}][title]"
+                   placeholder="Miễn phí vận chuyển"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Mô tả</label>
+            <textarea name="summary_highlights[${rowIndex}][description]"
+                      rows="2"
+                      placeholder="Giao nhanh 24-72h toàn quốc"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition resize-none"></textarea>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Thứ tự</label>
+            <input type="number"
+                   name="summary_highlights[${rowIndex}][sort]"
+                   value="0"
+                   min="0"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+        </div>
+        <div class="flex justify-end">
+            <button type="button"
+                    onclick="removeSummaryHighlightRow(this)"
+                    class="remove-summary-highlight-btn text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                <i class="fas fa-trash-alt mr-1"></i> Xóa dòng
+            </button>
+        </div>
+    `;
+
+    container.appendChild(newRow);
+    updateSummaryHighlightRemoveButtons();
+}
+
+function removeSummaryHighlightRow(button) {
+    const row = button.closest('.summary-highlight-row');
+    if (!row) return;
+
+    row.style.transition = 'opacity 0.3s, transform 0.3s';
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+
+    setTimeout(() => {
+        row.remove();
+        updateSummaryHighlightRemoveButtons();
+    }, 300);
+}
+
+function updateSummaryHighlightRemoveButtons() {
+    const rows = document.querySelectorAll('.summary-highlight-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-summary-highlight-btn');
+        if (removeBtn) {
+            if (index === 0 && rows.length === 1) {
+                removeBtn.classList.add('hidden');
+            } else {
+                removeBtn.classList.remove('hidden');
+            }
+        }
+    });
+}
+
+function addDetailHighlightRow() {
+    const container = document.getElementById('detailHighlightsContainer');
+    if (!container) {
+        console.error('detailHighlightsContainer not found');
+        return;
+    }
+
+    const rowIndex = detailHighlightRowIndex;
+    detailHighlightRowIndex++;
+
+    const newRow = document.createElement('div');
+    newRow.className = 'detail-highlight-row bg-gray-50/60 border border-gray-200 rounded-lg p-4 space-y-3 fade-in';
+    newRow.innerHTML = `
+        <input type="hidden"
+               name="detail_highlights[${rowIndex}][icon]"
+               value="">
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Tiêu đề</label>
+            <input type="text"
+                   name="detail_highlights[${rowIndex}][title]"
+                   placeholder="Cam kết chính hãng 100%"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Mô tả</label>
+            <textarea name="detail_highlights[${rowIndex}][description]"
+                      rows="2"
+                      placeholder="Có đầy đủ tem chống hàng giả, hóa đơn VAT..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition resize-none"></textarea>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Thứ tự</label>
+            <input type="number"
+                   name="detail_highlights[${rowIndex}][sort]"
+                   value="0"
+                   min="0"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition">
+        </div>
+        <div class="flex justify-end">
+            <button type="button"
+                    onclick="removeDetailHighlightRow(this)"
+                    class="remove-detail-highlight-btn text-xs text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition">
+                <i class="fas fa-trash-alt mr-1"></i> Xóa dòng
+            </button>
+        </div>
+    `;
+
+    container.appendChild(newRow);
+    updateDetailHighlightRemoveButtons();
+}
+
+function removeDetailHighlightRow(button) {
+    const row = button.closest('.detail-highlight-row');
+    if (!row) return;
+
+    row.style.transition = 'opacity 0.3s, transform 0.3s';
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+
+    setTimeout(() => {
+        row.remove();
+        updateDetailHighlightRemoveButtons();
+    }, 300);
+}
+
+function updateDetailHighlightRemoveButtons() {
+    const rows = document.querySelectorAll('.detail-highlight-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-detail-highlight-btn');
         if (removeBtn) {
             if (index === 0 && rows.length === 1) {
                 removeBtn.classList.add('hidden');

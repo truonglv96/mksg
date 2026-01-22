@@ -155,10 +155,10 @@
                     @endif
                     <img src="{{ $mainImage }}"
                         alt="{{ $product->name }}"
-                        class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                        class="product-img-main w-full h-48 object-contain transition-opacity duration-300">
                     <img src="{{ $hoverImage }}"
                         alt="{{ $product->name }} - Hover"
-                        class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                        class="product-img-hover w-full h-48 object-contain transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
                 </a>
                 <div class="p-3">
                     <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">

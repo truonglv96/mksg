@@ -1,6 +1,42 @@
 @extends('web.master')
 
-@section('title', config('texts.page_title'))
+@section('title', $settings->meta_title ?? config('texts.page_title'))
+
+@section('meta')
+    @php
+        $homeTitle = $settings->meta_title ?? config('texts.page_title');
+        $homeDescription = $settings->meta_description ?? null;
+        $homeKeywords = $settings->meta_keyword ?? null;
+        $homeCanonical = request()->url();
+        $homeImage = ($settings && $settings->logo)
+            ? $settings->getLogo()
+            : asset('img/logo.png');
+        $homeImageSecure = preg_replace('/^http:/i', 'https:', $homeImage);
+    @endphp
+    @if(!empty($homeDescription))
+        <meta name="description" content="{{ trim(strip_tags($homeDescription)) }}">
+    @endif
+    @if(!empty($homeKeywords))
+        <meta name="keywords" content="{{ $homeKeywords }}">
+    @endif
+    <link rel="canonical" href="{{ $homeCanonical }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $homeTitle }}">
+    @if(!empty($homeDescription))
+        <meta property="og:description" content="{{ trim(strip_tags($homeDescription)) }}">
+    @endif
+    <meta property="og:url" content="{{ $homeCanonical }}">
+    <meta property="og:site_name" content="{{ $homeTitle }}">
+    <meta property="og:image" content="{{ $homeImage }}">
+    <meta property="og:image:secure_url" content="{{ $homeImageSecure }}">
+    <meta property="og:image:alt" content="{{ $homeTitle }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $homeTitle }}">
+    @if(!empty($homeDescription))
+        <meta name="twitter:description" content="{{ trim(strip_tags($homeDescription)) }}">
+    @endif
+    <meta name="twitter:image" content="{{ $homeImage }}">
+@endsection
 
 @section('content')
 <!-- Banner Slider Full Màn Hình -->
@@ -140,13 +176,13 @@
                                         loading="lazy"
                                         width="400"
                                         height="192"
-                                        class="product-img-main w-full h-48 object-cover transition-opacity duration-300">
+                                        class="product-img-main w-full h-48 object-contain transition-opacity duration-300">
                                     <img src="{{ $hoverImage }}"
                                         alt="{{ $product->name }} - Hình 2"
                                         loading="lazy"
                                         width="400"
                                         height="192"
-                                        class="product-img-hover w-full h-48 object-cover transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
+                                        class="product-img-hover w-full h-48 object-contain transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
                                     @if($discount > 0)
                                     <!-- Badge giảm giá góc phải trên -->
                                     <span

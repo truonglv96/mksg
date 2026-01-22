@@ -9,6 +9,7 @@ use App\Models\Color;
 use App\Models\Material;
 use App\Models\Brand;
 use App\Models\DiscountedCombo;
+use App\Models\ProductHighlight;
 use App\Models\Area;
 use App\Models\ClientInformation;
 use App\Models\Bill as BillDetail;
@@ -196,6 +197,67 @@ class ProductController extends Controller
         foreach ($jsonFields as $field) {
             $decodedData[$field] = $product->$field ? json_decode($product->$field) : null;
         }
+
+        $highlightItems = ProductHighlight::where('product_id', $product->id)
+            ->orderBy('group', 'ASC')
+            ->orderBy('sort', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $summaryHighlights = $highlightItems
+            ->where('group', 'summary')
+            ->map(fn($item) => [
+                'icon' => $item->icon,
+                'title' => $item->title,
+                'description' => $item->description,
+            ])
+            ->values();
+
+        if ($summaryHighlights->isEmpty()) {
+            $summaryHighlights = collect([
+                [
+                    'icon' => '🚚',
+                    'title' => config('texts.product_free_shipping'),
+                    'description' => config('texts.product_shipping_time'),
+                ],
+                [
+                    'icon' => '🔁',
+                    'title' => config('texts.product_return_policy'),
+                    'description' => config('texts.product_return_free'),
+                ],
+                [
+                    'icon' => '🛡️',
+                    'title' => config('texts.product_warranty'),
+                    'description' => config('texts.product_warranty_info'),
+                ],
+            ]);
+        }
+
+        $detailHighlights = $highlightItems
+            ->where('group', 'highlight')
+            ->map(fn($item) => [
+                'icon' => $item->icon,
+                'title' => $item->title,
+                'description' => $item->description,
+            ])
+            ->values();
+
+        if ($detailHighlights->isEmpty()) {
+            $detailHighlights = collect([
+                [
+                    'title' => config('texts.product_guarantee_title'),
+                    'description' => config('texts.product_guarantee_desc'),
+                ],
+                [
+                    'title' => config('texts.product_eye_test_title'),
+                    'description' => config('texts.product_eye_test_desc'),
+                ],
+                [
+                    'title' => config('texts.product_after_sale_title'),
+                    'description' => config('texts.product_after_sale_desc'),
+                ],
+            ]);
+        }
         // dd($product);
         return view('web.page.products.detail', array_merge([
             'title' => $product->name . ' - Mắt Kính Sài Gòn',
@@ -220,6 +282,8 @@ class ProductController extends Controller
             'productFeatures' => \App\Models\FeaturesProduct::whereIn('id', is_array($product->id_features_product) ? $product->id_features_product : [])
                 ->orderBy('id', 'ASC')
                 ->get(),
+            'summaryHighlights' => $summaryHighlights,
+            'detailHighlights' => $detailHighlights,
             'contacts' => Contact::getContact(), // Lấy danh sách địa chỉ từ bảng contacts
         ], $decodedData));
         
