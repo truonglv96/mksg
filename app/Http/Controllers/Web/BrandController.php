@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\BrandImage;
+use App\Models\ProductImage;
 use App\Models\Products;
-use App\Models\Category;
+use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BrandController extends Controller
 {
@@ -35,96 +37,88 @@ class BrandController extends Controller
             abort(404);
         }
 
-        // Lấy danh sách sản phẩm theo thương hiệu
-        $sort = $request->get('sort', 'newest');
-        $categoryId = $request->get('category');
-        $materialId = $request->get('material_id');
-        $priceMin = $request->get('price_min');
-        $priceMax = $request->get('price_max');
-        $colorId = $request->get('color_id');
+        // Lấy hình ảnh từ bảng brand_images
+        $brandImages = BrandImage::getBrandImageByID($brand->id);
 
-        $hasJoin = false;
-        $products = Products::where('products.brand_id', $brand->id)
-            ->where('products.hidden', 1)
-            ->select('products.*');
+        // Lấy sản phẩm thuộc thương hiệu
+        $selectedMaterialId = $request->get('brand_material_id');
+        $brandProductsQuery = Products::select('products.*')
+            ->where('products.brand_id', $brand->id)
+            ->where('products.hidden', 1);
 
-        // Filter by category
-        if ($categoryId) {
-            $products->join('product_categories', 'product_categories.productID', '=', 'products.id')
-                ->where('product_categories.CategoryID', $categoryId);
-            $hasJoin = true;
+        if (!empty($selectedMaterialId) && $selectedMaterialId !== 'all') {
+            $brandProductsQuery->where('products.material_id', $selectedMaterialId);
         }
 
-        // Filter by material
-        if ($materialId) {
-            $products->where('products.material_id', $materialId);
-        }
+        $brandProducts = $brandProductsQuery
+            ->orderBy('products.id', 'DESC')
+            ->orderBy('products.weight', 'ASC')
+            ->paginate(12)
+            ->withQueryString();
 
-        // Apply price filters
-        if (!empty($priceMin) || !empty($priceMax)) {
-            $priceMin = $priceMin ?? 0;
-            $priceMax = $priceMax ?? 999999999;
-            $products->where(function($query) use ($priceMin, $priceMax) {
-                $query->whereBetween('products.price_sale', [$priceMin, $priceMax])
-                    ->orWhereBetween('products.price', [$priceMin, $priceMax]);
+        $productIds = $brandProducts->pluck('id')->all();
+
+        // Pre-process product data để giảm logic trong view
+        $processedBrandProducts = collect();
+        if (!empty($productIds)) {
+            $allImages = ProductImage::whereIn('product_id', $productIds)
+                ->orderBy('product_id')
+                ->orderBy('weight', 'ASC')
+                ->get()
+                ->groupBy('product_id');
+
+            $processedBrandProducts = $brandProducts->getCollection()->map(function ($product) use ($allImages) {
+                $images = $allImages[$product->id] ?? collect();
+                $mainImage = $images->count() > 0
+                    ? asset('img/product/' . $images->first()->image)
+                    : asset('img/product/no-image.jpg');
+                $hoverImage = $images->count() > 1
+                    ? asset('img/product/' . $images->get(1)->image)
+                    : $mainImage;
+
+                $priceSale = $product->price_sale ?? $product->price ?? 0;
+                $price = $product->price ?? 0;
+                $discount = $price > 0 && $priceSale < $price
+                    ? round((($price - $priceSale) / $price) * 100)
+                    : 0;
+
+                return [
+                    'product' => $product,
+                    'mainImage' => $mainImage,
+                    'hoverImage' => $hoverImage,
+                    'priceSale' => $priceSale,
+                    'price' => $price,
+                    'discount' => $discount,
+                ];
             });
         }
 
-        // Filter by color
-        if (!empty($colorId)) {
-            if ($hasJoin) {
-                $products->join('product_color', 'product_color.productID', '=', 'products.id')
-                    ->where('product_color.colorID', $colorId);
-            } else {
-                $products->join('product_color', 'product_color.productID', '=', 'products.id')
-                    ->where('product_color.colorID', $colorId);
-            }
-            $hasJoin = true;
-        }
+        // Lấy chất liệu thuộc thương hiệu theo sản phẩm
+        $brandMaterials = Material::select('material.*')
+            ->join('products', 'products.material_id', '=', 'material.id')
+            ->where('products.brand_id', $brand->id)
+            ->where('products.hidden', 1)
+            ->distinct()
+            ->orderBy('material.weight', 'ASC')
+            ->orderBy('material.name', 'ASC')
+            ->get();
 
-        // Add distinct if we have joins
-        if ($hasJoin) {
-            $products->distinct();
-        }
-
-        // Apply sorting
-        switch($sort) {
-            case 'price_asc':
-                $products->orderBy('products.price_sale', 'ASC')->orderBy('products.price', 'ASC');
-                break;
-            case 'price_desc':
-                $products->orderBy('products.price_sale', 'DESC')->orderBy('products.price', 'DESC');
-                break;
-            case 'name_asc':
-                $products->orderBy('products.name', 'ASC');
-                break;
-            case 'name_desc':
-                $products->orderBy('products.name', 'DESC');
-                break;
-            case 'newest':
-            default:
-                $products->orderBy('products.id', 'DESC')->orderBy('products.weight', 'ASC');
-                break;
-        }
-
-        $products = $products->paginate(12);
-
-        // Lấy categories liên quan đến brand
-        $categories = Brand::getCategoryByBrandIDProduct($brand->id);
-        
-        // Lấy materials liên quan
-        $materials = Brand::getMarterialByBrandIDProduct($brand->id);
-
-        // Lấy hình ảnh từ bảng brand_images
-        $brandImages = BrandImage::getBrandImageByID($brand->id);
+        $brandMaterialCounts = Products::select('products.material_id', DB::raw('COUNT(DISTINCT products.id) as total'))
+            ->join('material', 'material.id', '=', 'products.material_id')
+            ->where('products.brand_id', $brand->id)
+            ->where('products.hidden', 1)
+            ->groupBy('products.material_id')
+            ->pluck('total', 'products.material_id');
 
         return view('web.page.brand.detail', [
             'title' => $brand->name . ' - Thương Hiệu - Mắt Kính Sài Gòn',
             'brand' => $brand,
-            'products' => $products,
-            'categories' => $categories,
-            'materials' => $materials,
             'brandImages' => $brandImages,
+            'brandProducts' => $brandProducts,
+            'processedBrandProducts' => $processedBrandProducts,
+            'brandMaterials' => $brandMaterials,
+            'brandMaterialCounts' => $brandMaterialCounts,
+            'selectedMaterialId' => $selectedMaterialId,
         ]);
     }
 }

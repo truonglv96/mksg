@@ -13,7 +13,7 @@ class BreadcrumbHelper
         $type = 'product'; // Mặc định
         if (str_starts_with($currentPath, 'tin-tuc')) {
             $type = 'new';
-        } elseif (str_starts_with($currentPath, 'san-pham')) {
+        } elseif (str_starts_with($currentPath, 'bai-viet-san-pham')) {
             $type = 'product';
         } elseif (str_starts_with($currentPath, 'thuong-hieu')) {
             $type = 'brand';

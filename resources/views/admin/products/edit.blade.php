@@ -129,7 +129,7 @@ $breadcrumbs = [
                                 'label' => 'Alias (URL)',
                                 'type' => 'text',
                                 'value' => old('alias', $product->alias ?? ''),
-                                'placeholder' => 'alias-san-pham (tự động nếu để trống)'
+                                'placeholder' => 'alias-bai-viet-san-pham (tự động nếu để trống)'
                             ])
                             @include('admin.helpers.form-input', [
                                 'name' => 'code_sp',

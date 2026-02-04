@@ -77,7 +77,7 @@
                                 $colClass = 'col-span-2';
 
                             // Xác định base path theo type của category
-                            $basePath = '/san-pham/';
+                            $basePath = '/bai-viet-san-pham/';
                             // Tin tức
                             if (isset($category->type) && $category->type === 'new') {
                                 $basePath = '/';
@@ -104,7 +104,7 @@
                         <li class="{{ $hasChildren ? 'has-mega-menu relative group' : '' }}">
                             <a href="{{ $categoryUrl }}"
                                 class="font-bold hover:text-[#11b3f1] transition-colors text-base {{ $isActive ? 'text-[#11b3f1]' : 'text-[#ed1c24]' }}">
-                                {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                                {{ mb_strtoupper($category->name ?? $category->title ?? 'Category', 'UTF-8') }}
                             </a>
                             @if($hasChildren)
                                 <div class="mega-menu-content bg-white shadow-xl py-6 group-hover:block">
@@ -113,7 +113,7 @@
                                             <div class="{{ $colClass }}">
                                                 <a href="{{ $child->alias ? url($basePath . $category->alias . '/' . $child->alias) : '#' }}"
                                                     class="font-bold mb-3 text-red-600 hover:text-red-700 transition-colors block">
-                                                    {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                                    {{ mb_strtoupper($child->name ?? $child->title ?? 'Sub Category', 'UTF-8') }}
                                                 </a>
                                                 @if(isset($child->childLevelParent) && $child->childLevelParent->count() > 0)
                                                     @php

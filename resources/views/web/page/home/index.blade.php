@@ -210,7 +210,7 @@
                                             data-product-id="{{ $product->id }}">
                                             {{ config('texts.add_to_cart') }}
                                         </button>
-                                        <a href="{{ $product->alias ? url('/san-pham/' . $product->alias) : '#' }}"
+                                        <a href="{{ $product->alias ? url('/bai-viet-san-pham/' . $product->alias) : '#' }}"
                                             class="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-100 transition-colors duration-200">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">

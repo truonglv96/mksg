@@ -11,6 +11,77 @@
         $canonicalUrl = $seo['canonicalUrl'] ?? route('new.detail', [$news->alias]);
         $imageUrl = $seo['imageUrl'] ?? '';
         $schemaData = $seo['schemaData'] ?? [];
+
+        $decodeCkeditorEmbeds = function ($html) {
+            if (!is_string($html) || $html === '') {
+                return $html;
+            }
+
+            $normalizeYoutubeUrl = function ($url) {
+                if (!is_string($url) || $url === '') {
+                    return $url;
+                }
+                $parts = parse_url($url);
+                if (!$parts || empty($parts['host'])) {
+                    return $url;
+                }
+                $host = strtolower($parts['host']);
+                $videoId = null;
+
+                if (strpos($host, 'youtu.be') !== false) {
+                    $videoId = ltrim($parts['path'] ?? '', '/');
+                } elseif (strpos($host, 'youtube.com') !== false) {
+                    $path = $parts['path'] ?? '';
+                    if (strpos($path, '/embed/') === 0) {
+                        $videoId = substr($path, strlen('/embed/'));
+                    } elseif (strpos($path, '/shorts/') === 0) {
+                        $videoId = substr($path, strlen('/shorts/'));
+                    } elseif (strpos($path, '/watch') === 0) {
+                        parse_str($parts['query'] ?? '', $query);
+                        $videoId = $query['v'] ?? null;
+                    }
+                }
+
+                if (!$videoId) {
+                    return $url;
+                }
+
+                $videoId = preg_replace('/[^a-zA-Z0-9_-]/', '', $videoId);
+                if ($videoId === '') {
+                    return $url;
+                }
+
+                return 'https://www.youtube.com/embed/' . $videoId;
+            };
+
+            $decoded = preg_replace_callback(
+                '/<img[^>]+data-cke-realelement=(["\'])(.*?)\1[^>]*>/i',
+                function ($matches) {
+                    $decoded = rawurldecode($matches[2]);
+                    return htmlspecialchars_decode($decoded, ENT_QUOTES);
+                },
+                $html
+            );
+
+            // Remove sandbox attribute to avoid blocking iframe scripts
+            $decoded = preg_replace('/\s+sandbox(=([\"\']).*?\2)?/i', '', $decoded);
+
+            // Normalize YouTube URLs to embed form
+            $decoded = preg_replace_callback(
+                '/<iframe[^>]+src=(["\'])(.*?)\1[^>]*>/i',
+                function ($matches) use ($normalizeYoutubeUrl) {
+                    $originalUrl = $matches[2];
+                    $normalized = $normalizeYoutubeUrl($originalUrl);
+                    if ($normalized === $originalUrl) {
+                        return $matches[0];
+                    }
+                    return str_replace($originalUrl, $normalized, $matches[0]);
+                },
+                $decoded
+            );
+
+            return $decoded;
+        };
     @endphp
     @if(!empty($seoDescription))
         <meta name="description" content="{{ trim(strip_tags($seoDescription)) }}">
@@ -114,7 +185,7 @@
         <article class="bg-white rounded-3xl shadow-xl overflow-hidden">
             {{-- Nội dung bài viết --}}
             <div class="px-5 sm:px-8 md:px-10 py-8 md:py-10 news-detail-content">
-                {!! $news->content !!}
+                {!! $decodeCkeditorEmbeds($news->content) !!}
             </div>
 
             {{-- Box "Từ khóa / chia sẻ" đơn giản --}}

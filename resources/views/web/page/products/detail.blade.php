@@ -33,6 +33,77 @@
             return $value;
         };
 
+        $decodeCkeditorEmbeds = function ($html) {
+            if (!is_string($html) || $html === '') {
+                return $html;
+            }
+
+            $normalizeYoutubeUrl = function ($url) {
+                if (!is_string($url) || $url === '') {
+                    return $url;
+                }
+                $parts = parse_url($url);
+                if (!$parts || empty($parts['host'])) {
+                    return $url;
+                }
+                $host = strtolower($parts['host']);
+                $videoId = null;
+
+                if (strpos($host, 'youtu.be') !== false) {
+                    $videoId = ltrim($parts['path'] ?? '', '/');
+                } elseif (strpos($host, 'youtube.com') !== false) {
+                    $path = $parts['path'] ?? '';
+                    if (strpos($path, '/embed/') === 0) {
+                        $videoId = substr($path, strlen('/embed/'));
+                    } elseif (strpos($path, '/shorts/') === 0) {
+                        $videoId = substr($path, strlen('/shorts/'));
+                    } elseif (strpos($path, '/watch') === 0) {
+                        parse_str($parts['query'] ?? '', $query);
+                        $videoId = $query['v'] ?? null;
+                    }
+                }
+
+                if (!$videoId) {
+                    return $url;
+                }
+
+                $videoId = preg_replace('/[^a-zA-Z0-9_-]/', '', $videoId);
+                if ($videoId === '') {
+                    return $url;
+                }
+
+                return 'https://www.youtube.com/embed/' . $videoId;
+            };
+
+            $decoded = preg_replace_callback(
+                '/<img[^>]+data-cke-realelement=(["\'])(.*?)\1[^>]*>/i',
+                function ($matches) {
+                    $decoded = rawurldecode($matches[2]);
+                    return htmlspecialchars_decode($decoded, ENT_QUOTES);
+                },
+                $html
+            );
+
+            // Remove sandbox attribute to avoid blocking iframe scripts
+            $decoded = preg_replace('/\s+sandbox(=([\"\']).*?\2)?/i', '', $decoded);
+
+            // Normalize YouTube URLs to embed form
+            $decoded = preg_replace_callback(
+                '/<iframe[^>]+src=(["\'])(.*?)\1[^>]*>/i',
+                function ($matches) use ($normalizeYoutubeUrl) {
+                    $originalUrl = $matches[2];
+                    $normalized = $normalizeYoutubeUrl($originalUrl);
+                    if ($normalized === $originalUrl) {
+                        return $matches[0];
+                    }
+                    return str_replace($originalUrl, $normalized, $matches[0]);
+                },
+                $decoded
+            );
+
+            return $decoded;
+        };
+
         $rawDescription = $extractText($product->meta_description ?? null);
         if (empty($rawDescription) && !empty($product->description)) {
             $rawDescription = $extractText($product->description);
@@ -566,7 +637,7 @@
             <div class="p-6 space-y-6">
                 <div id="tab-description" class="tab-panel active space-y-4 text-sm leading-relaxed text-gray-700">
                     @if(isset($content) && isset($content->text) && $content->text)
-                        {!! $content->text !!}
+                        {!! $decodeCkeditorEmbeds($content->text) !!}
                     @else
                         <div class="text-center py-8 text-gray-500">
                             <p>{{ config('texts.product_no_description') }}</p>
@@ -577,7 +648,7 @@
                 <div id="tab-specs" class="tab-panel">
                     @if(isset($tech) && isset($tech->text) && $tech->text)
                         <div class="text-sm text-gray-700">
-                            {!! $tech->text !!}
+                            {!! $decodeCkeditorEmbeds($tech->text) !!}
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
@@ -589,7 +660,7 @@
                 <div id="tab-services" class="tab-panel">
                     @if(isset($service) && isset($service->text) && $service->text)
                         <div class="text-sm text-gray-700">
-                            {!! $service->text !!}
+                            {!! $decodeCkeditorEmbeds($service->text) !!}
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
@@ -601,7 +672,7 @@
                 <div id="tab-faq" class="tab-panel">
                     @if(isset($tutorial) && isset($tutorial->text) && $tutorial->text)
                         <div class="text-sm text-gray-700">
-                            {!! $tutorial->text !!}
+                            {!! $decodeCkeditorEmbeds($tutorial->text) !!}
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">
@@ -613,7 +684,7 @@
                 <div id="tab-address" class="tab-panel">
                     @if(isset($address_sale) && isset($address_sale->text) && $address_sale->text)
                         <div class="text-sm text-gray-700">
-                            {!! $address_sale->text !!}
+                            {!! $decodeCkeditorEmbeds($address_sale->text) !!}
                         </div>
                     @else
                         <div class="text-center py-8 text-gray-500">

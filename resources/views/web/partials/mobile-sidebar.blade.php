@@ -27,7 +27,7 @@
                         $submenuId = 'submenu-category-' . $category->id;
                         
                         // Xác định base path theo type của category (giống desktop)
-                        $basePath = '/san-pham/';
+                        $basePath = '/bai-viet-san-pham/';
                         if (isset($category->type) && $category->type === 'new') {
                             $basePath = '/';
                         }
@@ -53,7 +53,7 @@
                             <div class="p-3 flex justify-between items-center font-bold">
                                 <a href="{{ $categoryUrl }}" 
                                    class="category-text flex-1 hover:text-[#11b3f1] transition-colors {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
-                                    {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                                    {{ mb_strtoupper($category->name ?? $category->title ?? 'Category', 'UTF-8') }}
                                 </a>
                                 <button class="toggle-category-btn p-1 hover:text-red-600 transition-colors" 
                                         data-submenu-id="{{ $submenuId }}">
@@ -75,7 +75,7 @@
                                             <div class="p-2 flex justify-between items-center">
                                                 <a href="{{ $child->alias ? url($basePath . $childPath) : '#' }}" 
                                                    class="child-text flex-1 font-bold text-red-600 hover:text-red-700 transition-colors">
-                                                    {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                                    {{ mb_strtoupper($child->name ?? $child->title ?? 'Sub Category', 'UTF-8') }}
                                                 </a>
                                                 <button class="toggle-child-btn p-1 hover:text-red-600 transition-colors" 
                                                         data-submenu-id="{{ $childSubmenuId }}">
@@ -131,7 +131,7 @@
                                         <li class="py-2 px-2 border-b border-gray-200 hover:bg-gray-200">
                                             <a href="{{ $child->alias ? url($basePath . $childPath) : '#' }}" 
                                                class="block font-bold text-red-600 hover:text-red-700 transition-colors">
-                                                {{ strtoupper($child->name ?? $child->title ?? 'Sub Category') }}
+                                                {{ mb_strtoupper($child->name ?? $child->title ?? 'Sub Category', 'UTF-8') }}
                                             </a>
                                         </li>
                                     @endif
@@ -142,7 +142,7 @@
                         <li class="p-3 border-b hover:bg-gray-100">
                             <a href="{{ $categoryUrl }}" 
                                class="font-bold hover:text-[#11b3f1] transition-colors {{ $isActive ? 'text-[#11b3f1]' : 'text-gray-600' }}">
-                                {{ strtoupper($category->name ?? $category->title ?? 'Category') }}
+                                {{ mb_strtoupper($category->name ?? $category->title ?? 'Category', 'UTF-8') }}
                             </a>
                         </li>
                     @endif

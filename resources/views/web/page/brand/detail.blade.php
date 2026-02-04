@@ -90,66 +90,78 @@
         </div>
     </section>
 
-    {{-- Filters and Sort Section --}}
-    <section class="mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-            <div class="text-sm text-gray-600">
-                @if(isset($products) && $products->count() > 0)
-                    {{ config('texts.brand_detail_showing') }} <span class="font-semibold">{{ $products->firstItem() }}-{{ $products->lastItem() }}</span> {{ config('texts.brand_detail_in') }} <span class="font-semibold">{{ $products->total() }}</span> {{ config('texts.brand_detail_products') }}
-                @else
-                    {{ config('texts.brand_detail_no_products') }}
-                @endif
+    {{-- Brand Categories & Products --}}
+    <section class="mb-12" id="brand-products">
+        <div class="flex flex-col gap-6">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">
+                    Sản phẩm thuộc thương hiệu "{{ $brand->name }}"
+                </h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Chọn chất liệu để lọc nhanh sản phẩm.
+            </p>
             </div>
-            <select
-                id="sort-select"
-                name="sort"
-                class="px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 border-none focus:ring-2 focus:ring-red-600"
-                onchange="handleSortChange(this.value)">
-                <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ config('texts.brand_detail_sort_newest') }}</option>
-                <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>{{ config('texts.brand_detail_sort_price_asc') }}</option>
-                <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>{{ config('texts.brand_detail_sort_price_desc') }}</option>
-                <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>{{ config('texts.brand_detail_sort_name_asc') }}</option>
-                <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>{{ config('texts.brand_detail_sort_name_desc') }}</option>
-            </select>
-        </div>
 
-        {{-- Category Filter (if available) --}}
-        @if(isset($categories) && $categories->count() > 0)
-        <div class="mb-4">
-            <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ config('texts.brand_detail_category') }}</h3>
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('brand.detail', ['alias' => $brand->alias]) }}"
-                   class="px-3 py-1.5 text-sm rounded-full {{ !request('category') ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} transition-colors">
-                    {{ config('texts.brand_detail_all') }}
-                </a>
-                @foreach($categories as $category)
-                    @if(($category->type ?? 'product') !== 'new')
-                    <a href="{{ route('brand.detail', ['alias' => $brand->alias, 'category' => $category->id]) }}#products-section"
-                       class="px-3 py-1.5 text-sm rounded-full {{ request('category') == $category->id ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} transition-colors">
-                        {{ $category->name ?? $category->title ?? config('texts.brand_detail_category_fallback', 'Danh mục') }}
-                    </a>
-                    @endif
+            @if(isset($brandMaterials) && $brandMaterials->count() > 0)
+            <div class="md:hidden">
+                <button type="button"
+                        id="brand-material-filter-btn"
+                        class="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-medium flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    Lọc chất liệu
+                </button>
+            </div>
+
+            <div class="hidden md:flex flex-wrap gap-2 border-b border-gray-100 pb-2">
+                <button type="button"
+                        class="brand-material-chip px-4 py-2 rounded-full text-sm font-semibold border border-red-200 bg-red-50 text-red-600 shadow-sm transition-all {{ empty($selectedMaterialId) || $selectedMaterialId === 'all' ? 'is-active' : '' }}"
+                        data-material-id="all">
+                    Tất cả
+                </button>
+                @foreach($brandMaterials as $material)
+                @php
+                    $materialCount = $brandMaterialCounts[$material->id] ?? 0;
+                @endphp
+                <button type="button"
+                        class="brand-material-chip px-4 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-all {{ (string) $selectedMaterialId === (string) $material->id ? 'is-active bg-red-50 text-red-600 border-red-200' : '' }}"
+                        data-material-id="{{ $material->id }}">
+                    {{ $material->name }}
+                    <!-- <span class="ml-1 text-xs text-gray-400">
+                        ({{ number_format($materialCount, 0, ',', '.') }})
+                    </span> -->
+                </button>
                 @endforeach
             </div>
+            @else
+            <div class="bg-white border border-dashed border-gray-200 rounded-xl p-6 text-gray-500">
+                Chưa có chất liệu phù hợp cho thương hiệu này.
+            </div>
+            @endif
         </div>
-        @endif
     </section>
 
-    {{-- Products Grid --}}
-    <section id="products-section">
-        @if(isset($products) && $products->count() > 0)
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
-            @foreach($products as $product)
+    <section class="mb-6">
+
+        @if(isset($processedBrandProducts) && $processedBrandProducts->count() > 0)
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 gap-4" id="brand-products-grid">
+            @foreach($processedBrandProducts as $item)
             @php
-                $productImages = \App\Models\ProductImage::getTwoImageCategoryProduct($product->id);
-                $mainImage = $productImages->count() > 0 ? asset('img/product/' . $productImages->first()->image) : asset('img/product/no-image.jpg');
-                $hoverImage = $productImages->count() > 1 ? asset('img/product/' . $productImages->get(1)->image) : $mainImage;
-                $priceSale = $product->price_sale ?? $product->price ?? 0;
-                $price = $product->price ?? 0;
-                $discount = $price > 0 && $priceSale < $price ? round((($price - $priceSale) / $price) * 100) : 0;
+                $product = $item['product'];
+                $mainImage = $item['mainImage'];
+                $hoverImage = $item['hoverImage'];
+                $priceSale = $item['priceSale'];
+                $price = $item['price'];
+                $discount = $item['discount'];
+                $productUrl = $product->alias
+                    ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias])
+                    : '#';
+                $brandName = $product->brand_name ?? ($product->brand ? $product->brand->name : '');
             @endphp
-            <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}" class="relative overflow-hidden block">
+            <div class="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group brand-product-card">
+                <a href="{{ $productUrl }}" class="relative overflow-hidden block">
                     @if($discount > 0)
                     <span class="discount-badge absolute top-2 right-2 text-white text-xs font-bold px-2 py-1 rounded shadow-lg z-10" style="background-color: #ed1c24;">-{{ $discount }}%</span>
                     @endif
@@ -161,9 +173,12 @@
                         class="product-img-hover w-full h-48 object-contain transition-opacity duration-300 absolute top-0 left-0 opacity-0 group-hover:opacity-100">
                 </a>
                 <div class="p-3">
-                    <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}">
+                    <a href="{{ $productUrl }}">
                         <h3 class="text-sm font-medium text-gray-800 mb-1 line-clamp-2 min-h-[2.5rem] product-title" style="color: #000; transition: color 0.3s;" onmouseover="this.style.color='#ed1c24'" onmouseout="this.style.color='#000'">{{ $product->name }}</h3>
                     </a>
+                    @if($brandName)
+                    <p class="text-xs text-gray-500 mb-2">{{ $brandName }}</p>
+                    @endif
                     <div class="mb-3 text-right">
                         <p class="font-bold text-lg leading-tight" style="color: #ed1c24;">{{ number_format($priceSale, 0, ',', '.') }} {{ config('texts.currency') }}</p>
                         @if($price > $priceSale)
@@ -183,7 +198,7 @@
                             onmouseout="this.style.backgroundColor='#ed1c24'">
                             {{ config('texts.add_to_cart') }}
                         </button>
-                        <a href="{{ $product->alias ? route('product.detail', ['categoryPath' => $product->getCategoryPath(), 'productAlias' => $product->alias]) : '#' }}"
+                        <a href="{{ $productUrl }}"
                             class="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-100 transition-colors duration-200">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -199,28 +214,27 @@
             @endforeach
         </div>
 
-        {{-- Pagination --}}
-        @if(method_exists($products, 'hasPages') && $products->hasPages())
-        <div class="mt-8 flex justify-center">
+        @if(isset($brandProducts) && $brandProducts->hasPages())
+        <div class="mt-8 flex justify-center" id="brand-products-pagination">
             <nav class="flex gap-2 flex-wrap justify-center">
                 @php
-                    $products->appends(request()->query());
+                    $brandProducts->appends(request()->query());
                 @endphp
-                @if($products->onFirstPage())
+                @if($brandProducts->onFirstPage())
                 <span class="px-4 py-2 bg-gray-100 rounded text-gray-400 cursor-not-allowed">«</span>
                 @else
-                <a href="{{ $products->previousPageUrl() }}" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">«</a>
+                <a href="{{ $brandProducts->previousPageUrl() }}#brand-products" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">«</a>
                 @endif
 
                 @php
-                    $currentPage = $products->currentPage();
-                    $lastPage = $products->lastPage();
+                    $currentPage = $brandProducts->currentPage();
+                    $lastPage = $brandProducts->lastPage();
                     $startPage = max(1, $currentPage - 2);
                     $endPage = min($lastPage, $currentPage + 2);
                 @endphp
 
                 @if($startPage > 1)
-                    <a href="{{ $products->url(1) }}" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">1</a>
+                    <a href="{{ $brandProducts->url(1) }}#brand-products" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">1</a>
                     @if($startPage > 2)
                     <span class="px-4 py-2 bg-gray-100 rounded text-gray-400">...</span>
                     @endif
@@ -230,7 +244,7 @@
                     @if($page == $currentPage)
                     <span class="px-4 py-2 text-white rounded" style="background-color: #ed1c24;">{{ $page }}</span>
                     @else
-                    <a href="{{ $products->url($page) }}" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">{{ $page }}</a>
+                    <a href="{{ $brandProducts->url($page) }}#brand-products" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">{{ $page }}</a>
                     @endif
                 @endfor
 
@@ -238,11 +252,11 @@
                     @if($endPage < $lastPage - 1)
                     <span class="px-4 py-2 bg-gray-100 rounded text-gray-400">...</span>
                     @endif
-                    <a href="{{ $products->url($lastPage) }}" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">{{ $lastPage }}</a>
+                    <a href="{{ $brandProducts->url($lastPage) }}#brand-products" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">{{ $lastPage }}</a>
                 @endif
 
-                @if($products->hasMorePages())
-                <a href="{{ $products->nextPageUrl() }}" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">»</a>
+                @if($brandProducts->hasMorePages())
+                <a href="{{ $brandProducts->nextPageUrl() }}#brand-products" class="px-4 py-2 bg-gray-100 rounded hover:bg-[#ed1c24] hover:text-white transition-colors">»</a>
                 @else
                 <span class="px-4 py-2 bg-gray-100 rounded text-gray-400 cursor-not-allowed">»</span>
                 @endif
@@ -250,48 +264,111 @@
         </div>
         @endif
         @else
-        <div class="text-center py-12">
-            <p class="text-gray-500 text-lg">{{ config('texts.brand_detail_no_products_brand') }}</p>
+        <div class="bg-white border border-dashed border-gray-200 rounded-xl p-6 text-gray-500">
+            Chưa có sản phẩm nào thuộc thương hiệu này.
         </div>
         @endif
     </section>
-</main>
 
-<script>
-function handleSortChange(value) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('sort', value);
-    url.searchParams.delete('page');
-    window.location.href = url.toString();
-}
-</script>
+</main>
 
 @push('scripts')
 <script>
-// Scroll to products section when category filter is active
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if hash exists or category parameter exists
-    const hash = window.location.hash;
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    if (hash === '#products-section' || urlParams.has('category')) {
-        setTimeout(function() {
-            const productsSection = document.getElementById('products-section');
-            if (productsSection) {
-                // Scroll with offset to account for fixed headers if any
-                const offset = 80; // Adjust this value if you have fixed header
-                const elementPosition = productsSection.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - offset;
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        }, 300);
+(function () {
+    const materialChips = document.querySelectorAll('.brand-material-chip');
+    const countEl = document.getElementById('brand-products-count');
+    const allFilter = 'all';
+    const paginationEl = document.getElementById('brand-products-pagination');
+    const mobileFilterBtn = document.getElementById('brand-material-filter-btn');
+    const mobileFilterPanel = document.getElementById('brand-material-mobile-panel');
+    const mobileFilterOverlay = document.getElementById('brand-material-mobile-overlay');
+    const mobileFilterClose = document.getElementById('brand-material-mobile-close');
+
+    function handleMaterialClick(materialId) {
+        const normalizedId = String(materialId || '').trim();
+        const url = new URL(window.location.href);
+        if (!normalizedId || normalizedId === allFilter) {
+            url.searchParams.delete('brand_material_id');
+        } else {
+            url.searchParams.set('brand_material_id', normalizedId);
+        }
+        url.searchParams.delete('page');
+        url.hash = 'brand-products';
+        window.location.href = url.toString();
     }
-});
+
+    materialChips.forEach(chip => {
+        chip.addEventListener('click', () => handleMaterialClick(chip.dataset.materialId));
+    });
+
+    function openMobileFilter() {
+        if (!mobileFilterPanel || !mobileFilterOverlay) return;
+        mobileFilterPanel.classList.remove('-translate-x-full');
+        mobileFilterOverlay.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeMobileFilter() {
+        if (!mobileFilterPanel || !mobileFilterOverlay) return;
+        mobileFilterPanel.classList.add('-translate-x-full');
+        mobileFilterOverlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    if (mobileFilterBtn) {
+        mobileFilterBtn.addEventListener('click', openMobileFilter);
+    }
+    if (mobileFilterClose) {
+        mobileFilterClose.addEventListener('click', closeMobileFilter);
+    }
+    if (mobileFilterOverlay) {
+        mobileFilterOverlay.addEventListener('click', closeMobileFilter);
+    }
+
+})();
 </script>
+@endpush
+
+@if(isset($brandMaterials) && $brandMaterials->count() > 0)
+<div id="brand-material-mobile-overlay" class="fixed inset-0 bg-black/40 z-[70] hidden md:hidden"></div>
+<aside id="brand-material-mobile-panel"
+       class="fixed inset-y-0 left-0 w-80 max-w-[85vw] bg-white shadow-2xl z-[80] transform -translate-x-full transition-transform duration-300 md:hidden overflow-y-auto">
+    <div class="p-4">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b">
+            <h3 class="text-lg font-bold text-gray-800">Lọc chất liệu</h3>
+            <button id="brand-material-mobile-close" class="text-gray-600 hover:text-red-600" type="button">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <button type="button"
+                    class="brand-material-chip px-4 py-2 rounded-full text-sm font-semibold border border-red-200 bg-red-50 text-red-600 shadow-sm transition-all {{ empty($selectedMaterialId) || $selectedMaterialId === 'all' ? 'is-active' : '' }}"
+                    data-material-id="all">
+                Tất cả
+            </button>
+            @foreach($brandMaterials as $material)
+            @php
+                $materialCount = $brandMaterialCounts[$material->id] ?? 0;
+            @endphp
+            <button type="button"
+                    class="brand-material-chip px-4 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-all {{ (string) $selectedMaterialId === (string) $material->id ? 'is-active bg-red-50 text-red-600 border-red-200' : '' }}"
+                    data-material-id="{{ $material->id }}">
+                {{ $material->name }}
+                <!-- <span class="ml-1 text-xs text-gray-400">
+                    ({{ number_format($materialCount, 0, ',', '.') }})
+                </span> -->
+            </button>
+            @endforeach
+        </div>
+    </div>
+</aside>
+@endif
+
+@push('scripts')
 @if($hasImages)
 <script>
 (function() {

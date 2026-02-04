@@ -13,9 +13,9 @@ use App\Http\Controllers\Web\PageController;
 Route::get('/', [IndexController::class, 'index'])->name('home');
 
 // Sản phẩm
-Route::prefix('san-pham')->name('product.')->group(function () {
+Route::prefix('bai-viet-san-pham')->name('product.')->group(function () {
     Route::get('/', [ProductController::class, 'category'])->name('category');
-    // Product detail với category path: /san-pham/{categoryPath}/{productAlias}
+    // Product detail với category path: /bai-viet-san-pham/{categoryPath}/{productAlias}
     Route::get('/{categoryPath}/{productAlias}', [ProductController::class, 'detail'])
         ->where('categoryPath', '[^/]+(/[^/]+)*')
         ->name('detail');

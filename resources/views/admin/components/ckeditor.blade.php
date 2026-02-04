@@ -19,6 +19,9 @@
     $editorIds = $editorIds ?? [];
     $height = $height ?? 300;
     $customConfig = $config ?? [];
+
+    $fileManagerBrowseUrl = route('admin.file-manager.index', ['returnUrl' => url()->current()]);
+    $fileManagerUploadUrl = route('admin.file-manager.upload', ['_token' => csrf_token()]);
     
     // Default CKEditor configuration
     $defaultConfig = [
@@ -40,8 +43,19 @@
             ['name' => 'tools', 'items' => ['Maximize', 'ShowBlocks']],
             ['name' => 'about', 'items' => ['About']]
         ],
-        'filebrowserBrowseUrl' => '',
-        'filebrowserUploadUrl' => '',
+        'filebrowserBrowseUrl' => $fileManagerBrowseUrl,
+        'filebrowserUploadUrl' => $fileManagerUploadUrl,
+        'filebrowserImageBrowseUrl' => $fileManagerBrowseUrl,
+        'filebrowserImageUploadUrl' => $fileManagerUploadUrl,
+        'filebrowserWindowWidth' => 1200,
+        'filebrowserWindowHeight' => 800,
+        // Enable iframe plugin explicitly and preserve iframe markup
+        'extraPlugins' => 'iframe',
+        'protectedSource' => [ '/<iframe[\\s\\S]*?<\\/iframe>/gi' ],
+        // Disable ACF to keep iframes intact (e.g., YouTube embeds)
+        'allowedContent' => true,
+        // Allow iframe embeds like YouTube
+        'extraAllowedContent' => 'iframe[*]{*}(*)',
         'removePlugins' => 'elementspath',
         'resize_enabled' => true
     ];
@@ -459,6 +473,128 @@
             });
         }
     };
+
+    function setUrlInDialog(editor, url) {
+        var dialog = null;
+        if (window.CKEDITOR && window.CKEDITOR.dialog && typeof window.CKEDITOR.dialog.getCurrent === 'function') {
+            dialog = window.CKEDITOR.dialog.getCurrent();
+        }
+        if (!dialog && editor && typeof editor.getDialog === 'function') {
+            dialog = editor.getDialog();
+        }
+        if (!dialog || typeof dialog.getContentElement !== 'function') return false;
+
+        var urlField = dialog.getContentElement('info', 'txtUrl')
+            || dialog.getContentElement('info', 'src');
+        if (urlField && typeof urlField.setValue === 'function') {
+            urlField.setValue(url);
+            return true;
+        }
+        return false;
+    }
+
+    function getActiveEditor() {
+        if (!window.CKEDITOR) return false;
+        var editor = window.CKEDITOR.currentInstance;
+        if (editor) return editor;
+        var instances = window.CKEDITOR.instances || {};
+        var keys = Object.keys(instances);
+        return keys.length ? instances[keys[0]] : null;
+    }
+
+    function applyFilePickerUrl(url, openDialog) {
+        var editor = getActiveEditor();
+        if (!editor) return false;
+        if (setUrlInDialog(editor, url)) return true;
+        if (!openDialog) return false;
+
+        editor.execCommand('image');
+        if (editor.commands && editor.commands.image && editor.commands.image.state === 0) {
+            // Keep using the image dialog.
+        } else if (editor.commands && editor.commands.image2) {
+            editor.execCommand('image2');
+        }
+        var attempts = 0;
+        var waiter = setInterval(function() {
+            attempts += 1;
+            if (setUrlInDialog(editor, url) || attempts >= 15) {
+                clearInterval(waiter);
+            }
+        }, 200);
+        return true;
+    }
+
+    function consumeFilePickerStorage() {
+        var raw = null;
+        try {
+            raw = localStorage.getItem('ckeditor:file');
+        } catch (e) {}
+        if (!raw) return;
+        try {
+            var data = JSON.parse(raw);
+            if (data && data.url && applyFilePickerUrl(data.url, data.openDialog)) {
+                localStorage.removeItem('ckeditor:file');
+            }
+        } catch (e) {}
+    }
+
+    function consumeFilePickerQuery() {
+        try {
+            var search = window.location.search || '';
+            if (!search) return;
+            var params = new URLSearchParams(search);
+            var url = params.get('ckfile');
+            if (!url) return;
+            params.delete('ckfile');
+            var cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+            window.__ckfilePendingUrl = url;
+            scheduleCkfileApply();
+        } catch (e) {}
+    }
+
+    window.addEventListener('storage', function(event) {
+        if (event.key === 'ckeditor:file') {
+            consumeFilePickerStorage();
+        }
+    });
+
+    window.addEventListener('focus', function() {
+        consumeFilePickerStorage();
+    });
+    consumeFilePickerQuery();
+
+    function scheduleCkfileApply() {
+        if (!window.__ckfilePendingUrl) return;
+        var attempts = 0;
+        var runner = setInterval(function() {
+            attempts += 1;
+            if (window.__ckfilePendingUrl && applyFilePickerUrl(window.__ckfilePendingUrl, true)) {
+                window.__ckfilePendingUrl = null;
+                clearInterval(runner);
+                return;
+            }
+            if (attempts >= 20) {
+                clearInterval(runner);
+            }
+        }, 300);
+    }
+
+    if (window.CKEDITOR && typeof window.CKEDITOR.on === 'function') {
+        window.CKEDITOR.on('instanceReady', function() {
+            scheduleCkfileApply();
+        });
+    }
+
+    // Safety net: poll for a short period to catch cases where focus/storage events don't fire.
+    var pickerPollCount = 0;
+    var pickerPoll = setInterval(function() {
+        pickerPollCount += 1;
+        consumeFilePickerStorage();
+        if (pickerPollCount >= 20) {
+            clearInterval(pickerPoll);
+        }
+    }, 500);
 })();
 </script>
 

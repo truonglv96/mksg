@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\FeaturedCategoryController;
 use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\FeaturesProductController;
+use App\Http\Controllers\Admin\FileManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +43,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
+        // File Manager (CKEditor)
+        Route::get('/file-manager', [FileManagerController::class, 'index'])->name('file-manager.index');
+        Route::post('/file-manager/upload', [FileManagerController::class, 'upload'])->name('file-manager.upload');
 
         // Profile
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile');

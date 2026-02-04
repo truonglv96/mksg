@@ -233,7 +233,7 @@ class SearchController extends Controller
                                 'name' => $brand->name,
                                 'alias' => $brand->alias,
                                 'logo' => $logoUrl,
-                                'url' => $brand->alias ? url('/san-pham?brand=' . $brand->id) : '#',
+                                'url' => $brand->alias ? url('/bai-viet-san-pham?brand=' . $brand->id) : '#',
                             ];
                         });
                 });
@@ -264,7 +264,7 @@ class SearchController extends Controller
                                 'name' => $brand->name,
                                 'alias' => $brand->alias,
                                 'logo' => $logoUrl,
-                                'url' => $brand->alias ? url('/san-pham?brand=' . $brand->id) : '#',
+                            'url' => $brand->alias ? url('/bai-viet-san-pham?brand=' . $brand->id) : '#',
                             ];
                         });
                 } catch (\Exception $e2) {

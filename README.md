@@ -35,7 +35,7 @@ Tập trung trong `routes/web.php` và `app/Http/Controllers/Web/*`:
 - Trang chủ `/`:
   - Banner slider, danh mục nổi bật, sản phẩm theo danh mục.
   - Tin tức mới, thương hiệu, featured categories (có cache).
-- Sản phẩm `/san-pham`:
+- Sản phẩm `/bai-viet-san-pham`:
   - Danh sách sản phẩm theo danh mục hoặc đường dẫn nhiều cấp.
   - Filter theo giá, màu, chất liệu, thương hiệu.
   - Chi tiết sản phẩm kèm hình ảnh, màu sắc, combo giảm giá, range độ.
