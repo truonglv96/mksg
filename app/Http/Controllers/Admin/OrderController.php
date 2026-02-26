@@ -65,6 +65,15 @@ class OrderController extends Controller
         
         // Get total amounts for each order
         $orderIds = $orders->pluck('id')->toArray();
+        $unreadOrderIds = [];
+        if (!empty($orderIds)) {
+            $unreadOrderIds = DB::table('bill_details')
+                ->whereIn('bill_id', $orderIds)
+                ->where('read_only', false)
+                ->distinct()
+                ->pluck('bill_id')
+                ->toArray();
+        }
         
         // Tính toán tổng từ bill_details cho tất cả đơn hàng
         $calculatedTotals = [];
@@ -137,6 +146,7 @@ class OrderController extends Controller
         
         return view('admin.orders.index', compact(
             'orders',
+            'unreadOrderIds',
             'totalOrders',
             'pendingOrders',
             'processingOrders',
@@ -154,6 +164,7 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = ClientInformation::with(['billItems.product.images', 'cityArea', 'districtArea'])->findOrFail($id);
+        $this->markOrderRead($id);
         
         // Get total amount - ưu tiên lấy từ tatal_bill_details, nếu không có thì tính từ bill_details
         $total = TatalBillDetail::where('bill_id', $id)->value('tatal');
@@ -195,6 +206,7 @@ class OrderController extends Controller
         $order = ClientInformation::findOrFail($id);
         $order->status = $request->status;
         $order->save();
+        $this->markOrderRead($id);
         
         if ($request->ajax()) {
             return response()->json([
@@ -205,6 +217,38 @@ class OrderController extends Controller
         }
         
         return redirect()->route('admin.orders.index')->with('success', 'Trạng thái đơn hàng đã được cập nhật!');
+    }
+
+    /**
+     * Get unread orders count + recent list.
+     */
+    public function unreadCount()
+    {
+        $count = DB::table('bill_details')
+            ->where('read_only', false)
+            ->distinct('bill_id')
+            ->count('bill_id');
+
+        $recentUnread = DB::table('bill_details as bd')
+            ->join('bill as b', 'bd.bill_id', '=', 'b.id')
+            ->where('bd.read_only', false)
+            ->select('b.id', 'b.code_bill', 'b.name', 'b.created_at', 'b.status')
+            ->distinct()
+            ->orderByDesc('b.id')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'count' => $count,
+            'recent' => $recentUnread
+        ]);
+    }
+
+    private function markOrderRead($id)
+    {
+        DB::table('bill_details')
+            ->where('bill_id', $id)
+            ->update(['read_only' => true]);
     }
 
     /**

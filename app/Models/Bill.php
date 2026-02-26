@@ -31,7 +31,8 @@ class Bill extends Model
         'color_text',
         'refractive_index',
         'degree_range',
-        'lens_package'
+        'lens_package',
+        'read_only'
     ];
 
     public function product()

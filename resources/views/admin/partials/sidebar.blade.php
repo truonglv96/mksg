@@ -127,6 +127,15 @@
                 </a>
             </li>
             
+            <!-- Policies -->
+            <li>
+                <a href="{{ route('admin.policies.index') }}" 
+                   class="flex items-center px-4 py-3 text-gray-600 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-blue-50 hover:text-primary-600 transition-colors {{ request()->routeIs('admin.policies.*') ? 'menu-item-active bg-gradient-to-r from-red-50 to-blue-50 text-primary-600 border-l-4 border-primary-600' : '' }}">
+                    <i class="fas fa-file-signature w-5 flex-shrink-0"></i>
+                    <span class="ml-3 sidebar-menu-text font-medium">Chính sách</span>
+                </a>
+            </li>
+
             <!-- Settings -->
             <li class="pt-4 border-t border-gray-200">
                 <a href="{{ route('admin.settings.index') }}" 

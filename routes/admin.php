@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\FeaturedCategoryController;
 use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\FeaturesProductController;
 use App\Http\Controllers\Admin\FileManagerController;
+use App\Http\Controllers\Admin\PolicyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -79,6 +80,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Orders
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::get('/unread/count', [OrderController::class, 'unreadCount'])->name('unread.count');
             Route::put('/{id}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
             Route::get('/{id}', [OrderController::class, 'show'])->name('show');
             Route::delete('/{id}', [OrderController::class, 'destroy'])->name('destroy');
@@ -131,6 +133,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{id}', [ContactController::class, 'getContact'])->name('get');
             Route::put('/{id}', [ContactController::class, 'update'])->name('update');
             Route::delete('/{id}', [ContactController::class, 'destroy'])->name('destroy');
+        });
+
+        // Policies
+        Route::prefix('policies')->name('policies.')->group(function () {
+            Route::get('/', [PolicyController::class, 'index'])->name('index');
+            Route::get('/create', [PolicyController::class, 'create'])->name('create');
+            Route::post('/', [PolicyController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [PolicyController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [PolicyController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PolicyController::class, 'destroy'])->name('destroy');
         });
 
         // Settings

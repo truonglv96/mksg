@@ -304,9 +304,14 @@ $breadcrumbs = [
                             <i class="fas fa-shopping-bag text-white"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900">
-                                #{{ $order->code_bill ?? $order->id }}
-                            </h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-bold text-gray-900">
+                                    #{{ $order->code_bill ?? $order->id }}
+                                </h3>
+                                @if(!empty($unreadOrderIds) && in_array($order->id, $unreadOrderIds))
+                                    <span class="inline-block w-2.5 h-2.5 bg-red-500 rounded-full" title="Đơn hàng chưa xem"></span>
+                                @endif
+                            </div>
                             <p class="text-xs text-gray-500">
                                 @if(isset($order->created_at) && $order->created_at)
                                     {{ $order->created_at->format('d/m/Y H:i') }}
