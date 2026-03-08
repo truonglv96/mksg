@@ -85,7 +85,9 @@
             );
 
             // Remove sandbox attribute to avoid blocking iframe scripts
-            $decoded = preg_replace('/\s+sandbox(=([\"\']).*?\2)?/i', '', $decoded);
+            // Xử lý nhiều trường hợp: sandbox, sandbox="", sandbox='', sandbox="allow-same-origin", etc.
+            $decoded = preg_replace('/\s+sandbox\s*=\s*["\'][^"\']*["\']/i', '', $decoded);
+            $decoded = preg_replace('/\s+sandbox\s*(?=\s|>)/i', '', $decoded);
 
             // Normalize YouTube URLs to embed form
             $decoded = preg_replace_callback(

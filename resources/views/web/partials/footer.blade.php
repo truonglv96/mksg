@@ -37,7 +37,13 @@
         <div class="mb-4 md:mb-0">
             <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">{{ config('texts.footer_map_title') }}</h4>
             <div class="w-full overflow-hidden rounded">
-                {!! $settings->map !!}
+                @php
+                    // Remove sandbox attribute to avoid blocking iframe scripts (e.g., Google Maps)
+                    // Xử lý nhiều trường hợp: sandbox, sandbox="", sandbox='', sandbox="allow-same-origin", etc.
+                    $cleanMap = preg_replace('/\s+sandbox\s*=\s*["\'][^"\']*["\']/i', '', $settings->map ?? '');
+                    $cleanMap = preg_replace('/\s+sandbox\s*(?=\s|>)/i', '', $cleanMap);
+                @endphp
+                {!! $cleanMap !!}
             </div>
         </div>
     </div>

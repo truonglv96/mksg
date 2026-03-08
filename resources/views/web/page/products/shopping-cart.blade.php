@@ -21,7 +21,7 @@
             </div>
             {!! $settings->order_success !!}
             <div class="order-success-actions">
-                <a href="{{ route('product.category') }}" class="btn-primary">{{ config('texts.cart_continue_shopping_btn') }}</a>
+                <a href="{{ route('product.category.index') }}" class="btn-primary">{{ config('texts.cart_continue_shopping_btn') }}</a>
             </div>
         </div>
     </div>

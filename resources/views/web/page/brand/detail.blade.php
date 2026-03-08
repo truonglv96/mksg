@@ -73,8 +73,14 @@
                 <div class="flex-1 flex flex-col justify-center">
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{{ $brand->name }}</h1>
                     @if($brand->content)
+                    @php
+                        // Remove sandbox attribute to avoid blocking iframe scripts (e.g., Google Maps)
+                        // Xử lý nhiều trường hợp: sandbox, sandbox="", sandbox='', sandbox="allow-same-origin", etc.
+                        $cleanContent = preg_replace('/\s+sandbox\s*=\s*["\'][^"\']*["\']/i', '', $brand->content);
+                        $cleanContent = preg_replace('/\s+sandbox\s*(?=\s|>)/i', '', $cleanContent);
+                    @endphp
                     <div class="text-gray-600 text-base leading-relaxed prose prose-sm max-w-none">
-                        {!! $brand->content !!}
+                        {!! $cleanContent !!}
                     </div>
                     @elseif($brand->description)
                     <div class="text-gray-600 text-lg leading-relaxed">

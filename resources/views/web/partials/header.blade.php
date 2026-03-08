@@ -77,7 +77,7 @@
                                 $colClass = 'col-span-2';
 
                             // Xác định base path theo type của category
-                            $basePath = '/bai-viet-san-pham/';
+                            $basePath = '/san-pham/';
                             // Tin tức
                             if (isset($category->type) && $category->type === 'new') {
                                 $basePath = '/';

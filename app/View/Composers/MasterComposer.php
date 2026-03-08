@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Setting;
 use App\Models\Slider;
+use App\Models\Contact;
 use Illuminate\View\View;
 use App\Models\Page;
 class MasterComposer
@@ -53,12 +54,17 @@ class MasterComposer
         // Lấy sliders (nếu cần cho header hoặc banner)
         $sliders = Slider::getSliderWeb();
         $policies = Page::where('status', Page::IS_ACTIVE)->where('type', 0)->orderBy('weight', 'ASC')->get();
+        
+        // Lấy thông tin cửa hàng (contacts) - chỉ lấy những cái active
+        $contacts = Contact::getContact();
+        
         return [
             'categories' => $categories,
             'brands' => $brands,
             'settings' => $settings,
             'sliders' => $sliders,
             'policies' => $policies,
+            'contacts' => $contacts,
         ];
     }
 }

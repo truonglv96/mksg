@@ -12,17 +12,21 @@ use App\Http\Controllers\Web\PageController;
 // Trang chủ
 Route::get('/', [IndexController::class, 'index'])->name('home');
 
-// Sản phẩm
+// Danh mục sản phẩm
+Route::prefix('san-pham')->name('product.category.')->group(function () {
+    Route::get('/', [ProductController::class, 'category'])->name('index');
+    // Route cho nested categories: /san-pham/{segments}
+    Route::get('/{segments}', [ProductController::class, 'categoryPath'])
+        ->where('segments', '[^/]+(/[^/]+)*')
+        ->name('path');
+});
+
+// Chi tiết sản phẩm
 Route::prefix('bai-viet-san-pham')->name('product.')->group(function () {
-    Route::get('/', [ProductController::class, 'category'])->name('category');
     // Product detail với category path: /bai-viet-san-pham/{categoryPath}/{productAlias}
     Route::get('/{categoryPath}/{productAlias}', [ProductController::class, 'detail'])
         ->where('categoryPath', '[^/]+(/[^/]+)*')
         ->name('detail');
-    // Route cho nested categories (phải đặt sau route detail)
-    Route::get('/{segments}', [ProductController::class, 'categoryPath'])
-        ->where('segments', '[^/]+(/[^/]+)*')
-        ->name('category.path');
 });
 
 // Tin tức

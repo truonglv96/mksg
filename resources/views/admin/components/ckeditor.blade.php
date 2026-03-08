@@ -56,6 +56,8 @@
         'allowedContent' => true,
         // Allow iframe embeds like YouTube
         'extraAllowedContent' => 'iframe[*]{*}(*)',
+        // Remove sandbox attribute from iframes to allow scripts (e.g., Google Maps)
+        'iframe_attributes' => [],
         'removePlugins' => 'elementspath',
         'resize_enabled' => true
     ];

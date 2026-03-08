@@ -62,7 +62,13 @@
                     prose-table:w-full prose-table:border-collapse
                     prose-th:bg-gray-100 prose-th:p-4 prose-th:text-left prose-th:font-bold prose-th:text-gray-900
                     prose-td:p-4 prose-td:border-t prose-td:border-gray-200">
-                    {!! $page->content !!}
+                    @php
+                        // Remove sandbox attribute to avoid blocking iframe scripts (e.g., Google Maps)
+                        // Xử lý nhiều trường hợp: sandbox, sandbox="", sandbox='', sandbox="allow-same-origin", etc.
+                        $cleanContent = preg_replace('/\s+sandbox\s*=\s*["\'][^"\']*["\']/i', '', $page->content);
+                        $cleanContent = preg_replace('/\s+sandbox\s*(?=\s|>)/i', '', $cleanContent);
+                    @endphp
+                    {!! $cleanContent !!}
                 </div>
             </div>
             @endif

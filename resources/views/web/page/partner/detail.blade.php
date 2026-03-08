@@ -24,8 +24,14 @@
                     @endif
                     
                     @if($partner->content)
+                    @php
+                        // Remove sandbox attribute to avoid blocking iframe scripts (e.g., Google Maps)
+                        // Xử lý nhiều trường hợp: sandbox, sandbox="", sandbox='', sandbox="allow-same-origin", etc.
+                        $cleanContent = preg_replace('/\s+sandbox\s*=\s*["\'][^"\']*["\']/i', '', $partner->content);
+                        $cleanContent = preg_replace('/\s+sandbox\s*(?=\s|>)/i', '', $cleanContent);
+                    @endphp
                     <div class="text-gray-600 text-base leading-relaxed prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600">
-                        {!! $partner->content !!}
+                        {!! $cleanContent !!}
                     </div>
                     @endif
                 </div>
@@ -132,7 +138,8 @@
                     allowfullscreen="" 
                     loading="lazy" 
                     referrerpolicy="no-referrer-when-downgrade"
-                    class="w-full h-full">
+                    class="w-full h-full"
+                    allow="geolocation; microphone; camera">
                 </iframe>
             </div>
             <div class="mt-4 flex items-center justify-between flex-wrap gap-4">
@@ -158,5 +165,63 @@
     </section>
     @endif
 </main>
+
+@push('scripts')
+<script>
+(function() {
+    // Remove sandbox attribute from all iframes to allow Google Maps and other embeds to work
+    function removeSandboxFromIframes() {
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach(function(iframe) {
+            if (iframe.hasAttribute('sandbox')) {
+                iframe.removeAttribute('sandbox');
+            }
+        });
+    }
+    
+    // Run immediately
+    removeSandboxFromIframes();
+    
+    // Run after DOM is fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', removeSandboxFromIframes);
+    }
+    
+    // Run after a short delay to catch any dynamically added iframes
+    setTimeout(removeSandboxFromIframes, 100);
+    setTimeout(removeSandboxFromIframes, 500);
+    setTimeout(removeSandboxFromIframes, 1000);
+    
+    // Use MutationObserver to watch for new iframes
+    if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.tagName === 'IFRAME' && node.hasAttribute('sandbox')) {
+                            node.removeAttribute('sandbox');
+                        }
+                        // Also check for iframes inside the added node
+                        const iframes = node.querySelectorAll && node.querySelectorAll('iframe');
+                        if (iframes) {
+                            iframes.forEach(function(iframe) {
+                                if (iframe.hasAttribute('sandbox')) {
+                                    iframe.removeAttribute('sandbox');
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        observer.observe(document.body || document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
+})();
+</script>
+@endpush
 @endsection
 

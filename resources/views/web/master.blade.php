@@ -85,6 +85,64 @@
     
     <!-- Custom JS -->
     <script src="{{ asset('js/app.js') }}"></script>
+    
+    <!-- Remove sandbox from all iframes globally -->
+    <script>
+    (function() {
+        // Remove sandbox attribute from all iframes to allow Google Maps and other embeds to work
+        function removeSandboxFromIframes() {
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                if (iframe.hasAttribute('sandbox')) {
+                    iframe.removeAttribute('sandbox');
+                }
+            });
+        }
+        
+        // Run immediately
+        removeSandboxFromIframes();
+        
+        // Run after DOM is fully loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', removeSandboxFromIframes);
+        }
+        
+        // Run after a short delay to catch any dynamically added iframes
+        setTimeout(removeSandboxFromIframes, 100);
+        setTimeout(removeSandboxFromIframes, 500);
+        setTimeout(removeSandboxFromIframes, 1000);
+        
+        // Use MutationObserver to watch for new iframes
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            if (node.tagName === 'IFRAME' && node.hasAttribute('sandbox')) {
+                                node.removeAttribute('sandbox');
+                            }
+                            // Also check for iframes inside the added node
+                            const iframes = node.querySelectorAll && node.querySelectorAll('iframe');
+                            if (iframes) {
+                                iframes.forEach(function(iframe) {
+                                    if (iframe.hasAttribute('sandbox')) {
+                                        iframe.removeAttribute('sandbox');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+            
+            observer.observe(document.body || document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+        }
+    })();
+    </script>
+    
     @stack('scripts')
 </body>
 </html>

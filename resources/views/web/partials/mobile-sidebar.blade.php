@@ -27,7 +27,7 @@
                         $submenuId = 'submenu-category-' . $category->id;
                         
                         // Xác định base path theo type của category (giống desktop)
-                        $basePath = '/bai-viet-san-pham/';
+                        $basePath = '/san-pham/';
                         if (isset($category->type) && $category->type === 'new') {
                             $basePath = '/';
                         }
