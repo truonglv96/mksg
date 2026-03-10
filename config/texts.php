@@ -5,7 +5,7 @@ return [
     'page_title' => 'Mắt Kính Sài Gòn - Trang chủ',
     'default_title' => 'Sản Phẩm - Mắt Kính Sài Gòn',
     'currency' => 'VNĐ',
-    
+
     // Categories
     'featured_categories' => 'Danh Mục Nổi Bật',
     'category_glasses' => 'GỌNG KÍNH',
@@ -13,14 +13,14 @@ return [
     'category_sunglasses' => 'KÍNH MÁT',
     'category_promotion' => 'KHUYẾN MÃI',
     'view_now' => 'Xem Ngay',
-    
+
     // Products
     'newest_products' => 'Sản Phẩm Mới Nhất',
     'newest_news' => 'Tin Tức Mới Nhất',
     'no_products' => 'Không tìm thấy sản phẩm nào',
     'no_products_in_category' => 'Chưa có sản phẩm nào trong danh mục này',
     'add_to_cart' => 'Thêm vào giỏ hàng',
-    
+
     // Filter & Sort
     'frame_style_title' => 'Thương Hiệu',
     'mobile_filter_button' => 'Bộ Lọc Sản Phẩm',
@@ -29,33 +29,33 @@ return [
     'color' => 'Màu Sắc',
     'color_fallback' => 'Màu sắc',
     'material' => 'CHẤT LIỆU',
-    
+
     // Results
     'results_showing' => 'Hiển thị',
     'results_of' => 'của',
     'results' => 'kết quả',
     'results_zero' => 'Hiển thị 0 kết quả',
-    
+
     // Sort Options
     'sort_newest' => 'Mới nhất',
     'sort_price_asc' => 'Giá: Thấp đến Cao',
     'sort_price_desc' => 'Giá: Cao đến Thấp',
     'sort_name_asc' => 'Tên: A-Z',
     'sort_name_desc' => 'Tên: Z-A',
-    
+
     // Price Ranges
     'price_under_500k' => 'Dưới 500k',
     'price_500k_1m' => '500k - 1 Triệu',
     'price_1m_3m' => '1 - 3 Triệu',
     'price_3m_5m' => '3 - 5 Triệu',
     'price_over_5m' => '> 5 Triệu',
-    
+
     // Navigation
     'nav_home' => 'TRANG CHỦ',
     'nav_brand' => 'THƯƠNG HIỆU',
     'nav_about' => 'GIỚI THIỆU',
     'view_all' => 'Xem tất cả',
-    
+
     // Search
     'search_title' => 'Tìm kiếm',
     'search_placeholder' => 'Nhập từ khóa tìm kiếm sản phẩm, tin tức hoặc thương hiệu...',
@@ -72,31 +72,31 @@ return [
     'search_error_message' => 'Có lỗi xảy ra khi tìm kiếm',
     'search_no_results' => 'Không tìm thấy kết quả',
     'search_try_other' => 'Thử với từ khóa khác',
-    
+
     // Footer
     'footer_policy_title' => 'CHÍNH SÁCH & QUY ĐỊNH',
     'footer_legal_title' => 'QUY ĐỊNH PHÁP LÝ',
     'footer_connect_title' => 'KẾT NỐI VỚI CHÚNG TÔI',
     'footer_work_time_title' => 'THỜI GIAN LÀM VIỆC',
     'footer_map_title' => 'BẢN ĐỒ',
-    
+
     // Cart
     'cart_title' => 'Giỏ Hàng',
     'cart_empty' => 'Giỏ hàng trống',
     'cart_total' => 'Tổng cộng:',
     'cart_checkout' => 'Thanh Toán',
     'cart_remove' => 'Xóa',
-    
+
     // Mobile Sidebar
     'mobile_sidebar_sale' => 'ĐANG GIẢM GIÁ',
-    
+
     // Mobile Contact Bar
     'mobile_contact_find_way' => 'Tìm đường',
     'mobile_contact_sms' => 'Nhắn SMS',
     'mobile_contact_call' => 'Gọi điện',
     'mobile_contact_messenger' => 'Messenger',
     'mobile_contact_zalo' => 'Chat Zalo',
-    
+
     // Product Detail
     'product_detail_title' => 'Chi Tiết Sản Phẩm - Mắt Kính Sài Gòn',
     'product_free_shipping' => 'Miễn phí vận chuyển',
@@ -174,7 +174,7 @@ return [
     'product_lightbox_prev' => 'Hình trước',
     'product_lightbox_next' => 'Hình tiếp theo',
     'product_fallback' => 'Sản phẩm',
-    
+
     // Shopping Cart
     'cart_page_title' => 'Giỏ hàng',
     'cart_order_info_title' => 'Thông tin đơn hàng',
@@ -262,7 +262,7 @@ return [
     'cart_close' => 'Đóng',
     'cart_option_color' => 'Màu',
     'cart_option_lens' => 'Gói tròng',
-    
+
     // Brand
     'brand_index_title' => 'Thương Hiệu - Mắt Kính Sài Gòn',
     'brand_index_hero_title' => 'Thương Hiệu Nổi Bật',
@@ -284,7 +284,7 @@ return [
     'brand_detail_no_products_brand' => 'Hiện tại chưa có sản phẩm nào cho thương hiệu này.',
     'brand_detail_default_desc' => 'Khám phá bộ sưu tập',
     'brand_detail_default_desc_2' => 'Thương hiệu kính mắt hàng đầu với thiết kế tinh tế và chất lượng vượt trội.',
-    
+
     // Partner
     'partner_index_title' => 'Đối Tác - Mắt Kính Sài Gòn',
     'partner_index_hero_title' => 'Đối Tác Của Chúng Tôi',
@@ -298,12 +298,12 @@ return [
     'partner_detail_website' => 'Website',
     'partner_detail_location_title' => 'Vị Trí',
     'partner_detail_view_map' => 'Xem trên Google Maps',
-    
+
     // Policy/Page
     'page_title_default' => 'Trang - Mắt Kính Sài Gòn',
     'page_badge' => 'Chính sách & Quy định',
     'page_back' => 'Quay lại',
-    
+
     // News
     'news_detail_title' => 'Tin Tức - Mắt Kính Sài Gòn',
     'news_detail_category' => 'Tin tức',
@@ -331,7 +331,7 @@ return [
     'news_category_filter_care' => 'Chăm sóc mắt',
     'news_category_filter_event' => 'Sự kiện nổi bật',
     'news_category_pagination_label' => 'Phân trang bài viết',
-    
+
     // Shopping Cart Page - Additional
     'cart_page_title_default' => 'Giỏ Hàng - Mắt Kính Sài Gòn',
     'cart_continue_shopping_btn' => 'Tiếp tục mua sắm',
@@ -339,7 +339,7 @@ return [
     'cart_option_none' => 'Không có',
     'cart_receipt_product_list_label' => 'Danh sách sản phẩm trong giỏ',
     'cart_receipt_totals_label' => 'Chi tiết thanh toán',
-    
+
     // Common Alt Text
     'alt_logo' => 'Mắt Kính Sài Gòn',
     'alt_logo_premium' => 'Mắt Kính Hàng Hiệu',

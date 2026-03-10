@@ -551,14 +551,12 @@ $breadcrumbs = [
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Giá bán (₫)
+                                Giá bán ({{ config('texts.currency') }})
                             </label>
-                            <input type="number" 
+                            <input type="text" 
                                    name="price_sale" 
                                    value="{{ old('price_sale') }}"
-                                   min="0"
-                                   step="1000"
-                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth @error('price_sale') border-red-500 @enderror"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input @error('price_sale') border-red-500 @enderror"
                                    placeholder="0">
                             @error('price_sale')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -567,14 +565,12 @@ $breadcrumbs = [
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Giá gốc (₫)
+                                Giá gốc ({{ config('texts.currency') }})
                             </label>
-                            <input type="number" 
+                            <input type="text" 
                                    name="price" 
                                    value="{{ old('price') }}"
-                                   min="0"
-                                   step="1000"
-                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth @error('price') border-red-500 @enderror"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input @error('price') border-red-500 @enderror"
                                    placeholder="0">
                             @error('price')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -795,16 +791,14 @@ $breadcrumbs = [
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Giá Giảm (VNĐ):
+                                    Giá Giảm ({{ config('texts.currency') }}):
                                 </label>
                                 <div class="flex items-center gap-2">
-                                    <input type="number" 
+                                    <input type="text" 
                                            name="sale_prices[0][discount_price]" 
                                            value=""
-                                           min="0"
-                                           step="1000"
                                            placeholder="0"
-                                           class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
+                                           class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
                                     <button type="button" 
                                             onclick="removeSalePriceRow(this)"
                                             class="hidden remove-row-btn p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
@@ -854,15 +848,13 @@ $breadcrumbs = [
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            Giá (VNĐ)
+                                            Giá ({{ config('texts.currency') }})
                                         </label>
-                                        <input type="number" 
+                                        <input type="text" 
                                                name="combos[0][price]" 
                                                value=""
-                                               min="0"
-                                               step="1000"
                                                placeholder="0"
-                                               class="combo-price w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
+                                               class="combo-price vnd-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -987,27 +979,23 @@ $breadcrumbs = [
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2.5">
-                                            Giá (VNĐ)
+                                            Giá ({{ config('texts.currency') }})
                                         </label>
-                                        <input type="number" 
+                                        <input type="text" 
                                                name="degree_ranges[0][price]" 
                                                value=""
-                                               min="0"
-                                               step="1000"
                                                placeholder="0"
-                                               class="degree-range-price w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                               class="degree-range-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2.5">
-                                            Giá Khuyến Mãi (VNĐ)
+                                            Giá Khuyến Mãi ({{ config('texts.currency') }})
                                         </label>
-                                        <input type="number" 
+                                        <input type="text" 
                                                name="degree_ranges[0][price_sale]" 
                                                value=""
-                                               min="0"
-                                               step="1000"
                                                placeholder="0"
-                                               class="degree-range-price-sale w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                               class="degree-range-price-sale vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2.5">
@@ -1768,10 +1756,8 @@ function addSalePriceRow() {
                 <input type="number" 
                        name="sale_prices[${salePriceRowIndex}][discount_price]" 
                        value=""
-                       min="0"
-                       step="1000"
                        placeholder="0"
-                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
+                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
                 <button type="button" 
                         onclick="removeSalePriceRow(this)"
                         class="remove-row-btn p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
@@ -1920,15 +1906,13 @@ function addComboRow() {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Giá (VNĐ)
+                        Giá ({{ config('texts.currency') }})
                     </label>
-                    <input type="number" 
+                    <input type="text" 
                            name="combos[${comboRowIndex}][price]" 
                            value=""
-                           min="0"
-                           step="1000"
                            placeholder="0"
-                           class="combo-price w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
+                           class="combo-price vnd-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -2033,27 +2017,23 @@ function addDegreeRangeRow() {
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2.5">
-                        Giá (VNĐ)
+                        Giá ({{ config('texts.currency') }})
                     </label>
-                    <input type="number" 
+                    <input type="text" 
                            name="degree_ranges[${degreeRangeRowIndex}][price]" 
                            value=""
-                           min="0"
-                           step="1000"
                            placeholder="0"
-                           class="degree-range-price w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                           class="degree-range-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2.5">
-                        Giá Khuyến Mãi (VNĐ)
+                        Giá Khuyến Mãi ({{ config('texts.currency') }})
                     </label>
-                    <input type="number" 
+                    <input type="text" 
                            name="degree_ranges[${degreeRangeRowIndex}][price_sale]" 
                            value=""
-                           min="0"
-                           step="1000"
                            placeholder="0"
-                           class="degree-range-price-sale w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                           class="degree-range-price-sale vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2.5">
@@ -2877,6 +2857,54 @@ function updateFileInput() {
     });
 })();
 
+// VNĐ currency input formatting
+(function() {
+    function normalizeVndValue(value) {
+        if (!value) return '';
+        const digits = value.toString().replace(/[^\d]/g, '');
+        return digits;
+    }
+
+    function formatVndDisplay(value) {
+        const digits = normalizeVndValue(value);
+        if (!digits) return '';
+        const number = parseInt(digits, 10);
+        if (isNaN(number)) return '';
+        return new Intl.NumberFormat('vi-VN').format(number);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('productForm');
+        if (!form) return;
+
+        const vndInputs = form.querySelectorAll('.vnd-input');
+
+        vndInputs.forEach(function(input) {
+            if (input.value) {
+                input.value = formatVndDisplay(input.value);
+            }
+
+            input.addEventListener('input', function() {
+                const selectionStart = this.selectionStart;
+                const raw = this.value;
+                const formatted = formatVndDisplay(raw);
+                this.value = formatted;
+                this.setSelectionRange(this.value.length, this.value.length);
+            });
+
+            input.addEventListener('blur', function() {
+                this.value = formatVndDisplay(this.value);
+            });
+        });
+
+        form.addEventListener('submit', function() {
+            const submitVndInputs = form.querySelectorAll('.vnd-input');
+            submitVndInputs.forEach(function(input) {
+                input.value = normalizeVndValue(input.value);
+            });
+        });
+    });
+})();
 </script>
 @endpush
 @endsection

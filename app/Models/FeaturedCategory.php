@@ -51,10 +51,14 @@ class FeaturedCategory extends Model
     /**
      * Lấy danh sách featured categories active
      */
-    public static function getAllActive($limit = 4) {
-        return self::where('status', 1)
-            ->orderBy('weight', 'asc')
-            ->limit($limit)
-            ->get();
+    public static function getAllActive($limit = null) {
+        $query = self::where('status', 1)
+            ->orderBy('weight', 'asc');
+        
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+        
+        return $query->get();
     }
 }

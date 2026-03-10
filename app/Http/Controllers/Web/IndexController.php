@@ -147,10 +147,10 @@ class IndexController extends Controller
         // Cache featured categories - 1 giờ
         try {
             $featuredCategories = Cache::remember('home_featured_categories', 3600, function () {
-                return FeaturedCategory::getAllActive(4);
+                return FeaturedCategory::getAllActive(); // Lấy tất cả, không giới hạn
             });
         } catch (\Exception $e) {
-            $featuredCategories = FeaturedCategory::getAllActive(4);
+            $featuredCategories = FeaturedCategory::getAllActive(); // Lấy tất cả, không giới hạn
         }
 
         return view('web.page.home.index', [

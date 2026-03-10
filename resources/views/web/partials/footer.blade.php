@@ -22,7 +22,7 @@
                 <a href="{{ $settings->facebook }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconFB() }}" alt="Facebook" class="h-7 md:h-6 w-auto"></a>
                 <a href="{{ $settings->youtube }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconYoutube() }}" alt="Youtube" class="h-7 md:h-6 w-auto"></a>
                 <a href="{{ $settings->zalo }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconZalo() }}" alt="Zalo" class="h-7 md:h-6 w-auto"></a>
-                <a href="{{ $settings->email }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconEmail() }}" alt="Email" class="h-7 md:h-6 w-auto"></a>
+                <a href="mailto:{{ $settings->email }}" class="hover:opacity-80 transition-opacity"><img src="{{ $settings->getIconEmail() }}" alt="Email" class="h-7 md:h-6 w-auto"></a>
             </div>
             <h4 class="font-bold mb-3 text-base md:text-sm" style="color: #ed1c24;">{{ config('texts.footer_work_time_title') }}</h4>
             <div class="flex gap-2 md:gap-3 items-start">

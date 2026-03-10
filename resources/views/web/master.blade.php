@@ -67,6 +67,7 @@
     @stack('styles')
 </head>
 <body class="md:pb-0 pb-20">
+    <div id="fb-root"></div>
     @include('web.partials.header')
     
     @include('web.partials.cart')
@@ -82,6 +83,11 @@
     <a class="top_button" href="#" style="display: block;">&nbsp;</a>
     <!-- Swiper JS -->
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous"
+        src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v15.0"
+        nonce="mksgFbSdk"></script>
     
     <!-- Custom JS -->
     <script src="{{ asset('js/app.js') }}"></script>

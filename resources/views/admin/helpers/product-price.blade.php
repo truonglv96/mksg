@@ -34,18 +34,18 @@
 
 <div>
     @if($priceSale > 0)
-        <p class="{{ $priceClass }} font-bold text-primary-600">₫{{ number_format($priceSale, 0, ',', '.') }}</p>
+        <p class="{{ $priceClass }} font-bold text-primary-600">{{ number_format($priceSale, 0, ',', '.') }} {{ config('texts.currency') }}</p>
     @endif
     
     @if($priceOriginal > 0 && $priceSale < $priceOriginal && $priceSale > 0)
-        <p class="{{ $originalPriceClass }} text-gray-400 line-through">₫{{ number_format($priceOriginal, 0, ',', '.') }}</p>
+        <p class="{{ $originalPriceClass }} text-gray-400 line-through">{{ number_format($priceOriginal, 0, ',', '.') }} {{ config('texts.currency') }}</p>
         @if($showDiscount && $discount > 0)
             <div class="text-xs text-green-600 font-medium mt-1">
                 <i class="fas fa-percent mr-1"></i>Giảm {{ $discount }}%
             </div>
         @endif
     @elseif($priceOriginal > 0 && $priceSale == 0)
-        <p class="{{ $priceClass }} font-bold text-primary-600">₫{{ number_format($priceOriginal, 0, ',', '.') }}</p>
+        <p class="{{ $priceClass }} font-bold text-primary-600">{{ number_format($priceOriginal, 0, ',', '.') }} {{ config('texts.currency') }}</p>
     @elseif($priceSale == 0 && $priceOriginal == 0)
         <p class="text-sm text-gray-400">Chưa có giá</p>
     @endif

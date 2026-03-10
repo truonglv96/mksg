@@ -271,7 +271,7 @@
                 <!-- Product content -->
                 <div class="space-y-4">
                     <!-- Product Header -->
-                    <div class="space-y-2">
+                    <div class="space-y-2 relative">
                         <h1 id="product-name" class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
                             {{ $product->name }}
                         </h1>
@@ -291,7 +291,7 @@
                             @endif
                             <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
                                 <label for="brand-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_brand') }}</label>
-                                <span id="product-brand" class="font-semibold text-emerald-600 truncate">
+                                <span id="product-brand" class="font-semibold text-red-600 truncate">
                                 @if($brand && $brand->name)
                                     {{ $brand->name }}
                                 @elseif($product->brand && $product->brand->name)
@@ -302,13 +302,13 @@
                             @if($product->unit)
                             <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
                                 <label for="unit-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Đơn vị:</label>
-                                <span id="product-unit" class="font-semibold text-gray-800 truncate">{{ $product->unit }}</span>
+                                <span id="product-unit" class="font-semibold text-red-600 truncate">{{ $product->unit }}</span>
                             </div>
                             @endif
                             @if(isset($product->type_sale))
                             <div class="flex items-center gap-1.5 min-w-0 flex-shrink">
                                 <label for="type-sale-select" class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Hình thức:</label>
-                                <span class="font-semibold text-gray-800 truncate">
+                                <span class="font-semibold text-red-600 truncate">
                                     @if($product->type_sale == -1)
                                         Tại Shop & Online
                                     @elseif($product->type_sale == 0)
@@ -322,17 +322,14 @@
                             </div>
                             @endif
                         </div>
-                        <div class="social-sharing flex items-center pt-2">
-                                <script async defer crossorigin="anonymous"
-                                    src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v15.0"
-                                    nonce="IrDKTUDJ"></script>
-                                <div class="fb-share-button"
-                                    data-href="{{ route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias]) }}"
-                                    data-layout="button_count" data-size="large">
-                                    <a target="_blank"
-                                        href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
-                                    class="fb-xfbml-parse-ignore text-base">{{ config('texts.product_share') }}</a>
-                            </div>
+                        <div class="social-sharing inline-flex items-center absolute top-2 right-2 md:top-[-60px] md:right-[-20px]">
+                            <a target="_blank" rel="noopener"
+                               href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
+                               class="inline-flex items-center">
+                                <img src="{{ asset('img/tmp/pngtree-facebook-like-share-icon-button-png-image_1805237.png') }}"
+                                     alt="Facebook Like &amp; Share"
+                                     class="h-10 sm:h-12 md:h-20 w-auto object-contain">
+                            </a>
                         </div>
                     </div>
 
@@ -344,10 +341,10 @@
                                 $oldPrice = $product->price ?? 0;
                                 $hasDiscount = $product->price_sale && $product->price && $product->price > $product->price_sale;
                             @endphp
-                            <span class="price-current text-2xl sm:text-3xl font-bold text-red-600" data-product-price data-base-price="{{ $currentPrice }}">{{ number_format($currentPrice, 0, ',', '.') }} VNĐ</span>
+                            <span class="price-current text-2xl sm:text-3xl font-bold text-red-600" data-product-price data-base-price="{{ $currentPrice }}">{{ number_format($currentPrice, 0, ',', '.') }} {{ config('texts.currency') }}</span>
                             @if($hasDiscount)
                             <div class="flex items-center gap-2.5 flex-wrap">
-                            <span class="price-old text-sm text-gray-500 line-through">{{ number_format($oldPrice, 0, ',', '.') }} VNĐ</span>
+                            <span class="price-old text-sm text-gray-500 line-through">{{ number_format($oldPrice, 0, ',', '.') }} {{ config('texts.currency') }}</span>
                             @php
                                 $savingPercent = round((($oldPrice - $currentPrice) / $oldPrice) * 100);
                             @endphp
@@ -462,7 +459,7 @@
                                     <p class="text-base text-gray-600 mt-0.5 leading-tight">{{ $combo->description }}</p>
                                     @endif
                                     @if($combo->price && $combo->price > 0)
-                                    <p class="text-base font-bold text-red-600 mt-0.5">+{{ number_format($combo->price, 0, ',', '.') }} VNĐ</p>
+                                    <p class="text-base font-bold text-red-600 mt-0.5">+{{ number_format($combo->price, 0, ',', '.') }} {{ config('texts.currency') }}</p>
                                     @endif
                                 </button>
                                 @endforeach
@@ -485,12 +482,12 @@
                                     @foreach($leftColumn as $feature)
                                     <div class="flex items-center gap-2">
                                         @if($feature->image)
-                                        <div class="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
                                             <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
                                         </div>
                                         @else
-                                        <div class="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                                            <span class="text-gray-500 text-base">📋</span>
+                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                            <span class="text-gray-500 text-2xl">📋</span>
                                         </div>
                                         @endif
                                         <p class="text-base text-gray-700 leading-tight">
@@ -504,12 +501,12 @@
                                     @foreach($rightColumn as $feature)
                                     <div class="flex items-center gap-2">
                                         @if($feature->image)
-                                        <div class="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
                                             <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
                                         </div>
                                         @else
-                                        <div class="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                                            <span class="text-gray-500 text-base">📋</span>
+                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                            <span class="text-gray-500 text-2xl">📋</span>
                                         </div>
                                         @endif
                                         <p class="text-base text-gray-700 leading-tight">
@@ -758,9 +755,9 @@
                                         </a>
                                     </h3>
                                     <div class="text-right space-y-1">
-                                        <span class="text-red-600 font-bold text-base">{{ number_format($relatedPrice, 0, ',', '.') }} VNĐ</span>
+                                        <span class="text-red-600 font-bold text-base">{{ number_format($relatedPrice, 0, ',', '.') }} {{ config('texts.currency') }}</span>
                                         @if($hasRelatedDiscount)
-                                        <span class="text-xs text-gray-400 line-through block">{{ number_format($relatedOldPrice, 0, ',', '.') }} VNĐ</span>
+                                        <span class="text-xs text-gray-400 line-through block">{{ number_format($relatedOldPrice, 0, ',', '.') }} {{ config('texts.currency') }}</span>
                                         @endif
                                     </div>
                                     <div class="flex gap-2">

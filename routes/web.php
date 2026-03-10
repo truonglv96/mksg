@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\NewsController;
 use App\Http\Controllers\Web\SearchController;
 use App\Http\Controllers\Web\BrandController;
 use App\Http\Controllers\Web\PartnerController;
+use App\Http\Controllers\Web\ContactController;
 use App\Http\Controllers\Web\PageController;
 
 // Trang chủ
@@ -55,6 +56,11 @@ Route::prefix('doi-tac')->name('partner.')->group(function () {
     Route::get('/{alias}', [PartnerController::class, 'detail'])->name('detail');
 });
 
+// Hệ thống cửa hàng
+Route::prefix('lien-he')->name('contact.')->group(function () {
+    Route::get('/', [ContactController::class, 'index'])->name('index');
+});
+
 // Page detail
 Route::prefix('trang')->name('page.')->group(function () {
     Route::get('/{alias}', [PageController::class, 'detail'])->name('detail');
@@ -71,12 +77,12 @@ Route::post('/checkout', [ProductController::class, 'checkout'])->name('checkout
 Route::get('/clear-cache', function () {
     $results = [];
     
-    // try {
-    //     \Illuminate\Support\Facades\Artisan::call('cache:clear');
-    //     $results['cache'] = 'Application cache cleared';
-    // } catch (\Exception $e) {
-    //     $results['cache'] = 'Cache clear skipped: ' . $e->getMessage();
-    // }
+    try {
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        $results['cache'] = 'Application cache cleared';
+    } catch (\Exception $e) {
+        $results['cache'] = 'Cache clear skipped: ' . $e->getMessage();
+    }
     
     try {
         \Illuminate\Support\Facades\Artisan::call('config:clear');
@@ -97,6 +103,14 @@ Route::get('/clear-cache', function () {
         $results['route'] = 'Route cache cleared';
     } catch (\Exception $e) {
         $results['route'] = 'Route clear skipped: ' . $e->getMessage();
+    }
+    
+    // Laravel 11+ optimize:clear
+    try {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        $results['optimize'] = 'Optimize cache cleared';
+    } catch (\Exception $e) {
+        $results['optimize'] = 'Optimize clear skipped: ' . $e->getMessage();
     }
     
     return response()->json([

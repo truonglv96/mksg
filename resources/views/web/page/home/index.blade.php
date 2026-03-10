@@ -66,8 +66,8 @@
             <div class="h-1 w-20" style="background-color: #ed1c24;"></div>
         </div>
 
-        <!-- Desktop: Grid tĩnh 4 cột -->
-        <div class="hidden md:grid md:grid-cols-4 gap-6">
+        <!-- Desktop: Grid responsive - hiển thị tất cả danh mục -->
+        <div class="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             @if(isset($featuredCategories) && $featuredCategories->count() > 0)
                 @foreach($featuredCategories as $item)
                 <a href="{{ $item->link ?? '#' }}" 
