@@ -110,6 +110,9 @@ return [
     'product_share' => 'Chia sẻ',
     'product_save' => 'Tiết kiệm',
     'product_frame_color' => 'Màu gọng',
+    /** Nhãn dropdown product_price_sales theo products.type_color: 1 = chiết suất, 0 = màu sắc */
+    'product_option_type_discount' => 'Chiết Suất',
+    'product_option_type_color' => 'Màu Sắc',
     'product_selected' => 'Đã chọn',
     'product_lens_package' => 'Chọn gói tròng kính',
     'product_add_to_cart' => 'Thêm vào giỏ hàng',

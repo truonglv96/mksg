@@ -263,7 +263,6 @@ class ProductController extends Controller
             'title' => $product->name . ' - Mắt Kính Sài Gòn',
             'product' => $product,
             'productImages' => \App\Models\ProductImage::getImageCategoryProduct($product->id),
-            'productColors' => Color::getColorByPhotoID($product->id),
             'mainCategory' => $mainCategory,
             'brand' => $product->brand,
             'relatedProducts' => $mainCategory ? Products::getProductOrtherByIDCategory($mainCategory->id)

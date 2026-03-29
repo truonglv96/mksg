@@ -797,7 +797,7 @@ $breadcrumbs = [
                                     <input type="text" 
                                            name="sale_prices[0][discount_price]" 
                                            value=""
-                                           placeholder="0"
+                                           placeholder="Mặc định 0"
                                            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
                                     <button type="button" 
                                             onclick="removeSalePriceRow(this)"
@@ -808,6 +808,9 @@ $breadcrumbs = [
                             </div>
                         </div>
                     </div>
+                    <p class="mt-2 text-xs text-gray-500">
+                        Dòng chiết suất đầu là mặc định, không cộng thêm giá (0). Các dòng sau là giá cộng thêm.
+                    </p>
                     
                     <button type="button" 
                             onclick="addSalePriceRow()"
@@ -977,6 +980,17 @@ $breadcrumbs = [
                                     </div>
                                 </div>
                                 <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                                            Chiết Suất Cha <span class="text-red-500">*</span>
+                                        </label>
+                                        <select name="degree_ranges[0][price_sale_key]"
+                                                class="degree-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                                                required>
+                                            <option value="">Chọn chiết suất cha</option>
+                                            <option value="0">Chiết suất #1</option>
+                                        </select>
+                                    </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2.5">
                                             Giá ({{ config('texts.currency') }})
@@ -1706,6 +1720,58 @@ document.getElementById('productForm').addEventListener('submit', function(e) {
 // Sale Prices Management
 var salePriceRowIndex = 1;
 
+function extractSalePriceKeyFromRow(row) {
+    const keyInput = row ? row.querySelector('input[name*="[discount_price]"]') : null;
+    if (!keyInput) return '';
+    const match = keyInput.name.match(/sale_prices\[(\d+)\]/);
+    return match ? match[1] : '';
+}
+
+function getSalePriceParentLabel(row, index) {
+    const category1Select = row.querySelector('.category1-select');
+    const category2Select = row.querySelector('.category2-select');
+    const category1Option = category1Select ? category1Select.options[category1Select.selectedIndex] : null;
+    const category2Option = category2Select ? category2Select.options[category2Select.selectedIndex] : null;
+
+    const category1Text = (category1Option && category1Option.value) ? category1Option.textContent.trim() : '';
+    const category2Text = (category2Option && category2Option.value) ? category2Option.textContent.trim() : '';
+
+    if (category2Text) return category2Text;
+    if (category1Text) return category1Text;
+    return `Chiết suất #${index + 1}`;
+}
+
+function buildDegreePriceSaleOptions(selectedKey = '') {
+    const rows = Array.from(document.querySelectorAll('#salePricesContainer .sale-price-row'));
+    let optionsHtml = '<option value="">Chọn chiết suất cha</option>';
+
+    rows.forEach((row, index) => {
+        const key = extractSalePriceKeyFromRow(row);
+        if (key === '') return;
+        const label = getSalePriceParentLabel(row, index);
+        const selected = String(selectedKey) === String(key) ? 'selected' : '';
+        optionsHtml += `<option value="${key}" ${selected}>${label}</option>`;
+    });
+
+    return optionsHtml;
+}
+
+function refreshDegreeRangeParentOptions() {
+    const selects = Array.from(document.querySelectorAll('.degree-price-sale-key'));
+    selects.forEach((selectEl) => {
+        const currentValue = selectEl.value;
+        selectEl.innerHTML = buildDegreePriceSaleOptions(currentValue);
+
+        if (currentValue && Array.from(selectEl.options).some(opt => opt.value === currentValue)) {
+            selectEl.value = currentValue;
+            return;
+        }
+
+        const firstAvailable = Array.from(selectEl.options).find(opt => opt.value !== '');
+        selectEl.value = firstAvailable ? firstAvailable.value : '';
+    });
+}
+
 function addSalePriceRow() {
     const container = document.getElementById('salePricesContainer');
     if (!container) {
@@ -1772,6 +1838,7 @@ function addSalePriceRow() {
     
     // Show remove buttons for all rows except the first one
     updateRemoveButtons();
+    refreshDegreeRangeParentOptions();
     
     // Attach event listener to the new category1 select
     const newCategory1Select = newRow.querySelector('.category1-select');
@@ -1779,6 +1846,10 @@ function addSalePriceRow() {
     if (newCategory1Select && newCategory2Select) {
         newCategory1Select.addEventListener('change', function() {
             updateCategory2Options(this, newCategory2Select);
+            refreshDegreeRangeParentOptions();
+        });
+        newCategory2Select.addEventListener('change', function() {
+            refreshDegreeRangeParentOptions();
         });
     }
 }
@@ -1825,6 +1896,8 @@ function updateCategory2Options(category1Select, category2Select) {
             category2Select.appendChild(option);
         });
     }
+
+    refreshDegreeRangeParentOptions();
 }
 
 function removeSalePriceRow(button) {
@@ -1838,6 +1911,7 @@ function removeSalePriceRow(button) {
     setTimeout(() => {
         row.remove();
         updateRemoveButtons();
+        refreshDegreeRangeParentOptions();
     }, 300);
 }
 
@@ -1865,10 +1939,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (category2Select) {
                 category1Select.addEventListener('change', function() {
                     updateCategory2Options(this, category2Select);
+                    refreshDegreeRangeParentOptions();
+                });
+                category2Select.addEventListener('change', function() {
+                    refreshDegreeRangeParentOptions();
                 });
             }
         }
     });
+    refreshDegreeRangeParentOptions();
 });
 
 // Combo Management
@@ -2017,6 +2096,16 @@ function addDegreeRangeRow() {
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                        Chiết Suất Cha <span class="text-red-500">*</span>
+                    </label>
+                    <select name="degree_ranges[${degreeRangeRowIndex}][price_sale_key]"
+                            class="degree-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                            required>
+                        ${buildDegreePriceSaleOptions()}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">
                         Giá ({{ config('texts.currency') }})
                     </label>
                     <input type="text" 
@@ -2052,6 +2141,7 @@ function addDegreeRangeRow() {
     
     container.appendChild(newRow);
     degreeRangeRowIndex++;
+    refreshDegreeRangeParentOptions();
     
     // Show remove buttons for all rows except the first one
     updateDegreeRangeRemoveButtons();
@@ -2861,8 +2951,7 @@ function updateFileInput() {
 (function() {
     function normalizeVndValue(value) {
         if (!value) return '';
-        const digits = value.toString().replace(/[^\d]/g, '');
-        return digits;
+        return value.toString().replace(/[^\d]/g, '');
     }
 
     function formatVndDisplay(value) {
@@ -2873,28 +2962,34 @@ function updateFileInput() {
         return new Intl.NumberFormat('vi-VN').format(number);
     }
 
+    function formatInputValue(input) {
+        if (!input) return;
+        input.value = formatVndDisplay(input.value);
+    }
+
+    function formatAllVndInputs(rootEl) {
+        if (!rootEl) return;
+        rootEl.querySelectorAll('.vnd-input').forEach(formatInputValue);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('productForm');
         if (!form) return;
 
-        const vndInputs = form.querySelectorAll('.vnd-input');
+        formatAllVndInputs(form);
 
-        vndInputs.forEach(function(input) {
-            if (input.value) {
-                input.value = formatVndDisplay(input.value);
-            }
+        form.addEventListener('input', function(event) {
+            const input = event.target.closest('.vnd-input');
+            if (!input || !form.contains(input)) return;
 
-            input.addEventListener('input', function() {
-                const selectionStart = this.selectionStart;
-                const raw = this.value;
-                const formatted = formatVndDisplay(raw);
-                this.value = formatted;
-                this.setSelectionRange(this.value.length, this.value.length);
-            });
+            input.value = formatVndDisplay(input.value);
+            input.setSelectionRange(input.value.length, input.value.length);
+        });
 
-            input.addEventListener('blur', function() {
-                this.value = formatVndDisplay(this.value);
-            });
+        form.addEventListener('focusout', function(event) {
+            const input = event.target.closest('.vnd-input');
+            if (!input || !form.contains(input)) return;
+            formatInputValue(input);
         });
 
         form.addEventListener('submit', function() {
@@ -2903,6 +2998,25 @@ function updateFileInput() {
                 input.value = normalizeVndValue(input.value);
             });
         });
+
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+
+                    if (node.matches && node.matches('.vnd-input')) {
+                        formatInputValue(node);
+                        return;
+                    }
+
+                    if (node.querySelectorAll) {
+                        formatAllVndInputs(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(form, { childList: true, subtree: true });
     });
 })();
 </script>

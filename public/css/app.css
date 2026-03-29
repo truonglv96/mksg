@@ -614,6 +614,27 @@
             box-shadow: 0 10px 25px rgba(220, 38, 38, 0.2);
             transform: translateY(-2px);
         }
+        .refractive-index-pill {
+            min-width: 3rem;
+            height: 2.4rem;
+            border-radius: 9999px;
+            border-width: 1.5px;
+            border-style: solid;
+            border-color: #d1d5db; /* xám nhạt */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            color: #374151; /* text xám */
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        .refractive-index-pill.active {
+            border-color: #dc2626; /* đỏ */
+            color: #dc2626;
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+            background-color: #fff7f7;
+        }
         .option-pill {
             border: 1.5px solid transparent;
             cursor: pointer;
@@ -3779,6 +3800,18 @@ h1, h2, h3, h4, h5, h6,
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+}
+
+/* Keep product detail title at requested size */
+#product-summary #product-name {
+    font-size: 22px !important;
+    line-height: 30px !important;
+}
+
+/* Force option section labels to 16px */
+#product-summary .product-option-field-label {
+    font-size: 16px !important;
+    line-height: 24px !important;
 }
 
 /* Category link hover color */

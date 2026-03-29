@@ -780,7 +780,7 @@ $breadcrumbs = [
                                     <input type="text" 
                                            name="sale_prices[0][discount_price]" 
                                            value=""
-                                           placeholder="0"
+                                           placeholder="Mặc định 0"
                                            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
                                     <button type="button" 
                                             onclick="removeSalePriceRow(this)"
@@ -791,6 +791,9 @@ $breadcrumbs = [
                             </div>
                         </div>
                     </div>
+                    <p class="mt-2 text-xs text-gray-500">
+                        Dòng chiết suất đầu là mặc định, không cộng thêm giá (0). Các dòng sau là giá cộng thêm.
+                    </p>
                     
                     <button type="button" 
                             onclick="addSalePriceRow()"
@@ -963,6 +966,17 @@ $breadcrumbs = [
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                                            Chiết Suất Cha <span class="text-red-500">*</span>
+                                        </label>
+                                        <select name="degree_ranges[0][price_sale_key]"
+                                                class="degree-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                                                required>
+                                            <option value="">Chọn chiết suất cha</option>
+                                            <option value="0">Chiết suất #1</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">
                                             Giá ({{ config('texts.currency') }})
                                         </label>
                                         <input type="text" 
@@ -1084,7 +1098,34 @@ const existingSalePrices = @json($productSalePrices ?? []);
 // Initialize existing combos
 const existingCombos = @json($productCombos ?? []);
 // Initialize existing degree ranges
-const existingDegreeRanges = @json($productDegreeRanges ?? []);
+const existingDegreeRanges = (@json($productDegreeRanges ?? []) || []).map(function(range) {
+    const normalizeMoneyFromDb = function(value) {
+        if (value === null || value === undefined || value === '') return '';
+        const raw = String(value).trim();
+
+        // DB may return decimal strings (e.g. "30000000.00"), while UI expects integer VND.
+        if (/^\d+[.,]\d+$/.test(raw)) {
+            const normalized = Number(raw.replace(',', '.'));
+            if (Number.isFinite(normalized)) {
+                return String(Math.round(normalized));
+            }
+        }
+
+        return raw;
+    };
+
+    return {
+        ...range,
+        price: normalizeMoneyFromDb(range.price),
+        price_sale: normalizeMoneyFromDb(range.price_sale),
+    };
+});
+const existingSalePriceIdToKeyMap = existingSalePrices.reduce((acc, item, idx) => {
+    if (item && item.id != null) {
+        acc[String(item.id)] = String(idx);
+    }
+    return acc;
+}, {});
 
 // Render existing images on page load
 function renderExistingImages() {
@@ -1206,6 +1247,7 @@ function initializeSalePrices() {
             existingSalePrices.forEach((salePrice, index) => {
                 addSalePriceRow(salePrice.parent_category || '', salePrice.id_category || '', salePrice.price || '', index);
             });
+            refreshDegreeRangeParentOptions();
         }
     }
 }
@@ -1854,6 +1896,58 @@ document.getElementById('productForm').addEventListener('submit', function(e) {
 // Sale Prices Management
 let salePriceRowIndex = 1;
 
+function extractSalePriceKeyFromRow(row) {
+    const keyInput = row ? row.querySelector('input[name*="[discount_price]"]') : null;
+    if (!keyInput) return '';
+    const match = keyInput.name.match(/sale_prices\[(\d+)\]/);
+    return match ? match[1] : '';
+}
+
+function getSalePriceParentLabel(row, index) {
+    const category1Select = row.querySelector('.category1-select');
+    const category2Select = row.querySelector('.category2-select');
+    const category1Option = category1Select ? category1Select.options[category1Select.selectedIndex] : null;
+    const category2Option = category2Select ? category2Select.options[category2Select.selectedIndex] : null;
+
+    const category1Text = (category1Option && category1Option.value) ? category1Option.textContent.trim() : '';
+    const category2Text = (category2Option && category2Option.value) ? category2Option.textContent.trim() : '';
+
+    if (category2Text) return category2Text;
+    if (category1Text) return category1Text;
+    return `Chiết suất #${index + 1}`;
+}
+
+function buildDegreePriceSaleOptions(selectedKey = '') {
+    const rows = Array.from(document.querySelectorAll('#salePricesContainer .sale-price-row'));
+    let optionsHtml = '<option value="">Chọn chiết suất cha</option>';
+
+    rows.forEach((row, index) => {
+        const key = extractSalePriceKeyFromRow(row);
+        if (key === '') return;
+        const label = getSalePriceParentLabel(row, index);
+        const selected = String(selectedKey) === String(key) ? 'selected' : '';
+        optionsHtml += `<option value="${key}" ${selected}>${label}</option>`;
+    });
+
+    return optionsHtml;
+}
+
+function refreshDegreeRangeParentOptions() {
+    const selects = Array.from(document.querySelectorAll('.degree-price-sale-key'));
+    selects.forEach((selectEl) => {
+        const currentValue = selectEl.value;
+        selectEl.innerHTML = buildDegreePriceSaleOptions(currentValue);
+
+        if (currentValue && Array.from(selectEl.options).some(opt => opt.value === currentValue)) {
+            selectEl.value = currentValue;
+            return;
+        }
+
+        const firstAvailable = Array.from(selectEl.options).find(opt => opt.value !== '');
+        selectEl.value = firstAvailable ? firstAvailable.value : '';
+    });
+}
+
 function addSalePriceRow(category1 = '', category2 = '', price = '', index = null) {
     const container = document.getElementById('salePricesContainer');
     if (!container) {
@@ -1862,7 +1956,10 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
     }
     
     const rowIndex = index !== null ? index : salePriceRowIndex;
-    if (index === null) {
+    const parsedRowIndex = parseInt(rowIndex, 10);
+    if (!isNaN(parsedRowIndex) && salePriceRowIndex <= parsedRowIndex) {
+        salePriceRowIndex = parsedRowIndex + 1;
+    } else if (index === null) {
         salePriceRowIndex++;
     }
     
@@ -1962,6 +2059,7 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
     
     // Show remove buttons for all rows except the first one
     updateRemoveButtons();
+    refreshDegreeRangeParentOptions();
     
     // Attach event listener to the new category1 select
     const newCategory1Select = newRow.querySelector('.category1-select');
@@ -1969,6 +2067,7 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
     if (newCategory1Select && newCategory2Select) {
         newCategory1Select.addEventListener('change', function() {
             updateCategory2Options(this, newCategory2Select);
+            refreshDegreeRangeParentOptions();
         });
         
         // Trigger change event if category1 has a value (for edit mode)
@@ -1980,8 +2079,12 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
                 if (category2) {
                     newCategory2Select.value = category2;
                 }
+                refreshDegreeRangeParentOptions();
             }, 100);
         }
+        newCategory2Select.addEventListener('change', function() {
+            refreshDegreeRangeParentOptions();
+        });
     }
 }
 
@@ -2027,6 +2130,8 @@ function updateCategory2Options(category1Select, category2Select) {
             category2Select.appendChild(option);
         });
     }
+
+    refreshDegreeRangeParentOptions();
 }
 
 function removeSalePriceRow(button) {
@@ -2040,6 +2145,7 @@ function removeSalePriceRow(button) {
     setTimeout(() => {
         row.remove();
         updateRemoveButtons();
+        refreshDegreeRangeParentOptions();
     }, 300);
 }
 
@@ -2067,16 +2173,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (category2Select) {
                 category1Select.addEventListener('change', function() {
                     updateCategory2Options(this, category2Select);
+                    refreshDegreeRangeParentOptions();
+                });
+                category2Select.addEventListener('change', function() {
+                    refreshDegreeRangeParentOptions();
                 });
             }
         }
     });
+    refreshDegreeRangeParentOptions();
 });
 
 // Degree Range Management
 let degreeRangeRowIndex = 1;
 
-function addDegreeRangeRow(name = '', price = '', priceSale = '', weight = '', index = null) {
+function addDegreeRangeRow(name = '', price = '', priceSale = '', weight = '', index = null, priceSaleKey = '') {
     const container = document.getElementById('degreeRangeContainer');
     if (!container) {
         console.error('degreeRangeContainer not found');
@@ -2114,6 +2225,16 @@ function addDegreeRangeRow(name = '', price = '', priceSale = '', weight = '', i
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2.5">
+                        Chiết Suất Cha <span class="text-red-500">*</span>
+                    </label>
+                    <select name="degree_ranges[${rowIndex}][price_sale_key]"
+                            class="degree-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white"
+                            required>
+                        ${buildDegreePriceSaleOptions(priceSaleKey)}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">
                         Giá ({{ config('texts.currency') }})
                     </label>
                     <input type="text" 
@@ -2148,6 +2269,7 @@ function addDegreeRangeRow(name = '', price = '', priceSale = '', weight = '', i
     `;
     
     container.appendChild(newRow);
+    refreshDegreeRangeParentOptions();
     
     // Show remove buttons for all rows except the first one
     updateDegreeRangeRemoveButtons();
@@ -2468,13 +2590,18 @@ function initializeDegreeRanges() {
             }
             
             existingDegreeRanges.forEach((range, index) => {
-                addDegreeRangeRow(range.name || '', range.price || '', range.price_sale || '', range.weight || 0, index);
+                const parentKey = (range.price_sale_id != null && existingSalePriceIdToKeyMap[String(range.price_sale_id)] !== undefined)
+                    ? existingSalePriceIdToKeyMap[String(range.price_sale_id)]
+                    : '';
+                addDegreeRangeRow(range.name || '', range.price || '', range.price_sale || '', range.weight || 0, index, parentKey);
             });
         }
     } else {
         // If no existing ranges, ensure the default row is visible
         updateDegreeRangeRemoveButtons();
     }
+
+    refreshDegreeRangeParentOptions();
 }
 
 // Handle hidden checkbox
@@ -3144,8 +3271,7 @@ function isNumeric(str) {
 (function() {
     function normalizeVndValue(value) {
         if (!value) return '';
-        const digits = value.toString().replace(/[^\d]/g, '');
-        return digits;
+        return value.toString().replace(/[^\d]/g, '');
     }
 
     function formatVndDisplay(value) {
@@ -3156,27 +3282,34 @@ function isNumeric(str) {
         return new Intl.NumberFormat('vi-VN').format(number);
     }
 
+    function formatInputValue(input) {
+        if (!input) return;
+        input.value = formatVndDisplay(input.value);
+    }
+
+    function formatAllVndInputs(rootEl) {
+        if (!rootEl) return;
+        rootEl.querySelectorAll('.vnd-input').forEach(formatInputValue);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('productForm');
         if (!form) return;
 
-        const vndInputs = form.querySelectorAll('.vnd-input');
+        formatAllVndInputs(form);
 
-        vndInputs.forEach(function(input) {
-            if (input.value) {
-                input.value = formatVndDisplay(input.value);
-            }
+        form.addEventListener('input', function(event) {
+            const input = event.target.closest('.vnd-input');
+            if (!input || !form.contains(input)) return;
 
-            input.addEventListener('input', function() {
-                const raw = this.value;
-                const formatted = formatVndDisplay(raw);
-                this.value = formatted;
-                this.setSelectionRange(this.value.length, this.value.length);
-            });
+            input.value = formatVndDisplay(input.value);
+            input.setSelectionRange(input.value.length, input.value.length);
+        });
 
-            input.addEventListener('blur', function() {
-                this.value = formatVndDisplay(this.value);
-            });
+        form.addEventListener('focusout', function(event) {
+            const input = event.target.closest('.vnd-input');
+            if (!input || !form.contains(input)) return;
+            formatInputValue(input);
         });
 
         form.addEventListener('submit', function() {
@@ -3185,6 +3318,25 @@ function isNumeric(str) {
                 input.value = normalizeVndValue(input.value);
             });
         });
+
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+
+                    if (node.matches && node.matches('.vnd-input')) {
+                        formatInputValue(node);
+                        return;
+                    }
+
+                    if (node.querySelectorAll) {
+                        formatAllVndInputs(node);
+                    }
+                });
+            });
+        });
+
+        observer.observe(form, { childList: true, subtree: true });
     });
 })();
 

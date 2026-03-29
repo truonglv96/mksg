@@ -18,6 +18,7 @@ class ProductDegreeRange extends Model
      */
     protected $fillable = [
         'product_id',
+        'price_sale_id',
         'name',
         'price',
         'price_sale',
@@ -43,6 +44,14 @@ class ProductDegreeRange extends Model
     public function product()
     {
         return $this->belongsTo(Products::class, 'product_id', 'id');
+    }
+
+    /**
+     * Get the price sale that owns this degree range.
+     */
+    public function priceSale()
+    {
+        return $this->belongsTo(ProductPriceSale::class, 'price_sale_id', 'id');
     }
 }
 

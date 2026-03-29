@@ -255,14 +255,24 @@ class ProductController extends Controller
                 }
             }
 
+            $priceSaleKeyToIdMap = [];
             if (!empty($validated['sale_prices'])) {
-                foreach ($validated['sale_prices'] as $salePrice) {
-                    ProductPriceSale::create([
+                foreach ($validated['sale_prices'] as $salePriceKey => $salePrice) {
+                    $isDefaultSalePrice = (string) $salePriceKey === '0';
+                    $discountPrice = $isDefaultSalePrice ? 0 : ($salePrice['discount_price'] ?? null);
+                    $hasDiscountPrice = $discountPrice !== null && $discountPrice !== '';
+                    $hasCategory = !empty($salePrice['category1']) || !empty($salePrice['category2']);
+                    if (!$hasDiscountPrice && !$hasCategory) {
+                        continue;
+                    }
+
+                    $createdPriceSale = ProductPriceSale::create([
                         'id_Product' => $product->id,
                         'parent_category' => $salePrice['category1'] ?? null,
                         'id_category' => $salePrice['category2'] ?? null,
-                        'price' => $salePrice['discount_price'] ?? 0,
+                        'price' => $hasDiscountPrice ? $discountPrice : 0,
                     ]);
+                    $priceSaleKeyToIdMap[(string) $salePriceKey] = $createdPriceSale->id;
                 }
             }
 
@@ -292,8 +302,12 @@ class ProductController extends Controller
             if (!empty($validated['degree_ranges'])) {
                 foreach ($validated['degree_ranges'] as $degreeRange) {
                     if (!empty($degreeRange['name'])) {
+                        $degreePriceSaleKey = isset($degreeRange['price_sale_key']) ? (string) $degreeRange['price_sale_key'] : null;
                         ProductDegreeRange::create([
                             'product_id' => $product->id,
+                            'price_sale_id' => ($degreePriceSaleKey !== null && isset($priceSaleKeyToIdMap[$degreePriceSaleKey]))
+                                ? $priceSaleKeyToIdMap[$degreePriceSaleKey]
+                                : null,
                             'name' => $degreeRange['name'] ?? '',
                             'price' => $degreeRange['price'] ?? 0,
                             'price_sale' => $degreeRange['price_sale'] ?? 0,
@@ -624,16 +638,26 @@ class ProductController extends Controller
                 ProductPriceSale::where('id_Product', $product->id)->delete();
                 
                 // Create new sale prices
-                foreach ($validated['sale_prices'] as $salePrice) {
-                    if (!empty($salePrice['discount_price'])) {
-                        ProductPriceSale::create([
-                            'id_Product' => $product->id,
-                            'parent_category' => $salePrice['category1'] ?? null,
-                            'id_category' => $salePrice['category2'] ?? null,
-                            'price' => $salePrice['discount_price'] ?? 0,
-                        ]);
+                $priceSaleKeyToIdMap = [];
+                foreach ($validated['sale_prices'] as $salePriceKey => $salePrice) {
+                    $isDefaultSalePrice = (string) $salePriceKey === '0';
+                    $discountPrice = $isDefaultSalePrice ? 0 : ($salePrice['discount_price'] ?? null);
+                    $hasDiscountPrice = $discountPrice !== null && $discountPrice !== '';
+                    $hasCategory = !empty($salePrice['category1']) || !empty($salePrice['category2']);
+                    if (!$hasDiscountPrice && !$hasCategory) {
+                        continue;
                     }
+
+                    $createdPriceSale = ProductPriceSale::create([
+                        'id_Product' => $product->id,
+                        'parent_category' => $salePrice['category1'] ?? null,
+                        'id_category' => $salePrice['category2'] ?? null,
+                        'price' => $hasDiscountPrice ? $discountPrice : 0,
+                    ]);
+                    $priceSaleKeyToIdMap[(string) $salePriceKey] = $createdPriceSale->id;
                 }
+            } else {
+                $priceSaleKeyToIdMap = [];
             }
 
             // Handle combos
@@ -673,8 +697,12 @@ class ProductController extends Controller
                 // Create new degree ranges
                 foreach ($validated['degree_ranges'] as $degreeRange) {
                     if (!empty($degreeRange['name'])) {
+                        $degreePriceSaleKey = isset($degreeRange['price_sale_key']) ? (string) $degreeRange['price_sale_key'] : null;
                         ProductDegreeRange::create([
                             'product_id' => $product->id,
+                            'price_sale_id' => ($degreePriceSaleKey !== null && isset($priceSaleKeyToIdMap[$degreePriceSaleKey]))
+                                ? $priceSaleKeyToIdMap[$degreePriceSaleKey]
+                                : null,
                             'name' => $degreeRange['name'] ?? '',
                             'price' => $degreeRange['price'] ?? 0,
                             'price_sale' => $degreeRange['price_sale'] ?? 0,

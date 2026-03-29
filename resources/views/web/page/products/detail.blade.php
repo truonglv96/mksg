@@ -217,7 +217,12 @@
         @include('web.partials.breadcrumb')
 
         <!-- Product Summary -->
-        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10 overflow-x-hidden" data-product-id="{{ $product->id }}" data-product-unit="{{ $product->unit ?? '' }}" data-product-brand="{{ ($brand && $brand->name) ? $brand->name : (($product->brand && $product->brand->name) ? $product->brand->name : '') }}">
+        @php
+            $priceSaleSelectLabel = (int)($product->type_color ?? 0) === 1
+                ? config('texts.product_option_type_discount')
+                : config('texts.product_option_type_color');
+        @endphp
+        <section id="product-summary" class="product-summary bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8 mb-10 overflow-x-hidden" data-product-id="{{ $product->id }}" data-product-unit="{{ $product->unit ?? '' }}" data-product-brand="{{ ($brand && $brand->name) ? $brand->name : (($product->brand && $product->brand->name) ? $product->brand->name : '') }}" data-price-sale-option-label="{{ e($priceSaleSelectLabel) }}">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10">
                 <!-- Gallery -->
                 <div>
@@ -272,7 +277,7 @@
                 <div class="space-y-4">
                     <!-- Product Header -->
                     <div class="space-y-2 relative">
-                        <h1 id="product-name" class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
+                        <h1 id="product-name" class="text-[22px] font-bold text-gray-900 leading-tight">
                             {{ $product->name }}
                         </h1>
                         <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-base text-gray-600">
@@ -323,9 +328,9 @@
                             @endif
                         </div>
                         <div class="social-sharing inline-flex items-center absolute top-2 right-2 md:top-[-60px] md:right-[-20px]">
-                            <a target="_blank" rel="noopener"
-                               href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
-                               class="inline-flex items-center">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('product.detail', ['categoryPath' => $mainCategory ? $product->getCategoryPath() : '', 'productAlias' => $product->alias])) }}"
+                               class="inline-flex items-center"
+                               onclick="window.open(this.href, 'fbshare', 'width=640,height=480'); return false;">
                                 <img src="{{ asset('img/tmp/pngtree-facebook-like-share-icon-button-png-image_1805237.png') }}"
                                      alt="Facebook Like &amp; Share"
                                      class="h-10 sm:h-12 md:h-20 w-auto object-contain">
@@ -361,36 +366,12 @@
 
                     <!-- Product Options -->
                     <div class="space-y-3">
-                        @if(isset($productColors) && $productColors && $productColors->count() > 0)
-                        <div class="bg-gray-50/50 rounded-lg px-2.5 py-1.5 border border-gray-200">
-                            <div class="flex items-center gap-2">
-                                <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">{{ config('texts.product_frame_color') }}</label>
-                                <!-- <p class="text-base font-semibold text-gray-700  tracking-wide whitespace-nowrap flex-shrink-0">{{ config('texts.product_frame_color') }}:</p> -->
-                                <div class="flex flex-wrap gap-1.5 flex-1">
-                                @foreach($productColors as $index => $color)
-                                    <button type="button" class="color-chip w-7 h-7 sm:w-8 sm:h-8 rounded-md border border-gray-300 shadow-sm bg-cover bg-center transition-all duration-200 hover:scale-105 hover:shadow hover:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-500 {{ $index === 0 ? 'active ring-1 ring-red-500 border-red-500' : '' }}"
-                                    data-color="{{ $color->name }}" 
-                                    data-color-id="{{ $color->id }}"
-                                    @if($color->url_img)
-                                    style="background-image: url('{{ asset('img/color/' . $color->url_img) }}');"
-                                    @endif
-                                    aria-label="{{ $color->name }}" 
-                                    aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
-                                </button>
-                                @endforeach
-                            </div>
-                            </div>
-                        </div>
-                        @endif
-                        
                         @if((isset($productPriceSales) && $productPriceSales->count() > 0) || (isset($productDegreeRanges) && $productDegreeRanges->count() > 0))
-                        <div class="bg-gray-50/50 rounded-lg p-2.5 border border-gray-200 flex flex-col lg:flex-row lg:gap-2.5">
+                        <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3 flex flex-col gap-3">
                             @if(isset($productPriceSales) && $productPriceSales->count() > 0)
-                            <div class="flex-1">
-                                <label for="price-sale-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">Chiết Suất</label>
-                                <select id="price-sale-select" 
-                                        class="w-full px-2.5 py-1.5 text-base border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
-                                        <option value="" data-price="0">Chưa chọn</option>
+                            <div class="w-full min-w-0 flex flex-row flex-wrap items-center gap-x-3 gap-y-2">
+                                <h3 id="price-sale-group-label" class="product-option-field-label m-0 shrink-0 text-[16px] font-black uppercase tracking-wide text-gray-700">{{ $priceSaleSelectLabel }}:</h3>
+                                <div class="price-sale-pills flex min-w-0 flex-1 flex-wrap items-center gap-1.5" role="group" aria-labelledby="price-sale-group-label">
                                         @foreach($productPriceSales as $priceSale)
                                             @php
                                                 $categoryName = '';
@@ -399,26 +380,40 @@
                                                 } elseif ($priceSale->mainCategory && $priceSale->mainCategory->name) {
                                                     $categoryName = $priceSale->mainCategory->name;
                                                 }
-                                                $displayPrice = $priceSale->discount ?? $priceSale->price ?? 0;
+                                                $displayPrice = ((int)($product->type_color ?? 0) === 1 && $loop->first)
+                                                    ? 0
+                                                    : ($priceSale->discount ?? $priceSale->price ?? 0);
+                                                // Chiết suất (type_color=1): chỉ hiển thị phần số/phần sau chữ "Chiết suất", ví dụ "Chiết Suất 1.50" → "1.50"
+                                                $priceSaleDisplayName = $categoryName;
+                                                if ((int)($product->type_color ?? 0) === 1 && $categoryName !== '') {
+                                                    $stripped = preg_replace('/^\s*chiết\s*suất\s*[:,：]?\s*/iu', '', $categoryName);
+                                                    $stripped = trim((string) $stripped);
+                                                    $priceSaleDisplayName = $stripped !== '' ? $stripped : $categoryName;
+                                                }
                                             @endphp
-                                            @if($categoryName && $displayPrice > 0)
-                                            <option value="{{ $priceSale->id }}" 
-                                                    data-price="{{ $displayPrice }}"
-                                                    data-category="{{ $categoryName }}">
-                                                {{ $categoryName }}
-                                            </option>
+                                            @if($categoryName)
+                                            <button type="button"
+                                                class="price-sale-pill min-h-9 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors duration-150 hover:border-red-300 hover:bg-red-50/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 active:scale-[0.98]"
+                                                data-price-sale-id="{{ $priceSale->id }}"
+                                                data-price="{{ $displayPrice }}"
+                                                data-category="{{ e($priceSaleDisplayName) }}"
+                                                aria-pressed="false">
+                                                {{ $priceSaleDisplayName }}
+                                            </button>
                                             @endif
                                         @endforeach
-                                    </select>
                                 </div>
+                            </div>
                             @endif
                             
                             @if(isset($productDegreeRanges) && $productDegreeRanges->count() > 0)
-                            <div class="flex-1 {{ isset($productPriceSales) && $productPriceSales->count() > 0 ? 'mt-2.5 lg:mt-0' : '' }}">
-                                <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">Độ Khúc Xạ</label>
+                            <div id="degree-range-section" class="w-full min-w-0 space-y-2 {{ (isset($productPriceSales) && $productPriceSales->count() > 0) ? 'pt-2 border-t border-gray-200/80' : '' }}">
+                                <!-- <label for="degree-range-select" class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700 cursor-pointer">Độ khúc xạ</label> -->
+                                <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Độ khúc xạ</h3>
                                 <select id="degree-range-select" 
-                                        class="w-full px-2.5 py-1.5 text-base border border-gray-300 rounded-lg focus:ring-1 focus:ring-red-500 focus:border-red-500 outline-none transition-all bg-white hover:border-gray-400">
-                                        <option value="" data-price="0">Chưa chọn</option>
+                                        class="w-full appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-2.5 pr-9 text-xs font-medium text-gray-900 transition-colors hover:border-gray-300 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 bg-[length:1rem] bg-[right_0.5rem_center] bg-no-repeat"
+                                        style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke-width=%271.5%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 d=%27M19.5 8.25l-7.5 7.5-7.5-7.5%27/%3E%3C/svg%3E');">
+                                        <option value="" data-price="0">—</option>
                                         @foreach($productDegreeRanges as $degreeRange)
                                             @if(!empty($degreeRange->name))
                                             @php
@@ -432,7 +427,8 @@
                                             @endphp
                                             <option value="{{ $degreeRange->id }}" 
                                                     data-price="{{ $displayPrice }}"
-                                                    data-name="{{ $degreeRange->name }}">
+                                                    data-name="{{ $degreeRange->name }}"
+                                                    data-price-sale-id="{{ $degreeRange->price_sale_id }}">
                                                 {{ $degreeRange->name }}@if($displayPrice > 0)@endif
                                             </option>
                                             @endif
@@ -444,16 +440,19 @@
                         @endif
 
                         @if(isset($discountedCombos) && $discountedCombos && $discountedCombos->count() > 0)
-                        <div class="bg-gray-50/50 rounded-lg p-2 border border-gray-200">
-                            <label for="degree-range-select" class="block text-base font-bold text-gray-800 mb-1 uppercase tracking-wide">{{ config('texts.product_lens_package') }}</label>
+                        <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
+                            <div class="space-y-2">
+                            <!-- <p class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</p> -->
+                            <!-- <label for="combo-select" class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700 cursor-pointer">{{ config('texts.product_lens_package') }}</label> -->
+                            <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @foreach($discountedCombos as $index => $combo)
                                 <button type="button" 
-                                    class="option-pill rounded-lg px-2 py-1.5 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200 {{ $index === 0 ? 'active border-red-500 bg-red-50 ring-1 ring-red-500' : '' }}"
+                                    class="option-pill rounded-lg px-2 py-1.5 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200"
                                     data-option="{{ $combo->name }}" 
                                     data-combo-id="{{ $combo->id }}"
                                     data-option-price="{{ $combo->price ?? 0 }}"
-                                    aria-pressed="{{ $index === 0 ? 'true' : 'false' }}">
+                                    aria-pressed="false">
                                     <p class="font-bold text-gray-900 text-base leading-tight">{{ $combo->name }}</p>
                                     @if($combo->description)
                                     <p class="text-base text-gray-600 mt-0.5 leading-tight">{{ $combo->description }}</p>
@@ -464,13 +463,15 @@
                                 </button>
                                 @endforeach
                             </div>
+                            </div>
                         </div>
                         @endif
                         
                         <!-- Features Product - Clean 2 Column Design -->
                         @if(isset($productFeatures) && $productFeatures->count() > 0)
-                        <div class="bg-gray-50/50 rounded-lg p-2.5 border border-gray-200">
-                            <h3 class="text-base font-bold text-gray-900 mb-2 uppercase tracking-wide">Tính năng</h3>
+                        <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
+                            <div class="space-y-2">
+                            <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Tính năng</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 @php
                                     $featuresArray = $productFeatures->values()->all();
@@ -517,6 +518,7 @@
                                 </div>
                                 @endif
                             </div>
+                            </div>
                         </div>
                         @endif
                     </div>
@@ -524,17 +526,11 @@
                     <!-- Tổng hợp lựa chọn -->
                     @php
                         $summary = [];
-                        if(isset($productColors) && $productColors->count() > 0) {
-                            $summary[] = ($productColors->first()->name ?? '');
-                        }
-                        if(isset($discountedCombos) && $discountedCombos->count() > 0) {
-                            $summary[] = ($discountedCombos->first()->name ?? '');
-                        }
                         $summaryText = implode(' - ', array_filter($summary)) ?: 'Chưa chọn';
                         $summaryCount = count(array_filter($summary));
                         $isInline = $summaryCount <= 1;
                     @endphp
-                    <div class="bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50/30 border border-blue-200/80 rounded-lg p-3 shadow-sm">
+                    <div id="selected-summary-wrapper" class="hidden bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50/30 border border-blue-200/80 rounded-lg p-3 shadow-sm">
                         @if($isInline)
                             <div class="flex items-center gap-2 flex-wrap min-w-0">
                                 <span class="text-sm sm:text-base font-semibold text-gray-800 whitespace-nowrap flex-shrink-0">
@@ -566,7 +562,7 @@
                         </button>
                     </div>
 
-                    <div class="support-chips flex flex-wrap items-center gap-3 text-base">
+                    <div class="support-chips flex flex-wrap items-center gap-3 text-[14px]">
                         <span class="px-3 py-2 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-2">
                             🛠️ {{ config('texts.product_install_time') }}
                         </span>

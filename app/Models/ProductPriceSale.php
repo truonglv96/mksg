@@ -37,4 +37,9 @@ class ProductPriceSale extends Model
     public function category(){
         return $this->belongsTo(Category::class, 'id_category');
     }
+
+    public function degreeRanges()
+    {
+        return $this->hasMany(ProductDegreeRange::class, 'price_sale_id', 'id');
+    }
 }

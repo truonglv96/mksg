@@ -900,6 +900,7 @@
                     : [],
                 selectedPriceSale: toSafeString(item.selectedPriceSale || ''),
                 selectedDegreeRange: toSafeString(item.selectedDegreeRange || ''),
+                priceSaleOptionLabel: toSafeString(item.priceSaleOptionLabel || ''),
                 unit: toSafeString(item.unit || ''),
                 origin: toSafeString(item.origin || ''),
                 quantity: parseInt(item.quantity) || 1
@@ -1072,11 +1073,14 @@
                         });
                     }
                     
-                    // Độ khúc xạ (Chiết suất)
+                    // Chiết suất / Màu sắc (theo priceSaleOptionLabel khi thêm từ trang chi tiết)
                     if (item.selectedPriceSale && item.selectedPriceSale.trim() !== '') {
+                        const psLabel = (item.priceSaleOptionLabel && String(item.priceSaleOptionLabel).trim() !== '')
+                            ? String(item.priceSaleOptionLabel).trim()
+                            : 'Chiết suất';
                         productDetails.push({
                             icon: '🔍',
-                            label: 'Chiết suất',
+                            label: psLabel,
                             value: item.selectedPriceSale
                         });
                     }
@@ -1231,10 +1235,13 @@
                         });
                     }
                     
-                    // Chiết suất
+                    // Chiết suất / Màu sắc
                     if (item.selectedPriceSale && String(item.selectedPriceSale).trim() !== '') {
+                        const psLabel = (item.priceSaleOptionLabel && String(item.priceSaleOptionLabel).trim() !== '')
+                            ? String(item.priceSaleOptionLabel).trim()
+                            : 'Chiết suất';
                         productDetails.push({
-                            label: 'Chiết suất',
+                            label: psLabel,
                             value: String(item.selectedPriceSale).trim()
                         });
                     }

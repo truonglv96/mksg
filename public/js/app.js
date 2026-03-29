@@ -291,6 +291,7 @@
                 // Xử lý selectedPriceSale và selectedDegreeRange
                 const selectedPriceSale = toSafeString(item.selectedPriceSale || '');
                 const selectedDegreeRange = toSafeString(item.selectedDegreeRange || '');
+                const priceSaleOptionLabel = toSafeString(item.priceSaleOptionLabel || '');
                 
                 return {
                     id: parseInt(item.id || item.productId || 0) || 0,
@@ -305,6 +306,7 @@
                     selectedOptions: selectedOptions.map(opt => toSafeString(opt)).filter(opt => opt !== ''),
                     selectedPriceSale: selectedPriceSale,
                     selectedDegreeRange: selectedDegreeRange,
+                    priceSaleOptionLabel: priceSaleOptionLabel,
                     quantity: parseInt(item.quantity) || 1
                 };
             }
@@ -454,7 +456,10 @@
                             
                             // Thêm chiết suất đã chọn
                             if (item.selectedPriceSale && typeof item.selectedPriceSale === 'string' && item.selectedPriceSale.trim() !== '') {
-                                optionParts.push(`Chiết Suất: ${escapeHtml(item.selectedPriceSale)}`);
+                                const psLabel = (item.priceSaleOptionLabel && String(item.priceSaleOptionLabel).trim() !== '')
+                                    ? String(item.priceSaleOptionLabel).trim()
+                                    : 'Chiết Suất';
+                                optionParts.push(`${escapeHtml(psLabel)}: ${escapeHtml(item.selectedPriceSale)}`);
                             }
                             
                             // Thêm độ khúc xạ đã chọn
@@ -659,7 +664,7 @@
                     const priceText = productSummary.querySelector('[data-product-price]')?.textContent.trim() || '';
                     const price = parseInt(priceText.replace(/[^\d]/g, '')) || 0;
                     const image = document.getElementById('main-product-image')?.src || '';
-                    const color = productSummary.dataset.selectedColor || productSummary.querySelector('.color-chip.active')?.dataset.color || '';
+                    const color = productSummary.dataset.selectedColor || '';
                     
                     // Lấy tất cả các option đã chọn (multi-select)
                     const activeOptionPills = Array.from(productSummary.querySelectorAll('.option-pill.active'));
@@ -674,14 +679,11 @@
                     // Lấy product ID
                     const productId = productSummary.dataset.productId || productSummary.getAttribute('data-product-id') || '';
                     
-                    // Lấy chiết suất đã chọn
-                    const priceSaleSelect = document.getElementById('price-sale-select');
+                    // Chiết suất / màu sắc (pill đơn, có thể không chọn)
+                    const activePriceSalePill = productSummary.querySelector('.price-sale-pill.active');
                     let selectedPriceSale = '';
-                    if (priceSaleSelect && priceSaleSelect.value) {
-                        const selectedOption = priceSaleSelect.options[priceSaleSelect.selectedIndex];
-                        if (selectedOption && selectedOption.value !== '') {
-                            selectedPriceSale = selectedOption.getAttribute('data-category') || '';
-                        }
+                    if (activePriceSalePill) {
+                        selectedPriceSale = activePriceSalePill.getAttribute('data-category') || '';
                     }
                     
                     // Lấy độ khúc xạ đã chọn
@@ -693,6 +695,8 @@
                             selectedDegreeRange = selectedOption.getAttribute('data-name') || '';
                         }
                     }
+
+                    const priceSaleOptionLabel = (productSummary.dataset.priceSaleOptionLabel || '').trim() || 'Chiết Suất';
 
                     return {
                         id: parseInt(productId) || 0,
@@ -706,8 +710,9 @@
                         lens,
                         lensLabel,
                         selectedOptions: selectedOptions, // Mảng tất cả các option đã chọn
-                        selectedPriceSale: selectedPriceSale, // Chiết suất đã chọn
-                        selectedDegreeRange: selectedDegreeRange // Độ khúc xạ đã chọn
+                        selectedPriceSale: selectedPriceSale, // Giá trị option (chiết suất / màu sắc tùy type_color)
+                        selectedDegreeRange: selectedDegreeRange, // Độ khúc xạ đã chọn
+                        priceSaleOptionLabel: priceSaleOptionLabel
                     };
                 }
 
@@ -1017,28 +1022,22 @@
             // --- PRODUCT DETAIL OPTIONS ---
             const productSummary = document.getElementById('product-summary');
             if (productSummary) {
-                const colorChips = Array.from(productSummary.querySelectorAll('.color-chip'));
                 const optionPills = Array.from(productSummary.querySelectorAll('.option-pill'));
                 const selectedSummaryLabel = document.getElementById('selected-summary');
+                const selectedSummaryWrapper = document.getElementById('selected-summary-wrapper');
 
                 const updateSelectedSummary = () => {
                     if (!selectedSummaryLabel) return;
                     
                     const summaryParts = [];
                     
-                    // Lấy màu đã chọn
-                    const activeColorChip = colorChips.find(chip => chip.classList.contains('active'));
-                    if (activeColorChip) {
-                        const color = activeColorChip.dataset.color || '';
-                        if (color) summaryParts.push(color);
-                    }
-                    
-                    // Lấy chiết suất đã chọn
-                    if (priceSaleSelect && priceSaleSelect.value) {
-                        const selectedPriceSaleOption = priceSaleSelect.options[priceSaleSelect.selectedIndex];
-                        if (selectedPriceSaleOption && selectedPriceSaleOption.value !== '') {
-                            const categoryName = selectedPriceSaleOption.getAttribute('data-category') || '';
-                            if (categoryName) summaryParts.push('Chiết Suất ' + categoryName);
+                    // Chiết suất / màu sắc (pill)
+                    const activePriceSalePill = productSummary.querySelector('.price-sale-pill.active');
+                    if (activePriceSalePill) {
+                        const categoryName = activePriceSalePill.getAttribute('data-category') || '';
+                        if (categoryName) {
+                            const psLabel = (productSummary.dataset.priceSaleOptionLabel || '').trim() || 'Chiết Suất';
+                            summaryParts.push(psLabel + ' ' + categoryName);
                         }
                     }
                     
@@ -1057,85 +1056,132 @@
                         summaryParts.push(...selectedOptions);
                     }
                     
-                    selectedSummaryLabel.textContent = summaryParts.length > 0 ? summaryParts.join(' - ') : 'Chưa chọn';
-                };
-                
-                const setSelectedColor = (chip) => {
-                    colorChips.forEach(btn => {
-                        btn.classList.toggle('active', btn === chip);
-                        btn.setAttribute('aria-pressed', btn === chip ? 'true' : 'false');
-                    });
-                    productSummary.dataset.selectedColor = chip?.dataset.color || '';
-                    updateSelectedSummary();
-                };
-
-                const toggleColor = (chip) => {
-                    const isCurrentlyActive = chip.classList.contains('active');
-                    
-                    if (isCurrentlyActive) {
-                        chip.classList.remove('active');
-                        chip.classList.remove('ring-1', 'ring-red-500', 'border-red-500');
-                        chip.setAttribute('aria-pressed', 'false');
-                    } else {
-                        chip.classList.add('active');
-                        chip.classList.add('ring-1', 'ring-red-500', 'border-red-500');
-                        chip.setAttribute('aria-pressed', 'true');
+                    if (selectedSummaryWrapper) {
+                        selectedSummaryWrapper.classList.toggle('hidden', summaryParts.length === 0);
                     }
-                    
-                    // Cập nhật selected color (lấy màu đầu tiên được chọn)
-                    const activeColorChip = colorChips.find(c => c.classList.contains('active'));
-                    productSummary.dataset.selectedColor = activeColorChip?.dataset.color || '';
-                    updateSelectedSummary();
+                    selectedSummaryLabel.textContent = summaryParts.length > 0 ? summaryParts.join(' - ') : '';
                 };
 
                 // Option pills - multi-select với tính giá tổng
                 const priceElement = productSummary.querySelector('[data-product-price]');
                 const selectedOptionsLabel = document.getElementById('selected-options-list');
-                // Tìm các select elements - có thể nằm trong hoặc ngoài productSummary
-                const priceSaleSelect = document.getElementById('price-sale-select') || productSummary.querySelector('#price-sale-select');
+                const priceSalePills = Array.from(productSummary.querySelectorAll('.price-sale-pill'));
                 const degreeRangeSelect = document.getElementById('degree-range-select') || productSummary.querySelector('#degree-range-select');
+                const degreeRangeSection = document.getElementById('degree-range-section');
                 const originalBasePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
-                let selectedSalePrice = 0; // Giá chiết suất được cộng thêm
+                let selectedSalePrice = 0; // Giá chiết suất / màu sắc (pill), mặc định không chọn
                 let selectedDegreeRangePrice = 0; // Giá độ khúc xạ được cộng thêm
+                const degreeRangeOptionTemplates = degreeRangeSelect
+                    ? Array.from(degreeRangeSelect.options).map(option => option.cloneNode(true))
+                    : [];
+                const hasMappedDegreeRanges = degreeRangeOptionTemplates.some((option) => {
+                    if (!option.value || option.value === '') return false;
+                    const parentId = (option.getAttribute('data-price-sale-id') || '').trim();
+                    return parentId !== '';
+                });
 
-                // Xử lý chọn giá sale từ dropdown - CỘNG THÊM vào giá gốc
-                if (priceSaleSelect) {
-                    priceSaleSelect.addEventListener('change', function() {
-                        const selectedOption = this.options[this.selectedIndex];
-                        if (selectedOption) {
-                            if (selectedOption.value !== '' && selectedOption.dataset.price) {
-                                // Lấy giá chiết suất để cộng thêm
-                                const priceValue = selectedOption.getAttribute('data-price');
-                                selectedSalePrice = priceValue ? parseFloat(priceValue) : 0;
-                                if (isNaN(selectedSalePrice)) selectedSalePrice = 0;
-                            } else {
-                                // Nếu chọn "Chưa chọn" thì không cộng thêm
-                                selectedSalePrice = 0;
-                            }
-                            updatePriceAndLabel();
-                            updateSelectedSummary();
+                const updateSelectedDegreeRangePrice = () => {
+                    if (!degreeRangeSelect) return;
+                    const selectedOption = degreeRangeSelect.options[degreeRangeSelect.selectedIndex];
+                    if (selectedOption && selectedOption.value && selectedOption.value !== '') {
+                        const priceAttr = selectedOption.getAttribute('data-price');
+                        if (priceAttr !== null && priceAttr !== undefined && priceAttr !== '') {
+                            const parsedPrice = parseFloat(priceAttr);
+                            selectedDegreeRangePrice = !isNaN(parsedPrice) && parsedPrice > 0 ? parsedPrice : 0;
+                            return;
+                        }
+                    }
+                    selectedDegreeRangePrice = 0;
+                };
+
+                const setDegreeRangeVisibility = (shouldShow) => {
+                    if (!degreeRangeSection) return;
+                    degreeRangeSection.classList.toggle('hidden', !shouldShow);
+                };
+
+                const filterDegreeRangesByPriceSale = (activePriceSaleId) => {
+                    if (!degreeRangeSelect || !hasMappedDegreeRanges) return;
+
+                    degreeRangeSelect.innerHTML = '';
+
+                    degreeRangeOptionTemplates.forEach((templateOption) => {
+                        if (!templateOption.value || templateOption.value === '') {
+                            degreeRangeSelect.appendChild(templateOption.cloneNode(true));
+                            return;
+                        }
+
+                        const parentId = (templateOption.getAttribute('data-price-sale-id') || '').trim();
+                        if (!activePriceSaleId || parentId !== String(activePriceSaleId).trim()) {
+                            return;
+                        }
+
+                        degreeRangeSelect.appendChild(templateOption.cloneNode(true));
+                    });
+
+                    const firstSelectableOption = Array.from(degreeRangeSelect.options).find(
+                        (option) => option.value && option.value !== ''
+                    );
+                    degreeRangeSelect.value = firstSelectableOption ? firstSelectableOption.value : '';
+                    updateSelectedDegreeRangePrice();
+                    degreeRangeSelect.disabled = !firstSelectableOption;
+                    setDegreeRangeVisibility(!!firstSelectableOption);
+                };
+
+                const setActivePriceSalePill = (pillToActivate) => {
+                    if (!pillToActivate) return;
+                    priceSalePills.forEach((p) => {
+                        const isActive = p === pillToActivate;
+                        p.classList.remove(
+                            'active',
+                            'ring-1',
+                            'ring-2',
+                            'ring-red-500',
+                            'ring-offset-2',
+                            'border-red-500',
+                            'bg-red-50',
+                            'text-red-800',
+                            'shadow-md'
+                        );
+                        p.classList.add('border-gray-200', 'bg-white', 'text-gray-800');
+                        p.setAttribute('aria-pressed', 'false');
+
+                        if (isActive) {
+                            p.classList.add(
+                                'active',
+                                'ring-2',
+                                'ring-red-500',
+                                'ring-offset-2',
+                                'border-red-500',
+                                'bg-red-50',
+                                'text-red-800',
+                                'shadow-md'
+                            );
+                            p.classList.remove('border-gray-200', 'bg-white', 'text-gray-800');
+                            p.setAttribute('aria-pressed', 'true');
                         }
                     });
-                }
+
+                    const pv = pillToActivate.getAttribute('data-price');
+                    selectedSalePrice = pv ? parseFloat(pv) : 0;
+                    if (isNaN(selectedSalePrice)) selectedSalePrice = 0;
+                    filterDegreeRangesByPriceSale(pillToActivate.getAttribute('data-price-sale-id'));
+                };
+
+                // Chiết suất / màu sắc: luôn giữ 1 pill đang chọn (mặc định là pill đầu tiên)
+                priceSalePills.forEach((pill) => {
+                    pill.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        setActivePriceSalePill(pill);
+                        updatePriceAndLabel();
+                    });
+                });
 
                 // Xử lý chọn độ khúc xạ từ dropdown - CỘNG THÊM vào giá gốc
                 if (degreeRangeSelect) {
                     degreeRangeSelect.addEventListener('change', function(e) {
                         const selectedOption = this.options[this.selectedIndex];
                         if (selectedOption) {
-                            if (selectedOption.value && selectedOption.value !== '') {
-                                // Lấy giá độ khúc xạ để cộng thêm
-                                const priceAttr = selectedOption.getAttribute('data-price');
-                                if (priceAttr !== null && priceAttr !== undefined && priceAttr !== '') {
-                                    const parsedPrice = parseFloat(priceAttr);
-                                    selectedDegreeRangePrice = !isNaN(parsedPrice) && parsedPrice > 0 ? parsedPrice : 0;
-                                } else {
-                                    selectedDegreeRangePrice = 0;
-                                }
-                            } else {
-                                // Nếu chọn "Chưa chọn" thì không cộng thêm
-                                selectedDegreeRangePrice = 0;
-                            }
+                            updateSelectedDegreeRangePrice();
                             updatePriceAndLabel();
                             updateSelectedSummary();
                         }
@@ -1189,38 +1235,29 @@
                 };
 
                 // Initialize defaults
-                if (colorChips.length) {
-                    const defaultChip = colorChips.find(chip => chip.classList.contains('active')) || colorChips[0];
-                    setSelectedColor(defaultChip);
-                }
-                
                 if (optionPills.length) {
-                    // Mặc định chọn option đầu tiên nếu chưa có option nào được chọn
-                    const hasActiveOption = optionPills.some(pill => pill.classList.contains('active'));
-                    if (!hasActiveOption && optionPills[0]) {
-                        optionPills[0].classList.add('active', 'border-red-400', 'bg-red-50');
-                        optionPills[0].setAttribute('aria-pressed', 'true');
-                    }
                     updatePriceAndLabel();
                 }
+
+                if (priceSalePills.length > 0) {
+                    setActivePriceSalePill(priceSalePills[0]);
+                } else if (hasMappedDegreeRanges && degreeRangeSelect) {
+                    const activePriceSalePill = productSummary.querySelector('.price-sale-pill.active');
+                    const activePriceSaleId = activePriceSalePill ? activePriceSalePill.getAttribute('data-price-sale-id') : '';
+                    filterDegreeRangesByPriceSale(activePriceSaleId);
+                }
+                updateSelectedDegreeRangePrice();
                 
                 // Cập nhật tổng hợp lựa chọn khi khởi tạo
+                updatePriceAndLabel();
                 updateSelectedSummary();
                 
                 // Debug: Kiểm tra các select elements
                 console.log('Product Detail Initialized:', {
-                    priceSaleSelect: priceSaleSelect ? 'Found' : 'Not found',
+                    priceSalePills: priceSalePills.length,
                     degreeRangeSelect: degreeRangeSelect ? 'Found' : 'Not found',
                     priceElement: priceElement ? 'Found' : 'Not found',
                     originalBasePrice: originalBasePrice
-                });
-
-                colorChips.forEach(chip => {
-                    chip.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleColor(chip);
-                    });
                 });
 
                 optionPills.forEach(pill => {
