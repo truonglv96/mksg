@@ -366,13 +366,33 @@
 
                     <!-- Product Options -->
                     <div class="space-y-3">
-                        @if((isset($productPriceSales) && $productPriceSales->count() > 0) || (isset($productDegreeRanges) && $productDegreeRanges->count() > 0))
+                        @php
+                            $visiblePriceSales = collect(isset($productPriceSales) ? $productPriceSales : [])->filter(function ($priceSale) {
+                                $categoryName = '';
+                                if (!empty($priceSale->category) && !empty($priceSale->category->name)) {
+                                    $categoryName = trim((string) $priceSale->category->name);
+                                } elseif (!empty($priceSale->mainCategory) && !empty($priceSale->mainCategory->name)) {
+                                    $categoryName = trim((string) $priceSale->mainCategory->name);
+                                }
+                                return $categoryName !== '';
+                            })->values();
+
+                            $visibleDegreeRanges = collect(isset($productDegreeRanges) ? $productDegreeRanges : [])->filter(function ($degreeRange) {
+                                return trim((string) ($degreeRange->name ?? '')) !== '';
+                            })->values();
+
+                            $visibleCombos = collect(isset($discountedCombos) ? $discountedCombos : [])->filter(function ($combo) {
+                                return trim((string) ($combo->name ?? '')) !== '';
+                            })->values();
+                        @endphp
+
+                        @if($visiblePriceSales->count() > 0 || $visibleDegreeRanges->count() > 0)
                         <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3 flex flex-col gap-3">
-                            @if(isset($productPriceSales) && $productPriceSales->count() > 0)
+                            @if($visiblePriceSales->count() > 0)
                             <div class="w-full min-w-0 flex flex-row flex-wrap items-center gap-x-3 gap-y-2">
                                 <h3 id="price-sale-group-label" class="product-option-field-label m-0 shrink-0 text-[16px] font-black uppercase tracking-wide text-gray-700">{{ $priceSaleSelectLabel }}:</h3>
                                 <div class="price-sale-pills flex min-w-0 flex-1 flex-wrap items-center gap-1.5" role="group" aria-labelledby="price-sale-group-label">
-                                        @foreach($productPriceSales as $priceSale)
+                                        @foreach($visiblePriceSales as $priceSale)
                                             @php
                                                 $categoryName = '';
                                                 if ($priceSale->category && $priceSale->category->name) {
@@ -406,15 +426,15 @@
                             </div>
                             @endif
                             
-                            @if(isset($productDegreeRanges) && $productDegreeRanges->count() > 0)
-                            <div id="degree-range-section" class="w-full min-w-0 space-y-2 {{ (isset($productPriceSales) && $productPriceSales->count() > 0) ? 'pt-2 border-t border-gray-200/80' : '' }}">
+                            @if($visibleDegreeRanges->count() > 0)
+                            <div id="degree-range-section" class="w-full min-w-0 space-y-2 {{ $visiblePriceSales->count() > 0 ? 'pt-2 border-t border-gray-200/80' : '' }}">
                                 <!-- <label for="degree-range-select" class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700 cursor-pointer">Độ khúc xạ</label> -->
                                 <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Độ khúc xạ</h3>
                                 <select id="degree-range-select" 
                                         class="w-full appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-2.5 pr-9 text-xs font-medium text-gray-900 transition-colors hover:border-gray-300 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 bg-[length:1rem] bg-[right_0.5rem_center] bg-no-repeat"
                                         style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke-width=%271.5%27 stroke=%27%236b7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 d=%27M19.5 8.25l-7.5 7.5-7.5-7.5%27/%3E%3C/svg%3E');">
                                         <option value="" data-price="0">—</option>
-                                        @foreach($productDegreeRanges as $degreeRange)
+                                        @foreach($visibleDegreeRanges as $degreeRange)
                                             @if(!empty($degreeRange->name))
                                             @php
                                                 // Ưu tiên price_sale, nếu price_sale = 0 hoặc null thì lấy price
@@ -439,14 +459,14 @@
                         </div>
                         @endif
 
-                        @if(isset($discountedCombos) && $discountedCombos && $discountedCombos->count() > 0)
+                        @if($visibleCombos->count() > 0)
                         <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
                             <div class="space-y-2">
                             <!-- <p class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</p> -->
                             <!-- <label for="combo-select" class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700 cursor-pointer">{{ config('texts.product_lens_package') }}</label> -->
                             <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                @foreach($discountedCombos as $index => $combo)
+                                @foreach($visibleCombos as $index => $combo)
                                 <button type="button" 
                                     class="option-pill rounded-lg px-2 py-1.5 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200"
                                     data-option="{{ $combo->name }}" 

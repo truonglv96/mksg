@@ -777,11 +777,10 @@ $breadcrumbs = [
                                     Giá Giảm ({{ config('texts.currency') }}):
                                 </label>
                                 <div class="flex items-center gap-2">
-                                    <input type="text" 
-                                           name="sale_prices[0][discount_price]" 
-                                           value=""
-                                           placeholder="Mặc định 0"
-                                           class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
+                                    <input type="hidden" name="sale_prices[0][discount_price]" value="0">
+                                    <div class="flex-1 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-500">
+                                        Mặc định (không cộng thêm giá)
+                                    </div>
                                     <button type="button" 
                                             onclick="removeSalePriceRow(this)"
                                             class="hidden remove-row-btn p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
@@ -1956,6 +1955,7 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
     }
     
     const rowIndex = index !== null ? index : salePriceRowIndex;
+    const isDefaultRow = String(rowIndex) === '0';
     const parsedRowIndex = parseInt(rowIndex, 10);
     if (!isNaN(parsedRowIndex) && salePriceRowIndex <= parsedRowIndex) {
         salePriceRowIndex = parsedRowIndex + 1;
@@ -2041,11 +2041,15 @@ function addSalePriceRow(category1 = '', category2 = '', price = '', index = nul
                 Giá Giảm ({{ config('texts.currency') }}):
             </label>
             <div class="flex items-center gap-2">
-                <input type="text" 
+                ${isDefaultRow
+                    ? `<input type="hidden" name="sale_prices[${rowIndex}][discount_price]" value="0">
+                       <div class="flex-1 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-500">Mặc định (không cộng thêm giá)</div>`
+                    : `<input type="text" 
                        name="sale_prices[${rowIndex}][discount_price]" 
                        value="${price}"
                        placeholder="0"
-                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">
+                       class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-smooth vnd-input">`
+                }
                 <button type="button" 
                         onclick="removeSalePriceRow(this)"
                         class="remove-row-btn p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
