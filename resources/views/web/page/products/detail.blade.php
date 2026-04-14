@@ -384,6 +384,25 @@
                             $visibleCombos = collect(isset($discountedCombos) ? $discountedCombos : [])->filter(function ($combo) {
                                 return trim((string) ($combo->name ?? '')) !== '';
                             })->values();
+
+                            $visibleMappedFeatures = collect(isset($mappedFeatureOptions) ? $mappedFeatureOptions : [])->filter(function ($featureMap) {
+                                return !empty($featureMap->feature) && trim((string) ($featureMap->feature->name ?? '')) !== '';
+                            })->values();
+
+                            $visibleMappedCombos = collect(isset($mappedComboOptions) ? $mappedComboOptions : [])->filter(function ($comboMap) {
+                                return !empty($comboMap->combo) && trim((string) ($comboMap->combo->name ?? '')) !== '';
+                            })->values();
+
+                            $fallbackFeatures = collect(isset($productFeatures) ? $productFeatures : [])->filter(function ($feature) {
+                                return trim((string) ($feature->name ?? '')) !== '';
+                            })->values();
+
+                            $fallbackCombos = $visibleCombos;
+                            $infoFeatures = $fallbackFeatures->count() > 0
+                                ? $fallbackFeatures
+                                : $visibleMappedFeatures->map(function ($item) {
+                                    return $item->feature;
+                                })->filter()->unique('id')->values();
                         @endphp
 
                         @if($visiblePriceSales->count() > 0 || $visibleDegreeRanges->count() > 0)
@@ -459,85 +478,116 @@
                         </div>
                         @endif
 
-                        @if($visibleCombos->count() > 0)
-                        <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
+                        @php
+                            $hasMappedFeatureOptions = $visibleMappedFeatures->count() > 0;
+                            $hasMappedComboOptions = $visibleMappedCombos->count() > 0;
+                            $hasFallbackComboOptions = !$hasMappedComboOptions && $fallbackCombos->count() > 0;
+                        @endphp
+
+                        @if($hasMappedFeatureOptions)
+                        <div id="feature-option-section" class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
                             <div class="space-y-2">
-                            <!-- <p class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</p> -->
-                            <!-- <label for="combo-select" class="product-option-field-label block text-xs font-black uppercase tracking-wide text-gray-700 cursor-pointer">{{ config('texts.product_lens_package') }}</label> -->
-                            <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">{{ config('texts.product_lens_package') }}</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                @foreach($visibleCombos as $index => $combo)
-                                <button type="button" 
-                                    class="option-pill rounded-lg px-2 py-1.5 text-left bg-white border border-gray-200 hover:border-red-400 hover:bg-red-50/50 transition-all duration-200"
-                                    data-option="{{ $combo->name }}" 
-                                    data-combo-id="{{ $combo->id }}"
-                                    data-option-price="{{ $combo->price ?? 0 }}"
-                                    aria-pressed="false">
-                                    <p class="font-bold text-gray-900 text-base leading-tight">{{ $combo->name }}</p>
-                                    @if($combo->description)
-                                    <p class="text-base text-gray-600 mt-0.5 leading-tight">{{ $combo->description }}</p>
-                                    @endif
-                                    @if($combo->price && $combo->price > 0)
-                                    <p class="text-base font-bold text-red-600 mt-0.5">+{{ number_format($combo->price, 0, ',', '.') }} {{ config('texts.currency') }}</p>
-                                    @endif
-                                </button>
-                                @endforeach
-                            </div>
+                                <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Tính năng</h3>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    @foreach($visibleMappedFeatures as $featureMap)
+                                        <button type="button"
+                                            class="option-pill feature-option-pill min-h-9 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors duration-150 hover:border-red-300 hover:bg-red-50/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 active:scale-[0.98]"
+                                            data-option="{{ $featureMap->feature->name }}"
+                                            data-option-price="{{ (int) ($featureMap->price ?? 0) }}"
+                                            data-price-sale-id="{{ $featureMap->price_sale_id }}"
+                                            aria-pressed="false">
+                                            <span class="whitespace-nowrap text-xs font-semibold leading-tight" style="font-size:12px !important;line-height:1rem !important;">{{ $featureMap->feature->name }}</span>
+                                        </button>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                         @endif
-                        
-                        <!-- Features Product - Clean 2 Column Design -->
-                        @if(isset($productFeatures) && $productFeatures->count() > 0)
+
+                        @if($hasMappedComboOptions || $hasFallbackComboOptions)
+                        <div id="combo-option-section" class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
+                            <div class="space-y-2">
+                                <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Lớp phủ</h3>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    @if($hasMappedComboOptions)
+                                        @foreach($visibleMappedCombos as $comboMap)
+                                            <button type="button"
+                                                class="option-pill combo-option-pill min-h-9 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors duration-150 hover:border-red-300 hover:bg-red-50/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 active:scale-[0.98]"
+                                                data-option="{{ $comboMap->combo->name }}"
+                                                data-combo-id="{{ $comboMap->combo_id }}"
+                                                data-option-price="{{ (int) ($comboMap->price ?? 0) }}"
+                                                data-price-sale-id="{{ $comboMap->price_sale_id }}"
+                                                aria-pressed="false">
+                                                <span class="whitespace-nowrap text-xs font-semibold leading-tight" style="font-size:12px !important;line-height:1rem !important;">{{ $comboMap->combo->name }}</span>
+                                            </button>
+                                        @endforeach
+                                    @else
+                                        @foreach($fallbackCombos as $combo)
+                                            <button type="button"
+                                                class="option-pill combo-option-pill min-h-9 inline-flex items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 transition-colors duration-150 hover:border-red-300 hover:bg-red-50/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 active:scale-[0.98]"
+                                                data-option="{{ $combo->name }}"
+                                                data-combo-id="{{ $combo->id }}"
+                                                data-option-price="0"
+                                                aria-pressed="false">
+                                                <span class="whitespace-nowrap text-xs font-semibold leading-tight">{{ $combo->name }}</span>
+                                            </button>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($infoFeatures->count() > 0)
                         <div class="rounded-lg border border-gray-200 bg-gray-50/60 p-3">
                             <div class="space-y-2">
-                            <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Tính năng</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                @php
-                                    $featuresArray = $productFeatures->values()->all();
-                                    $midPoint = ceil(count($featuresArray) / 2);
-                                    $leftColumn = array_slice($featuresArray, 0, $midPoint);
-                                    $rightColumn = array_slice($featuresArray, $midPoint);
-                                @endphp
-                                <div class="space-y-1.5">
-                                    @foreach($leftColumn as $feature)
-                                    <div class="flex items-center gap-2">
-                                        @if($feature->image)
-                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                                            <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
+                                <h3 class="product-option-field-label text-[16px] font-black uppercase tracking-wide text-gray-700">Tính năng</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    @php
+                                        $featuresArray = $infoFeatures->values()->all();
+                                        $midPoint = ceil(count($featuresArray) / 2);
+                                        $leftColumn = array_slice($featuresArray, 0, $midPoint);
+                                        $rightColumn = array_slice($featuresArray, $midPoint);
+                                    @endphp
+                                    <div class="space-y-1.5">
+                                        @foreach($leftColumn as $feature)
+                                        <div class="flex items-center gap-2">
+                                            @if($feature->image)
+                                            <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                                <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
+                                            </div>
+                                            @else
+                                            <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-gray-500 text-2xl">📋</span>
+                                            </div>
+                                            @endif
+                                            <p class="text-base text-gray-700 leading-tight">
+                                                {{ $feature->name }}
+                                            </p>
                                         </div>
-                                        @else
-                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                                            <span class="text-gray-500 text-2xl">📋</span>
-                                        </div>
-                                        @endif
-                                        <p class="text-base text-gray-700 leading-tight">
-                                            {{ $feature->name }}
-                                        </p>
+                                        @endforeach
                                     </div>
-                                    @endforeach
-                                </div>
-                                @if(count($rightColumn) > 0)
-                                <div class="space-y-1.5">
-                                    @foreach($rightColumn as $feature)
-                                    <div class="flex items-center gap-2">
-                                        @if($feature->image)
-                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                                            <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
+                                    @if(count($rightColumn) > 0)
+                                    <div class="space-y-1.5">
+                                        @foreach($rightColumn as $feature)
+                                        <div class="flex items-center gap-2">
+                                            @if($feature->image)
+                                            <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                                <img src="{{ $feature->getImageUrl() }}" alt="{{ $feature->name }}" class="w-full h-full object-contain">
+                                            </div>
+                                            @else
+                                            <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+                                                <span class="text-gray-500 text-2xl">📋</span>
+                                            </div>
+                                            @endif
+                                            <p class="text-base text-gray-700 leading-tight">
+                                                {{ $feature->name }}
+                                            </p>
                                         </div>
-                                        @else
-                                        <div class="w-7 h-7 flex-shrink-0 flex items-center justify-center">
-                                            <span class="text-gray-500 text-2xl">📋</span>
-                                        </div>
-                                        @endif
-                                        <p class="text-base text-gray-700 leading-tight">
-                                            {{ $feature->name }}
-                                        </p>
+                                        @endforeach
                                     </div>
-                                    @endforeach
+                                    @endif
                                 </div>
-                                @endif
-                            </div>
                             </div>
                         </div>
                         @endif

@@ -1023,6 +1023,8 @@
             const productSummary = document.getElementById('product-summary');
             if (productSummary) {
                 const optionPills = Array.from(productSummary.querySelectorAll('.option-pill'));
+                const featureOptionPills = optionPills.filter((pill) => pill.classList.contains('feature-option-pill'));
+                const comboOptionPills = optionPills.filter((pill) => pill.classList.contains('combo-option-pill'));
                 const selectedSummaryLabel = document.getElementById('selected-summary');
                 const selectedSummaryWrapper = document.getElementById('selected-summary-wrapper');
 
@@ -1068,6 +1070,8 @@
                 const priceSalePills = Array.from(productSummary.querySelectorAll('.price-sale-pill'));
                 const degreeRangeSelect = document.getElementById('degree-range-select') || productSummary.querySelector('#degree-range-select');
                 const degreeRangeSection = document.getElementById('degree-range-section');
+                const featureOptionSection = document.getElementById('feature-option-section');
+                const comboOptionSection = document.getElementById('combo-option-section');
                 const originalBasePrice = priceElement ? parseFloat(priceElement.dataset.basePrice) || 0 : 0;
                 let selectedSalePrice = 0; // Giá chiết suất / màu sắc (pill), mặc định không chọn
                 let selectedDegreeRangePrice = 0; // Giá độ khúc xạ được cộng thêm
@@ -1077,6 +1081,10 @@
                 const hasMappedDegreeRanges = degreeRangeOptionTemplates.some((option) => {
                     if (!option.value || option.value === '') return false;
                     const parentId = (option.getAttribute('data-price-sale-id') || '').trim();
+                    return parentId !== '';
+                });
+                const hasMappedOptionPills = optionPills.some((pill) => {
+                    const parentId = (pill.getAttribute('data-price-sale-id') || '').trim();
                     return parentId !== '';
                 });
 
@@ -1127,6 +1135,54 @@
                     setDegreeRangeVisibility(!!firstSelectableOption);
                 };
 
+                const setOptionSectionVisibility = () => {
+                    if (featureOptionSection) {
+                        const visibleFeaturePills = featureOptionSection.querySelectorAll('.option-pill:not(.hidden)');
+                        featureOptionSection.classList.toggle('hidden', visibleFeaturePills.length === 0);
+                    }
+                    if (comboOptionSection) {
+                        const visibleComboPills = comboOptionSection.querySelectorAll('.option-pill:not(.hidden)');
+                        comboOptionSection.classList.toggle('hidden', visibleComboPills.length === 0);
+                    }
+                };
+
+                const filterOptionPillsByPriceSale = (activePriceSaleId) => {
+                    if (!hasMappedOptionPills) {
+                        setOptionSectionVisibility();
+                        return;
+                    }
+
+                    optionPills.forEach((pill) => {
+                        const parentId = (pill.getAttribute('data-price-sale-id') || '').trim();
+                        const hasParent = parentId !== '';
+                        const shouldEnable = !hasParent || parentId === String(activePriceSaleId || '').trim();
+                        pill.disabled = !shouldEnable;
+                        pill.classList.toggle('opacity-40', !shouldEnable);
+                        pill.classList.toggle('cursor-not-allowed', !shouldEnable);
+                        pill.classList.toggle('pointer-events-none', !shouldEnable);
+
+                        if (!shouldEnable && pill.classList.contains('active')) {
+                            pill.classList.remove('active', 'border-red-400', 'bg-red-50', 'ring-2', 'ring-red-500', 'ring-offset-2', 'border-red-500', 'text-red-800', 'shadow-md');
+                            pill.classList.add('border-gray-200', 'bg-white', 'text-gray-800');
+                            pill.setAttribute('aria-pressed', 'false');
+                        }
+                    });
+
+                    const ensureGroupActive = (groupPills) => {
+                        const enabled = groupPills.filter((pill) => !pill.disabled);
+                        if (!enabled.length) return;
+                        const active = enabled.find((pill) => pill.classList.contains('active'));
+                        if (active) return;
+                        enabled[0].classList.add('active', 'ring-2', 'ring-red-500', 'ring-offset-2', 'border-red-500', 'bg-red-50', 'text-red-800', 'shadow-md');
+                        enabled[0].classList.remove('border-gray-200', 'bg-white', 'text-gray-800');
+                        enabled[0].setAttribute('aria-pressed', 'true');
+                    };
+                    ensureGroupActive(featureOptionPills);
+                    ensureGroupActive(comboOptionPills);
+
+                    setOptionSectionVisibility();
+                };
+
                 const setActivePriceSalePill = (pillToActivate) => {
                     if (!pillToActivate) return;
                     priceSalePills.forEach((p) => {
@@ -1165,6 +1221,7 @@
                     selectedSalePrice = pv ? parseFloat(pv) : 0;
                     if (isNaN(selectedSalePrice)) selectedSalePrice = 0;
                     filterDegreeRangesByPriceSale(pillToActivate.getAttribute('data-price-sale-id'));
+                    filterOptionPillsByPriceSale(pillToActivate.getAttribute('data-price-sale-id'));
                 };
 
                 // Chiết suất / màu sắc: luôn giữ 1 pill đang chọn (mặc định là pill đầu tiên)
@@ -1219,18 +1276,22 @@
                 };
 
                 const toggleOption = (pill) => {
-                    const isCurrentlyActive = pill.classList.contains('active');
-                    
-                    if (isCurrentlyActive) {
-                        pill.classList.remove('active');
-                        pill.classList.remove('border-red-400', 'bg-red-50');
-                        pill.setAttribute('aria-pressed', 'false');
-                    } else {
-                        pill.classList.add('active');
-                        pill.classList.add('border-red-400', 'bg-red-50');
-                        pill.setAttribute('aria-pressed', 'true');
-                    }
-                    
+                    if (pill.classList.contains('hidden') || pill.disabled) return;
+
+                    const groupPills = pill.classList.contains('feature-option-pill')
+                        ? featureOptionPills
+                        : (pill.classList.contains('combo-option-pill') ? comboOptionPills : optionPills);
+
+                    groupPills.forEach((item) => {
+                        item.classList.remove('active', 'border-red-400', 'bg-red-50', 'ring-2', 'ring-red-500', 'ring-offset-2', 'border-red-500', 'text-red-800', 'shadow-md');
+                        item.classList.add('border-gray-200', 'bg-white', 'text-gray-800');
+                        item.setAttribute('aria-pressed', 'false');
+                    });
+
+                    pill.classList.add('active', 'ring-2', 'ring-red-500', 'ring-offset-2', 'border-red-500', 'bg-red-50', 'text-red-800', 'shadow-md');
+                    pill.classList.remove('border-gray-200', 'bg-white', 'text-gray-800');
+                    pill.setAttribute('aria-pressed', 'true');
+
                     updatePriceAndLabel();
                 };
 
@@ -1245,6 +1306,9 @@
                     const activePriceSalePill = productSummary.querySelector('.price-sale-pill.active');
                     const activePriceSaleId = activePriceSalePill ? activePriceSalePill.getAttribute('data-price-sale-id') : '';
                     filterDegreeRangesByPriceSale(activePriceSaleId);
+                }
+                if (priceSalePills.length === 0) {
+                    filterOptionPillsByPriceSale('');
                 }
                 updateSelectedDegreeRangePrice();
                 

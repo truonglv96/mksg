@@ -23,6 +23,8 @@ use App\Models\DiscountedCombo;
 use App\Models\FeaturesProduct;
 use App\Models\ProductDegreeRange;
 use App\Models\ProductHighlight;
+use App\Models\ProductPriceSaleComboMap;
+use App\Models\ProductPriceSaleFeatureMap;
 use Exception;
 
 class ProductController extends Controller
@@ -317,6 +319,68 @@ class ProductController extends Controller
                 }
             }
 
+            // Handle feature maps by price sale
+            if (!empty($validated['price_sale_feature_maps'])) {
+                foreach ($validated['price_sale_feature_maps'] as $featureMap) {
+                    $featurePriceSaleKey = isset($featureMap['price_sale_key']) ? (string) $featureMap['price_sale_key'] : null;
+                    $featureId = isset($featureMap['feature_id']) ? (int) $featureMap['feature_id'] : 0;
+                    $featureName = trim((string)($featureMap['feature_name'] ?? ''));
+                    if ($featurePriceSaleKey === null || !isset($priceSaleKeyToIdMap[$featurePriceSaleKey])) {
+                        continue;
+                    }
+
+                    $featureModel = $featureId > 0 ? FeaturesProduct::find($featureId) : null;
+                    if (!$featureModel && $featureName !== '') {
+                        $featureModel = FeaturesProduct::firstOrCreate(
+                            ['name' => $featureName],
+                            ['image' => null]
+                        );
+                    }
+                    if (!$featureModel) {
+                        continue;
+                    }
+
+                    ProductPriceSaleFeatureMap::create([
+                        'product_id' => $product->id,
+                        'price_sale_id' => $priceSaleKeyToIdMap[$featurePriceSaleKey],
+                        'feature_id' => $featureModel->id,
+                        'price' => $featureMap['price'] ?? 0,
+                        'weight' => $featureMap['weight'] ?? 0,
+                    ]);
+                }
+            }
+
+            // Handle combo maps by price sale
+            if (!empty($validated['price_sale_combo_maps'])) {
+                foreach ($validated['price_sale_combo_maps'] as $comboMap) {
+                    $comboPriceSaleKey = isset($comboMap['price_sale_key']) ? (string) $comboMap['price_sale_key'] : null;
+                    $comboId = isset($comboMap['combo_id']) ? (int) $comboMap['combo_id'] : 0;
+                    $comboName = trim((string)($comboMap['combo_name'] ?? ''));
+                    if ($comboPriceSaleKey === null || !isset($priceSaleKeyToIdMap[$comboPriceSaleKey])) {
+                        continue;
+                    }
+
+                    $comboModel = $comboId > 0 ? DiscountedCombo::find($comboId) : null;
+                    if (!$comboModel && $comboName !== '') {
+                        $comboModel = DiscountedCombo::firstOrCreate(
+                            ['product_id' => $product->id, 'name' => $comboName],
+                            ['description' => null, 'price' => 0, 'status' => 1, 'weight' => 0]
+                        );
+                    }
+                    if (!$comboModel) {
+                        continue;
+                    }
+
+                    ProductPriceSaleComboMap::create([
+                        'product_id' => $product->id,
+                        'price_sale_id' => $priceSaleKeyToIdMap[$comboPriceSaleKey],
+                        'combo_id' => $comboModel->id,
+                        'price' => $comboMap['price'] ?? 0,
+                        'weight' => $comboMap['weight'] ?? 0,
+                    ]);
+                }
+            }
+
             $summaryIcons = ['🚚', '🔁', '🛡️'];
             $detailIcons = ['', '', ''];
 
@@ -440,6 +504,16 @@ class ProductController extends Controller
         
         // Get product degree ranges
         $productDegreeRanges = ProductDegreeRange::where('product_id', $product->id)->orderBy('weight', 'ASC')->get();
+        $productPriceSaleFeatureMaps = ProductPriceSaleFeatureMap::where('product_id', $product->id)
+            ->with('feature')
+            ->orderBy('weight', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
+        $productPriceSaleComboMaps = ProductPriceSaleComboMap::where('product_id', $product->id)
+            ->with('combo')
+            ->orderBy('weight', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
         
         // Get dropdown data (same as create)
         $categories = $this->getHierarchicalCategories();
@@ -457,6 +531,8 @@ class ProductController extends Controller
             'productCombos',
             'productFeaturesProductIds',
             'productDegreeRanges',
+            'productPriceSaleFeatureMaps',
+            'productPriceSaleComboMaps',
             'categories',
             'brands',
             'materials',
@@ -715,6 +791,70 @@ class ProductController extends Controller
                 ProductDegreeRange::where('product_id', $product->id)->delete();
             }
 
+            // Handle feature maps by price sale
+            ProductPriceSaleFeatureMap::where('product_id', $product->id)->delete();
+            if (!empty($validated['price_sale_feature_maps'])) {
+                foreach ($validated['price_sale_feature_maps'] as $featureMap) {
+                    $featurePriceSaleKey = isset($featureMap['price_sale_key']) ? (string) $featureMap['price_sale_key'] : null;
+                    $featureId = isset($featureMap['feature_id']) ? (int) $featureMap['feature_id'] : 0;
+                    $featureName = trim((string)($featureMap['feature_name'] ?? ''));
+                    if ($featurePriceSaleKey === null || !isset($priceSaleKeyToIdMap[$featurePriceSaleKey])) {
+                        continue;
+                    }
+
+                    $featureModel = $featureId > 0 ? FeaturesProduct::find($featureId) : null;
+                    if (!$featureModel && $featureName !== '') {
+                        $featureModel = FeaturesProduct::firstOrCreate(
+                            ['name' => $featureName],
+                            ['image' => null]
+                        );
+                    }
+                    if (!$featureModel) {
+                        continue;
+                    }
+
+                    ProductPriceSaleFeatureMap::create([
+                        'product_id' => $product->id,
+                        'price_sale_id' => $priceSaleKeyToIdMap[$featurePriceSaleKey],
+                        'feature_id' => $featureModel->id,
+                        'price' => $featureMap['price'] ?? 0,
+                        'weight' => $featureMap['weight'] ?? 0,
+                    ]);
+                }
+            }
+
+            // Handle combo maps by price sale
+            ProductPriceSaleComboMap::where('product_id', $product->id)->delete();
+            if (!empty($validated['price_sale_combo_maps'])) {
+                foreach ($validated['price_sale_combo_maps'] as $comboMap) {
+                    $comboPriceSaleKey = isset($comboMap['price_sale_key']) ? (string) $comboMap['price_sale_key'] : null;
+                    $comboId = isset($comboMap['combo_id']) ? (int) $comboMap['combo_id'] : 0;
+                    $comboName = trim((string)($comboMap['combo_name'] ?? ''));
+                    if ($comboPriceSaleKey === null || !isset($priceSaleKeyToIdMap[$comboPriceSaleKey])) {
+                        continue;
+                    }
+
+                    $comboModel = $comboId > 0 ? DiscountedCombo::find($comboId) : null;
+                    if (!$comboModel && $comboName !== '') {
+                        $comboModel = DiscountedCombo::firstOrCreate(
+                            ['product_id' => $product->id, 'name' => $comboName],
+                            ['description' => null, 'price' => 0, 'status' => 1, 'weight' => 0]
+                        );
+                    }
+                    if (!$comboModel) {
+                        continue;
+                    }
+
+                    ProductPriceSaleComboMap::create([
+                        'product_id' => $product->id,
+                        'price_sale_id' => $priceSaleKeyToIdMap[$comboPriceSaleKey],
+                        'combo_id' => $comboModel->id,
+                        'price' => $comboMap['price'] ?? 0,
+                        'weight' => $comboMap['weight'] ?? 0,
+                    ]);
+                }
+            }
+
             ProductHighlight::where('product_id', $product->id)->delete();
 
             $summaryIcons = ['🚚', '🔁', '🛡️'];
@@ -840,6 +980,9 @@ class ProductController extends Controller
             
             // Delete product colors (many-to-many relationship)
             ProductColor::where('productID', $product->id)->delete();
+
+            ProductPriceSaleFeatureMap::where('product_id', $product->id)->delete();
+            ProductPriceSaleComboMap::where('product_id', $product->id)->delete();
             
             // Delete product price sales
             ProductPriceSale::where('id_Product', $product->id)->delete();

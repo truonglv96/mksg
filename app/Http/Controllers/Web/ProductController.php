@@ -9,7 +9,10 @@ use App\Models\Color;
 use App\Models\Material;
 use App\Models\Brand;
 use App\Models\DiscountedCombo;
+use App\Models\FeaturesProduct;
 use App\Models\ProductHighlight;
+use App\Models\ProductPriceSaleComboMap;
+use App\Models\ProductPriceSaleFeatureMap;
 use App\Models\Area;
 use App\Models\ClientInformation;
 use App\Models\Bill as BillDetail;
@@ -258,7 +261,41 @@ class ProductController extends Controller
                 ],
             ]);
         }
-        // dd($product);
+        $productPriceSales = \App\Models\ProductPriceSale::where('id_Product', $product->id)
+            ->with(['category', 'mainCategory'])
+            ->orderBy('order', 'ASC')
+            ->get();
+        $productDegreeRanges = \App\Models\ProductDegreeRange::where('product_id', $product->id)
+            ->orderBy('weight', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get();
+        $discountedCombos = DiscountedCombo::where('product_id', $product->id)
+            ->orderBy('weight', 'ASC')
+            ->get();
+        $productFeatures = FeaturesProduct::whereIn('id', is_array($product->id_features_product) ? $product->id_features_product : [])
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $mappedFeatureOptions = ProductPriceSaleFeatureMap::where('product_id', $product->id)
+            ->with('feature')
+            ->orderBy('weight', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->filter(function ($item) {
+                return $item->feature && trim((string) $item->feature->name) !== '';
+            })
+            ->values();
+
+        $mappedComboOptions = ProductPriceSaleComboMap::where('product_id', $product->id)
+            ->with('combo')
+            ->orderBy('weight', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->filter(function ($item) {
+                return $item->combo && trim((string) $item->combo->name) !== '';
+            })
+            ->values();
+
         return view('web.page.products.detail', array_merge([
             'title' => $product->name . ' - Mắt Kính Sài Gòn',
             'product' => $product,
@@ -267,20 +304,12 @@ class ProductController extends Controller
             'brand' => $product->brand,
             'relatedProducts' => $mainCategory ? Products::getProductOrtherByIDCategory($mainCategory->id)
                 ->filter(fn($item) => $item->id != $product->id)->take(6) : collect(),
-            'discountedCombos' => DiscountedCombo::where('product_id', $product->id)
-                ->orderBy('weight', 'ASC')
-                ->get(),
-            'productPriceSales' => \App\Models\ProductPriceSale::where('id_Product', $product->id)
-                ->with(['category', 'mainCategory'])
-                ->orderBy('order', 'ASC')
-                ->get(),
-            'productDegreeRanges' => $productDegreeRanges = \App\Models\ProductDegreeRange::where('product_id', $product->id)
-                ->orderBy('weight', 'ASC')
-                ->orderBy('id', 'ASC')
-                ->get(),
-            'productFeatures' => \App\Models\FeaturesProduct::whereIn('id', is_array($product->id_features_product) ? $product->id_features_product : [])
-                ->orderBy('id', 'ASC')
-                ->get(),
+            'discountedCombos' => $discountedCombos,
+            'productPriceSales' => $productPriceSales,
+            'productDegreeRanges' => $productDegreeRanges,
+            'productFeatures' => $productFeatures,
+            'mappedFeatureOptions' => $mappedFeatureOptions,
+            'mappedComboOptions' => $mappedComboOptions,
             'summaryHighlights' => $summaryHighlights,
             'detailHighlights' => $detailHighlights,
             'contacts' => Contact::getContact(), // Lấy danh sách địa chỉ từ bảng contacts

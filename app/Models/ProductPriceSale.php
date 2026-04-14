@@ -42,4 +42,14 @@ class ProductPriceSale extends Model
     {
         return $this->hasMany(ProductDegreeRange::class, 'price_sale_id', 'id');
     }
+
+    public function featureMaps()
+    {
+        return $this->hasMany(ProductPriceSaleFeatureMap::class, 'price_sale_id', 'id');
+    }
+
+    public function comboMaps()
+    {
+        return $this->hasMany(ProductPriceSaleComboMap::class, 'price_sale_id', 'id');
+    }
 }

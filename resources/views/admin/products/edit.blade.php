@@ -802,6 +802,138 @@ $breadcrumbs = [
                     </button>
                 </div>
 
+                <!-- Feature Maps By Price Sale -->
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                            <i class="fas fa-sparkles text-white text-lg"></i>
+                        </div>
+                        Tính Năng Theo Chiết Suất
+                    </h2>
+
+                    <div id="featureMapContainer" class="space-y-4">
+                        <div class="feature-map-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Tính năng</label>
+                                        <input type="text"
+                                               name="price_sale_feature_maps[0][feature_name]"
+                                               value=""
+                                               placeholder="Nhập tên tính năng"
+                                               class="feature-map-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <button type="button"
+                                            onclick="removeFeatureMapRow(this)"
+                                            class="hidden remove-feature-map-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110 mt-7">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Chiết Suất Cha</label>
+                                    <select name="price_sale_feature_maps[0][price_sale_key]"
+                                            class="feature-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white">
+                                        <option value="">Chọn chiết suất cha</option>
+                                        <option value="0">Chiết suất #1</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Giá ({{ config('texts.currency') }})</label>
+                                        <input type="text"
+                                               name="price_sale_feature_maps[0][price]"
+                                               value=""
+                                               placeholder="0"
+                                               class="feature-map-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Thứ tự</label>
+                                        <input type="number"
+                                               name="price_sale_feature_maps[0][weight]"
+                                               value="0"
+                                               min="0"
+                                               placeholder="0"
+                                               class="feature-map-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            onclick="addFeatureMapRow()"
+                            class="mt-6 w-full px-4 py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-plus-circle text-lg"></i>
+                        <span>Thêm Tính Năng Theo Chiết Suất</span>
+                    </button>
+                </div>
+
+                <!-- Combo Maps By Price Sale -->
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                            <i class="fas fa-layer-group text-white text-lg"></i>
+                        </div>
+                        Lớp Phủ Theo Chiết Suất
+                    </h2>
+
+                    <div id="comboMapContainer" class="space-y-4">
+                        <div class="combo-map-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Lớp phủ</label>
+                                        <input type="text"
+                                               name="price_sale_combo_maps[0][combo_name]"
+                                               value=""
+                                               placeholder="Nhập tên lớp phủ"
+                                               class="combo-map-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <button type="button"
+                                            onclick="removeComboMapRow(this)"
+                                            class="hidden remove-combo-map-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110 mt-7">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Chiết Suất Cha</label>
+                                    <select name="price_sale_combo_maps[0][price_sale_key]"
+                                            class="combo-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white">
+                                        <option value="">Chọn chiết suất cha</option>
+                                        <option value="0">Chiết suất #1</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Giá ({{ config('texts.currency') }})</label>
+                                        <input type="text"
+                                               name="price_sale_combo_maps[0][price]"
+                                               value=""
+                                               placeholder="0"
+                                               class="combo-map-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2.5">Thứ tự</label>
+                                        <input type="number"
+                                               name="price_sale_combo_maps[0][weight]"
+                                               value="0"
+                                               min="0"
+                                               placeholder="0"
+                                               class="combo-map-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            onclick="addComboMapRow()"
+                            class="mt-6 w-full px-4 py-3 bg-gradient-to-r from-red-600 to-blue-600 hover:from-red-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-plus-circle text-lg"></i>
+                        <span>Thêm Lớp Phủ Theo Chiết Suất</span>
+                    </button>
+                </div>
+
                 <!-- Combo Selection -->
                 <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -1096,6 +1228,8 @@ let selectedImages = [];
 const existingSalePrices = @json($productSalePrices ?? []);
 // Initialize existing combos
 const existingCombos = @json($productCombos ?? []);
+const existingFeatureMaps = @json($productPriceSaleFeatureMaps ?? []);
+const existingComboMaps = @json($productPriceSaleComboMaps ?? []);
 // Initialize existing degree ranges
 const existingDegreeRanges = (@json($productDegreeRanges ?? []) || []).map(function(range) {
     const normalizeMoneyFromDb = function(value) {
@@ -1270,6 +1404,8 @@ document.addEventListener('DOMContentLoaded', function() {
     renderExistingImages();
     initializeSalePrices();
     initializeCombos();
+    initializeFeatureMaps();
+    initializeComboMaps();
     updateSummaryHighlightRemoveButtons();
     updateDetailHighlightRemoveButtons();
 });
@@ -1932,7 +2068,7 @@ function buildDegreePriceSaleOptions(selectedKey = '') {
 }
 
 function refreshDegreeRangeParentOptions() {
-    const selects = Array.from(document.querySelectorAll('.degree-price-sale-key'));
+    const selects = Array.from(document.querySelectorAll('.degree-price-sale-key, .feature-price-sale-key, .combo-price-sale-key'));
     selects.forEach((selectEl) => {
         const currentValue = selectEl.value;
         selectEl.innerHTML = buildDegreePriceSaleOptions(currentValue);
@@ -2307,6 +2443,208 @@ function updateDegreeRangeRemoveButtons() {
     });
 }
 
+// Feature Map Management
+let featureMapRowIndex = 1;
+
+function addFeatureMapRow(featureName = '', price = '', weight = '', index = null, priceSaleKey = '') {
+    const container = document.getElementById('featureMapContainer');
+    if (!container) return;
+
+    const rowIndex = index !== null ? index : featureMapRowIndex;
+    const parsedRowIndex = parseInt(rowIndex, 10);
+    if (!isNaN(parsedRowIndex) && featureMapRowIndex <= parsedRowIndex) {
+        featureMapRowIndex = parsedRowIndex + 1;
+    } else if (index === null) {
+        featureMapRowIndex++;
+    }
+
+    const newRow = document.createElement('div');
+    newRow.className = 'feature-map-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300 fade-in';
+    newRow.innerHTML = `
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="flex-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Tính năng</label>
+                    <input type="text"
+                           name="price_sale_feature_maps[${rowIndex}][feature_name]"
+                           value="${featureName}"
+                           placeholder="Nhập tên tính năng"
+                           class="feature-map-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <button type="button"
+                        onclick="removeFeatureMapRow(this)"
+                        class="remove-feature-map-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110 mt-7">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2.5">Chiết Suất Cha</label>
+                <select name="price_sale_feature_maps[${rowIndex}][price_sale_key]"
+                        class="feature-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white">
+                    ${buildDegreePriceSaleOptions(priceSaleKey)}
+                </select>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Giá ({{ config('texts.currency') }})</label>
+                    <input type="text"
+                           name="price_sale_feature_maps[${rowIndex}][price]"
+                           value="${price}"
+                           placeholder="0"
+                           class="feature-map-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Thứ tự</label>
+                    <input type="number"
+                           name="price_sale_feature_maps[${rowIndex}][weight]"
+                           value="${weight}"
+                           min="0"
+                           placeholder="0"
+                           class="feature-map-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(newRow);
+    refreshDegreeRangeParentOptions();
+    updateFeatureMapRemoveButtons();
+}
+
+function removeFeatureMapRow(button) {
+    const row = button.closest('.feature-map-row');
+    if (!row) return;
+    row.remove();
+    updateFeatureMapRemoveButtons();
+}
+
+function updateFeatureMapRemoveButtons() {
+    const rows = document.querySelectorAll('.feature-map-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-feature-map-btn');
+        if (removeBtn) {
+            removeBtn.classList.toggle('hidden', index === 0 && rows.length === 1);
+        }
+    });
+}
+
+function initializeFeatureMaps() {
+    if (existingFeatureMaps.length > 0) {
+        const container = document.getElementById('featureMapContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        existingFeatureMaps.forEach((mapItem, index) => {
+            const parentKey = (mapItem.price_sale_id != null && existingSalePriceIdToKeyMap[String(mapItem.price_sale_id)] !== undefined)
+                ? existingSalePriceIdToKeyMap[String(mapItem.price_sale_id)]
+                : '';
+            const featureName = (mapItem.feature && mapItem.feature.name) ? mapItem.feature.name : '';
+            addFeatureMapRow(featureName, mapItem.price || '', mapItem.weight || 0, index, parentKey);
+        });
+    }
+    updateFeatureMapRemoveButtons();
+}
+
+// Combo Map Management
+let comboMapRowIndex = 1;
+
+function addComboMapRow(comboName = '', price = '', weight = '', index = null, priceSaleKey = '') {
+    const container = document.getElementById('comboMapContainer');
+    if (!container) return;
+
+    const rowIndex = index !== null ? index : comboMapRowIndex;
+    const parsedRowIndex = parseInt(rowIndex, 10);
+    if (!isNaN(parsedRowIndex) && comboMapRowIndex <= parsedRowIndex) {
+        comboMapRowIndex = parsedRowIndex + 1;
+    } else if (index === null) {
+        comboMapRowIndex++;
+    }
+
+    const newRow = document.createElement('div');
+    newRow.className = 'combo-map-row bg-white p-5 rounded-xl border-2 border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 hover:border-red-300 fade-in';
+    newRow.innerHTML = `
+        <div class="space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="flex-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Lớp phủ</label>
+                    <input type="text"
+                           name="price_sale_combo_maps[${rowIndex}][combo_name]"
+                           value="${comboName}"
+                           placeholder="Nhập tên lớp phủ"
+                           class="combo-map-name w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <button type="button"
+                        onclick="removeComboMapRow(this)"
+                        class="remove-combo-map-btn p-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110 mt-7">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2.5">Chiết Suất Cha</label>
+                <select name="price_sale_combo_maps[${rowIndex}][price_sale_key]"
+                        class="combo-price-sale-key w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400 bg-white">
+                    ${buildDegreePriceSaleOptions(priceSaleKey)}
+                </select>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Giá ({{ config('texts.currency') }})</label>
+                    <input type="text"
+                           name="price_sale_combo_maps[${rowIndex}][price]"
+                           value="${price}"
+                           placeholder="0"
+                           class="combo-map-price vnd-input w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2.5">Thứ tự</label>
+                    <input type="number"
+                           name="price_sale_combo_maps[${rowIndex}][weight]"
+                           value="${weight}"
+                           min="0"
+                           placeholder="0"
+                           class="combo-map-weight w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 hover:border-gray-400">
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.appendChild(newRow);
+    refreshDegreeRangeParentOptions();
+    updateComboMapRemoveButtons();
+}
+
+function removeComboMapRow(button) {
+    const row = button.closest('.combo-map-row');
+    if (!row) return;
+    row.remove();
+    updateComboMapRemoveButtons();
+}
+
+function updateComboMapRemoveButtons() {
+    const rows = document.querySelectorAll('.combo-map-row');
+    rows.forEach((row, index) => {
+        const removeBtn = row.querySelector('.remove-combo-map-btn');
+        if (removeBtn) {
+            removeBtn.classList.toggle('hidden', index === 0 && rows.length === 1);
+        }
+    });
+}
+
+function initializeComboMaps() {
+    if (existingComboMaps.length > 0) {
+        const container = document.getElementById('comboMapContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        existingComboMaps.forEach((mapItem, index) => {
+            const parentKey = (mapItem.price_sale_id != null && existingSalePriceIdToKeyMap[String(mapItem.price_sale_id)] !== undefined)
+                ? existingSalePriceIdToKeyMap[String(mapItem.price_sale_id)]
+                : '';
+            const comboName = (mapItem.combo && mapItem.combo.name) ? mapItem.combo.name : '';
+            addComboMapRow(comboName, mapItem.price || '', mapItem.weight || 0, index, parentKey);
+        });
+    }
+    updateComboMapRemoveButtons();
+}
+
 // Highlights Management
 let summaryHighlightRowIndex = document.querySelectorAll('.summary-highlight-row').length;
 let detailHighlightRowIndex = document.querySelectorAll('.detail-highlight-row').length;
@@ -2579,7 +2917,10 @@ function updateComboRemoveButtons() {
 document.addEventListener('DOMContentLoaded', function() {
     updateComboRemoveButtons();
     updateDegreeRangeRemoveButtons();
+    updateFeatureMapRemoveButtons();
+    updateComboMapRemoveButtons();
     initializeDegreeRanges();
+    refreshDegreeRangeParentOptions();
 });
 
 // Initialize existing degree ranges on page load
